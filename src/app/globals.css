@@ -1,0 +1,99 @@
+@import url("https://fonts.googleapis.com/css2?family=Squada+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@100..900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "../styles/theme.css";
+body {
+  @apply bg-body text-fg font-light;
+}
+
+label {
+  @apply font-normal;
+}
+button.button {
+  @apply bg-primary text-inverse rounded px-3 py-1.5 transition-colors inline-flex items-center justify-center gap-2 font-semibold;
+}
+
+button.button:not([disabled]) {
+  @apply hover:bg-accent;
+}
+
+button[disabled] {
+  @apply opacity-80 bg-muted;
+}
+
+*:focus-visible {
+  @apply outline-accent;
+}
+
+a {
+  @apply inline-flex gap-1 items-center font-normal;
+}
+
+input,
+select,
+textarea {
+  @apply px-3 py-1.5 border-primary border rounded font-normal bg-bg text-fg;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-highlight;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  display: none;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input::placeholder {
+  @apply text-muted font-light;
+}
+
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.card {
+  @apply bg-bg rounded-md shadow-none overflow-hidden border border-muted;
+}
+
+.error {
+  @apply text-danger text-sm;
+}
+
+.content-ellipsis {
+  @apply text-nowrap text-ellipsis overflow-hidden;
+}
+
+p {
+  margin-bottom: 0.5rem;
+}
+
+.paragraph > h1 {
+  @apply text-3xl pt-6 pb-2;
+}
+
+.paragraph > h2 {
+  @apply text-2xl pt-6 pb-2;
+}
+
+.paragraph > ul {
+  @apply list-disc pl-6;
+}
+
+.card-header {
+  @apply bg-secondary font-header text-inverse px-4 py-2;
+}
+
+.card-body {
+  @apply px-4 py-2;
+}

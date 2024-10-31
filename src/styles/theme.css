@@ -1,0 +1,261 @@
+:root {
+  --color-primary: #485277;
+  --color-secondary: #485277;
+  --color-accent: #d60b8b;
+  --color-danger: #d60b0b;
+  --color-muted: #9ba4af;
+  --color-highlight: #0b66d6;
+  --color-body: #e0e7ff;
+  --color-fg: #313131;
+  --color-bg: #ffffff;
+  --color-inverse: var(--color-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #7d8cc1;
+    --color-secondary: #485277;
+    --color-accent: #d60b8b;
+    --color-danger: #d60b0b;
+    --color-muted: #868d97;
+    --color-highlight: #0b66d6;
+    --color-body: #363643;
+    --color-fg: #ebebeb;
+    --color-bg: #212121;
+    --color-inverse: #efefef;
+  }
+}
+
+.theme-light {
+  --color-primary: #485277;
+  --color-secondary: #485277;
+  --color-accent: #d60b8b;
+  --color-danger: #d60b0b;
+  --color-muted: #9ba4af;
+  --color-highlight: #0b66d6;
+  --color-body: #e0e7ff;
+  --color-fg: #313131;
+  --color-bg: #ffffff;
+  --color-inverse: var(--color-bg);
+}
+
+.theme-dark {
+  --color-primary: #7d8cc1;
+  --color-secondary: #485277;
+  --color-accent: #d60b8b;
+  --color-danger: #d60b0b;
+  --color-muted: #868d97;
+  --color-highlight: #0b66d6;
+  --color-body: #363643;
+  --color-fg: #ebebeb;
+  --color-bg: #212121;
+  --color-inverse: #efefef;
+}
+
+.theme-solarize-dark {
+  --color-primary: #268bd2;
+  --color-secondary: #b58900;
+  --color-accent: #b58900;
+  --color-danger: #dc322f;
+  --color-muted: #839496;
+  --color-highlight: #6c71c4;
+  --color-body: #073642;
+  --color-fg: #eee8d5;
+  --color-bg: #002b36;
+  --color-inverse: #fdf6e3;
+}
+
+.theme-urban-light {
+  --color-primary: #5c646e;
+  --color-secondary: #474747;
+  --color-accent: #c86735;
+  --color-danger: #b91313;
+  --color-muted: #110f0d;
+  --color-highlight: #4779a1;
+  --color-body: #f1f1f1;
+  --color-fg: #222222;
+  --color-bg: #fafafa;
+  --color-inverse: #fafafa;
+}
+
+.theme-urban-dark {
+  --color-primary: #7f91a8;
+  --color-secondary: #474747;
+  --color-accent: #c86735;
+  --color-danger: #d42f2f;
+  --color-muted: #a7a5a2;
+  --color-highlight: #4779a1;
+  --color-body: #2c2c2c;
+  --color-fg: #f1f1f1;
+  --color-bg: #1b1b1b;
+  --color-inverse: #fafafa;
+}
+
+.theme-detroit-dark {
+  --color-primary: #f77f00;
+  --color-secondary: #1d2d50;
+  --color-accent: #693ba2;
+  --color-danger: #d62828;
+  --color-muted: #6d7783;
+  --color-highlight: #0077b6;
+  --color-body: #1b263b;
+  --color-fg: #f5f5f5;
+  --color-bg: #0f172a;
+  --color-inverse: #f5f5f5;
+}
+
+.theme-twilight-light {
+  --color-primary: #564787;
+  --color-secondary: #7b476d;
+  --color-accent: #db7093;
+  --color-danger: #e63946;
+  --color-muted: #b5a7c8;
+  --color-highlight: #705ea4;
+  --color-body: #f3eefc;
+  --color-fg: #383e56;
+  --color-bg: #fbf7ff;
+  --color-inverse: #fbf7ff;
+}
+
+.theme-twilight-dark {
+  --color-primary: #b5a7c8;
+  --color-secondary: #705ea4;
+  --color-accent: #db7093;
+  --color-danger: #e63946;
+  --color-muted: #b5a7c8;
+  --color-highlight: #564787;
+  --color-body: #383e56;
+  --color-fg: #f3eefc;
+  --color-bg: #201b3e;
+  --color-inverse: #fbf7ff;
+}
+
+.theme-bohemia-dark {
+  --color-primary: #ff616f;
+  --color-secondary: #523b58;
+  --color-accent: #ff616f;
+  --color-danger: #c2185b;
+  --color-muted: #a897aa;
+  --color-highlight: #f78da7;
+  --color-body: #3d2b3d;
+  --color-fg: #ffe6f0;
+  --color-bg: #301b2d;
+  --color-inverse: #ffeef6;
+}
+
+.theme-high-contrast-light {
+  --color-primary: #000000;
+  --color-secondary: #000000;
+  --color-accent: #770077;
+  --color-danger: #770000;
+  --color-muted: #444444;
+  --color-highlight: #0000aa;
+  --color-body: #ffffff;
+  --color-fg: #000000;
+  --color-bg: #ffffff;
+  --color-inverse: #ffffff;
+}
+
+.theme-high-contrast-dark {
+  --color-primary: #eeeeee;
+  --color-secondary: #eeeeee;
+  --color-accent: #9e62d6;
+  --color-danger: #ff0000;
+  --color-muted: #bbbbbb;
+  --color-highlight: #0000ff;
+  --color-body: #000000;
+  --color-fg: #ffffff;
+  --color-bg: #000000;
+  --color-inverse: #000000;
+}
+
+.theme-sunset {
+  --color-primary: #ff4500;
+  --color-secondary: #ff6347;
+  --color-accent: #f79d65;
+  --color-danger: #ff2400;
+  --color-muted: #fbc490;
+  --color-highlight: #ff7e67;
+  --color-body: #fff8e1;
+  --color-fg: #3b1d1d;
+  --color-bg: #fff0d6;
+  --color-inverse: #3b1d1d;
+}
+
+.theme-ocean-breeze {
+  --color-primary: #006ca2;
+  --color-secondary: #0077b6;
+  --color-accent: #019696;
+  --color-danger: #ff4d4d;
+  --color-muted: #66a0bb;
+  --color-highlight: #1ecbe1;
+  --color-body: #b7cce3;
+  --color-fg: #00405d;
+  --color-bg: #e8f7fe;
+  --color-inverse: #e8f7fe;
+}
+
+.theme-mountain-peak {
+  --color-primary: #4a8f95;
+  --color-secondary: #3b7d83;
+  --color-accent: #8fc1e3;
+  --color-danger: #e63946;
+  --color-muted: #8e9eab;
+  --color-highlight: #a8dadc;
+  --color-body: #f1faee;
+  --color-fg: #264653;
+  --color-bg: #e6f4f1;
+  --color-inverse: #264653;
+}
+
+.theme-golden-hour {
+  --color-primary: #f1c40f;
+  --color-secondary: #d4ac0d;
+  --color-accent: #ee821c;
+  --color-danger: #d12f1d;
+  --color-muted: #f4d03f;
+  --color-highlight: #f5b041;
+  --color-body: #1d1d1d;
+  --color-fg: #cba407;
+  --color-bg: #000000;
+  --color-inverse: #000000;
+}
+
+.theme-woodland-trail {
+  --color-primary: #7d5a50;
+  --color-secondary: #a0522d;
+  --color-accent: #cc7000;
+  --color-danger: #b22222;
+  --color-muted: #9c8d7f;
+  --color-highlight: #9e7145;
+  --color-body: #f4f1e9;
+  --color-fg: #4e342e;
+  --color-bg: #f5e8d0;
+  --color-inverse: #f5e8d0;
+}
+
+.theme-moonlit-sky {
+  --color-primary: #181846;
+  --color-secondary: #293367;
+  --color-accent: #6495ed;
+  --color-danger: #e60000;
+  --color-muted: #8d9cb1;
+  --color-highlight: #4169e1;
+  --color-body: #f0f8ff;
+  --color-fg: #0d1b1e;
+  --color-bg: #e0f5fa;
+  --color-inverse: #ffffff;
+}
+
+.theme-rainy-day {
+  --color-primary: #64748b;
+  --color-secondary: #475569;
+  --color-accent: #8eaec9;
+  --color-danger: #b22222;
+  --color-muted: #b0c4de;
+  --color-highlight: #3b82f6;
+  --color-body: #e0e7ff;
+  --color-fg: #1e293b;
+  --color-bg: #cbd5e1;
+  --color-inverse: #cbd5e1;
+}
