@@ -24,7 +24,7 @@ export default function RootLayout({
     <PrimeReactProvider value={value}>
       <html lang="en">
         <ThemeProvider>
-          <body>
+          <body className="overflow-hidden">
             <AxiosProvider>
               <Toasts />
               {children}

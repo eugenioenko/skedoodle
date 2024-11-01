@@ -1,17 +1,19 @@
 "use client";
 
-import { useAppState, useToolRef } from "@/stores/app.store";
-import { useEffect, useRef } from "react";
+import { useInitCanvas } from "@/hooks/use-init-canvas";
+import { useInitTwo } from "@/hooks/use-init-two";
+import { useInitZui } from "@/hooks/use-init-zui";
+import { useRef } from "react";
 
 export const Canvas = () => {
-  const date = useAppState((state) => state.date);
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useInitTwo(containerRef);
+  useInitCanvas();
+  useInitZui();
   return (
-    <div>
-      <button onClick={() => console.log(useAppState.getState().tool)}>
-        Button
-      </button>
-      {date.toDateString()}
-    </div>
+    <div
+      className="w-full h-full bg-white overflow-hidden"
+      ref={containerRef}
+    ></div>
   );
 };
