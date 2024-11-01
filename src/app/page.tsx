@@ -1,5 +1,5 @@
-import { Canvas } from "@/components/canvas";
+import { App } from "@/components/app";
 
 export default async function RootPage() {
-  return <Canvas />;
+  return <App />;
 }

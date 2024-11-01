@@ -1,4 +1,4 @@
-import { Canvas } from "@/components/canvas";
+import { App } from "@/components/app";
 
 export default async function BoardPage() {
   /*
@@ -7,5 +7,5 @@ export default async function BoardPage() {
   );
   */
 
-  return <Canvas />;
+  return <App />;
 }

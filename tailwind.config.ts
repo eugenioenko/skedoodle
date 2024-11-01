@@ -28,6 +28,8 @@ const config: Config = {
         fg: "var(--color-fg)",
         inverse: "var(--color-inverse)",
         bg: "var(--color-bg)",
+        toolbar: "var(--color-toolbar)",
+        border: "var(--color-border)",
       },
       animation: {
         "fade-in-down": "fadeInDown 250ms linear",
