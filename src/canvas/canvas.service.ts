@@ -5,6 +5,12 @@ import { Group } from "two.js/src/group";
 import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
+import { eventToGlobalPosition } from "./canvas.utils";
+
+export interface Coordinates {
+  x: number;
+  y: number;
+}
 
 interface Context {
   two: Two;
@@ -12,15 +18,20 @@ interface Context {
   zui: ZUI;
   selectedTool?: Tool;
   activeTool?: Tool;
+  cursor?: Coordinates;
 }
 
-export const ctx = (): Context => ({
-  two: useCanvasStore.getState().two as Two,
-  canvas: useCanvasStore.getState().canvas as Group,
-  zui: useCanvasStore.getState().zui as ZUI,
-  selectedTool: useCanvasStore.getState().selectedTool,
-  activeTool: useCanvasStore.getState().activeTool,
-});
+export const ctx = (): Context => {
+  const state = useCanvasStore.getState();
+  return {
+    two: state.two as Two,
+    canvas: state.canvas as Group,
+    zui: state.zui as ZUI,
+    selectedTool: state.selectedTool,
+    activeTool: state.activeTool,
+    cursor: state.cursor,
+  };
+};
 
 function doMouseWheel(e: WheelEvent<HTMLDivElement>): void {
   const { zui } = ctx();
@@ -29,10 +40,12 @@ function doMouseWheel(e: WheelEvent<HTMLDivElement>): void {
 }
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
-  console.log(e.clientX);
-  const selectedTool = useCanvasStore.getState().selectedTool || "hand";
-  useCanvasStore.getState().setActiveTool(selectedTool);
+  const { selectedTool, setCursor, setActiveTool, zui } =
+    useCanvasStore.getState();
 
+  setActiveTool(selectedTool || "hand");
+
+  setCursor(eventToGlobalPosition(e, zui));
   if (selectedTool === "hand") {
     doDragStart(e);
     return;

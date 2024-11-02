@@ -1,6 +1,6 @@
 "use client";
 
-import { handlers } from "@/canvas/canvas.client";
+import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/use-canvas";
 import { useRef } from "react";
 
