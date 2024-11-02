@@ -1,10 +1,10 @@
 import { envIsDevelopment } from "@/environment";
-import { useRef, useEffect } from "react";
 import Two from "two.js";
-import { Group } from "two.js/src/group";
 import { ZUI } from "two.js/extras/jsm/zui";
+import { Group } from "two.js/src/group";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { Coordinates } from "./canvas.service";
 
 export type Tool = "hand" | "pointer" | "brush";
 
@@ -14,6 +14,7 @@ export interface CanvasState {
   two?: Two;
   zui?: ZUI;
   canvas?: Group;
+  cursor?: Coordinates;
   container?: HTMLDivElement;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
@@ -21,6 +22,7 @@ export interface CanvasState {
   setCanvas: (canvas?: Group | undefined) => void;
   setZui: (zui?: ZUI | undefined) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
+  setCursor: (cursor?: Coordinates) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -31,6 +33,7 @@ export const useCanvasStore = create<CanvasState>()(
       two: undefined,
       canvas: undefined,
       zui: undefined,
+      cursor: undefined,
       setSelectedTool: (selectedTool) =>
         set((state) => ({ ...state, selectedTool })),
       setActiveTool: (activeTool) => set((state) => ({ ...state, activeTool })),
@@ -38,20 +41,8 @@ export const useCanvasStore = create<CanvasState>()(
       setCanvas: (canvas) => set((state) => ({ ...state, canvas })),
       setZui: (zui) => set((state) => ({ ...state, zui })),
       setContainer: (container) => set((state) => ({ ...state, container })),
+      setCursor: (cursor) => set((state) => ({ ...state, cursor })),
     }),
     { name: "appStore", enabled: envIsDevelopment }
   )
 );
-
-export const useToolRef = () => {
-  const toolRef = useRef<any>();
-
-  useEffect(() => {
-    const unsubscribe = useCanvasStore.subscribe((state) => {
-      toolRef.current = state.tool;
-    });
-
-    return () => unsubscribe();
-  }, []);
-  return toolRef;
-};
