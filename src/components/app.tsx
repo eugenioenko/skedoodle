@@ -1,8 +1,8 @@
 "use client";
 
-import { Splitter, SplitterPanel } from "primereact/splitter";
 import { Toolbar } from "./toolbar";
 import { Canvas } from "./canvas";
+import { StatusBar } from "./status-bar";
 
 export const App = () => {
   return (
@@ -17,7 +17,9 @@ export const App = () => {
         </div>
         <div className="bg-toolbar border-l border-border w-96">Panel 2</div>
       </div>
-      <div className="bg-toolbar border-t border-border h-6">toolbar</div>
+      <div className="bg-toolbar border-t border-border min-h-6">
+        <StatusBar />
+      </div>
     </main>
   );
 };

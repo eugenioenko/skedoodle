@@ -44,17 +44,17 @@ const createTwo = (container: HTMLDivElement): Two => {
     autostart: true,
     width: container.clientWidth,
     height: container.clientHeight,
-    type: Two.Types.svg,
+    type: Two.Types.canvas,
   }).appendTo(container);
 };
 
 const createCanvas = (two: Two): Group => {
   const canvas = new Two.Group();
 
-  for (var i = 0; i < 100; i++) {
-    const x = Math.random() * two.width * 4 - two.width;
-    const y = Math.random() * two.height * 4 - two.height;
-    const size = 50;
+  for (var i = 0; i < 1000; i++) {
+    const x = Math.random() * two.width * 6 - two.width;
+    const y = Math.random() * two.height * 6 - two.height;
+    const size = Math.random() * 50;
     const shape = new Two.Rectangle(x, y, size, size);
     shape.rotation = Math.random() * Math.PI * 2;
     shape.noStroke().fill = "#ccc";

@@ -16,6 +16,7 @@ export const Canvas = () => {
       onMouseDown={(e) => handlers.doMouseDown(e)}
       onMouseMove={(e) => handlers.doMouseMove(e)}
       onMouseUp={(e) => handlers.doMouseUp(e)}
+      onMouseOut={(e) => handlers.doMouseOut(e)}
     ></div>
   );
 };

@@ -40,12 +40,10 @@ function doMouseWheel(e: WheelEvent<HTMLDivElement>): void {
 }
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
-  const { selectedTool, setCursor, setActiveTool, zui } =
-    useCanvasStore.getState();
+  const { selectedTool, setActiveTool } = useCanvasStore.getState();
 
   setActiveTool(selectedTool || "hand");
 
-  setCursor(eventToGlobalPosition(e, zui));
   if (selectedTool === "hand") {
     doDragStart(e);
     return;
@@ -58,7 +56,9 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const activeTool = useCanvasStore.getState().activeTool;
+  const { activeTool, setCursor, zui } = useCanvasStore.getState();
+  setCursor(eventToGlobalPosition(e, zui));
+
   if (!activeTool) {
     return;
   }
@@ -91,9 +91,15 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
   }
 }
 
+function doMouseOut(e: MouseEvent<HTMLDivElement>) {
+  const { setCursor } = useCanvasStore.getState();
+  setCursor(undefined);
+}
+
 export const handlers = {
   doMouseWheel,
   doMouseDown,
   doMouseMove,
   doMouseUp,
+  doMouseOut,
 };

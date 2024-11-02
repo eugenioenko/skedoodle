@@ -43,6 +43,6 @@ export const useCanvasStore = create<CanvasState>()(
       setContainer: (container) => set((state) => ({ ...state, container })),
       setCursor: (cursor) => set((state) => ({ ...state, cursor })),
     }),
-    { name: "appStore", enabled: envIsDevelopment }
+    { name: "canvasStore", enabled: false || envIsDevelopment }
   )
 );
