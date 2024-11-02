@@ -1,6 +1,6 @@
 import { MouseEvent } from "react";
 import Two from "two.js";
-import { ctx } from "./canvas.client";
+import { ctx } from "./canvas.service";
 
 let mouse = new Two.Vector();
 
