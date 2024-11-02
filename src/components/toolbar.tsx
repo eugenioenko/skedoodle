@@ -1,4 +1,4 @@
-import { useAppStore } from "@/stores/app.store";
+import { useCanvasStore } from "@/canvas/canvas.store";
 import {
   IconBrush,
   IconColorPicker,
@@ -52,8 +52,8 @@ interface ToggleButtonProps {
 }
 
 const ToggleButton = ({ value, children }: ToggleButtonProps) => {
-  const current = useAppStore((state) => state.tool);
-  const setTool = useAppStore((state) => state.setTool);
+  const current = useCanvasStore((state) => state.selectedTool);
+  const setTool = useCanvasStore((state) => state.setSelectedTool);
 
   return (
     <button

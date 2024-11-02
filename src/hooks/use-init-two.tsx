@@ -1,12 +1,13 @@
-import { useAppStore } from "@/stores/app.store";
+import { useCanvasStore } from "@/canvas/canvas.store";
 import { MutableRefObject, useEffect } from "react";
 import Two from "two.js";
 
 export const useInitTwo = (
   containerRef: MutableRefObject<HTMLDivElement | null>
 ) => {
-  const two = useAppStore((state) => state.two);
-  const setTwo = useAppStore((state) => state.setTwo);
+  const two = useCanvasStore((state) => state.two);
+  const setTwo = useCanvasStore((state) => state.setTwo);
+  const setContainer = useCanvasStore((state) => state.setContainer);
 
   useEffect(() => {
     if (containerRef.current && !two) {
@@ -17,6 +18,7 @@ export const useInitTwo = (
         type: Two.Types.canvas,
       }).appendTo(containerRef.current);
       setTwo(instance);
+      setContainer(containerRef.current);
     }
 
     return () => {
