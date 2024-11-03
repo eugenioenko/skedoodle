@@ -59,9 +59,9 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     line.noFill().stroke = "#333";
     line.linewidth = 20;
     line.vertices.forEach(function (v) {
-      v.addSelf(line.translation);
+      v.addSelf(line.position);
     });
-    line.translation.clear();
+    line.position.clear();
     canvas.add(line);
     setPath(line);
   } else {

@@ -6,6 +6,7 @@ import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
+import { Circle } from "two.js/src/shapes/circle";
 
 export interface Coordinates {
   x: number;
@@ -56,8 +57,14 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, setCursor, zui } = useCanvasStore.getState();
-  setCursor(eventToGlobalPosition(e, zui));
+  const { activeTool, setCursor, zui, two } = useCanvasStore.getState();
+  const cursor = eventToGlobalPosition(e, zui);
+  setCursor(cursor);
+
+  const circle = window["circle"] as Circle;
+  if (circle) {
+    circle.position.set(cursor.x, cursor.y);
+  }
 
   if (!activeTool) {
     return;

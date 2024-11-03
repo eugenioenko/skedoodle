@@ -1,7 +1,7 @@
 "use client";
 
 import { handlers } from "@/canvas/canvas.service";
-import { useInitTwoCanvas } from "@/canvas/use-canvas";
+import { useInitTwoCanvas } from "@/canvas/canvas.hook";
 import { useRef } from "react";
 
 export const Canvas = () => {
@@ -10,7 +10,7 @@ export const Canvas = () => {
 
   return (
     <div
-      className="w-full h-full bg-white overflow-hidden"
+      className="flex-grow bg-white overflow-hidden"
       ref={containerRef}
       onWheel={(e) => handlers.doMouseWheel(e)}
       onMouseDown={(e) => handlers.doMouseDown(e)}

@@ -39,9 +39,9 @@ export const useInitTwoCanvas = (
 };
 
 const createTwo = (container: HTMLDivElement): Two => {
-  console.log(container.clientWidth);
   return new Two({
     autostart: true,
+    fitted: true,
     width: container.clientWidth,
     height: container.clientHeight,
     type: Two.Types.canvas,
@@ -51,7 +51,7 @@ const createTwo = (container: HTMLDivElement): Two => {
 const createCanvas = (two: Two): Group => {
   const canvas = new Two.Group();
 
-  for (var i = 0; i < 1000; i++) {
+  for (var i = 0; i < 100; i++) {
     const x = Math.random() * two.width * 6 - two.width;
     const y = Math.random() * two.height * 6 - two.height;
     const size = Math.random() * 50;
@@ -60,6 +60,11 @@ const createCanvas = (two: Two): Group => {
     shape.noStroke().fill = "#ccc";
     canvas.add(shape);
   }
+
+  let circle = two.makeCircle(0, 0, 10);
+  circle.fill = "#F00";
+  canvas.add(circle);
+  window.circle = circle;
 
   two.add(canvas);
   return canvas as never;
