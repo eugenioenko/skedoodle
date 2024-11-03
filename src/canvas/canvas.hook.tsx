@@ -84,6 +84,6 @@ const createCanvas = (two: Two): Group => {
 
 const createZUI = (canvas: Two): ZUI => {
   const zui = new ZUI(canvas as never);
-  zui.addLimits(0.25, 4);
+  zui.addLimits(0.05, 4);
   return zui;
 };

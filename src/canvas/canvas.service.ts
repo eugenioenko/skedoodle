@@ -119,7 +119,7 @@ function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
   const { zui } = ctx();
 
-  if (e.ctrlKey) {
+  if (e.ctrlKey || e.metaKey || e.altKey) {
     doWheelZoom(e);
   } else {
     zui.translateSurface(-e.deltaX, -e.deltaY);

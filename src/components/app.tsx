@@ -3,7 +3,7 @@
 import { Toolbar } from "./toolbar";
 import { Canvas } from "../canvas/canvas.comp";
 import { StatusBar } from "./status-bar";
-import { Layers } from "./layers";
+import { Panel } from "./panel";
 import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
 
 export const App = () => {
@@ -12,14 +12,10 @@ export const App = () => {
   return (
     <main className="min-w-dvw min-h-dvh flex flex-col">
       <div className="bg-toolbar border-b border-border h-12">topbar</div>
-      <div className="flex-grow flex">
-        <div className="bg-toolbar w-14 border-r border-border">
-          <Toolbar />
-        </div>
+      <div className="flex-grow flex relative bg-gray-50">
+        <Toolbar />
         <Canvas />
-        <div className="bg-toolbar border-l border-border w-64">
-          <Layers />
-        </div>
+        <Panel />
       </div>
       <div className="bg-toolbar border-t border-border min-h-6">
         <StatusBar />

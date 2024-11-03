@@ -26,4 +26,10 @@
 
   --color-border: #0d0d0d;
   --color-toolbar: #363636;
+
+  --width-breakpoint: 768px;
+}
+
+body {
+  font-weight: 100;
 }
