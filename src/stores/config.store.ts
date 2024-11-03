@@ -14,7 +14,7 @@ export const useConfigStore = create<ConfigState>()(
         theme: undefined,
         setTheme: (theme) => set((state) => ({ ...state, theme })),
       }),
-      { name: "configStore", enabled: envIsDevelopment }
+      { name: "configStore", enabled: false || envIsDevelopment }
     ),
     {
       name: "wbc-config",

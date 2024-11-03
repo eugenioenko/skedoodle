@@ -8,6 +8,7 @@ import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
 import { Circle } from "two.js/src/shapes/circle";
 import { doWheelZoom } from "./zoom.tool";
+import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 
 export interface Coordinates {
   x: number;
@@ -49,6 +50,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
     doBrushStart(e);
     return;
   }
+
+  if (selectedTool === "square") {
+    doShapeStart(e);
+    return;
+  }
 }
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
@@ -74,6 +80,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     doBrushMove(e);
     return;
   }
+
+  if (activeTool === "square") {
+    doShapeMove(e);
+    return;
+  }
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
@@ -88,6 +99,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "brush") {
     doBrushUp(e);
+    useCanvasStore.getState().setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "square") {
+    doShapeUp();
     useCanvasStore.getState().setActiveTool(undefined);
     return;
   }
@@ -109,9 +126,7 @@ function doMouseWheel(e: WheelEvent): void {
   }
 }
 
-function doTouchStart(e: TouchEvent<HTMLDivElement>) {
-  console.log("start");
-}
+function doTouchStart(e: TouchEvent<HTMLDivElement>) {}
 function doTouchMove(e: TouchEvent<HTMLDivElement>) {}
 function doTouchEnd(e: TouchEvent<HTMLDivElement>) {}
 

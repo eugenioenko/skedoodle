@@ -33,6 +33,6 @@ export const useToastStore = create<ToastStore>()(
         }, 3000);
       },
     }),
-    { name: "toastStore", enabled: envIsDevelopment }
+    { name: "toastStore", enabled: false || envIsDevelopment }
   )
 );

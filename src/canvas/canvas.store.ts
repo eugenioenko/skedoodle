@@ -6,7 +6,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { Coordinates } from "./canvas.service";
 
-export type Tool = "hand" | "pointer" | "brush";
+export type Tool = "hand" | "pointer" | "brush" | "square";
 
 export interface CanvasState {
   selectedTool?: Tool;

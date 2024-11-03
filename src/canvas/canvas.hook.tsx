@@ -63,10 +63,10 @@ const createTwo = (container: HTMLDivElement): Two => {
 const createCanvas = (two: Two): Group => {
   const canvas = new Two.Group();
 
-  for (var i = 0; i < 100; i++) {
+  for (var i = 0; i < 5000; i++) {
     const x = Math.random() * two.width * 6 - two.width;
     const y = Math.random() * two.height * 6 - two.height;
-    const size = Math.random() * 50;
+    const size = Math.random() * 100;
     const shape = new Two.Rectangle(x, y, size, size);
     shape.rotation = Math.random() * Math.PI * 2;
     shape.noStroke().fill = "#ccc";
