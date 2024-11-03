@@ -13,23 +13,23 @@ export const Toolbar = () => {
   return (
     <div className="flex flex-col items-center gap-4 pt-4">
       <ToggleButton value="hand">
-        <IconHandStop />
+        <IconHandStop stroke={1} />
       </ToggleButton>
       <ToggleButton value="pointer">
-        <IconPointer />
+        <IconPointer stroke={1} />
       </ToggleButton>
       <ToggleButton value="brush">
-        <IconBrush />
+        <IconBrush stroke={1} />
       </ToggleButton>
       <ToggleButton value="selection">
-        <IconNewSection />
+        <IconNewSection stroke={1} />
       </ToggleButton>
       <ToggleButton value="zoom">
-        <IconZoom />
+        <IconZoom stroke={1} />
       </ToggleButton>
       <Separator />
       <ToggleButton value="picker">
-        <IconColorPicker />
+        <IconColorPicker stroke={1} />
       </ToggleButton>
       <ColorPicker />
       <ColorPicker />
