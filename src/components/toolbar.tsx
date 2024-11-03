@@ -5,6 +5,8 @@ import {
   IconHandStop,
   IconNewSection,
   IconPointer,
+  IconSquare,
+  IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
 import { ColorPicker } from "primereact/colorpicker";
@@ -18,12 +20,20 @@ export const Toolbar = () => {
       <ToggleButton value="pointer">
         <IconPointer stroke={1} />
       </ToggleButton>
-      <ToggleButton value="brush">
-        <IconBrush stroke={1} />
-      </ToggleButton>
       <ToggleButton value="selection">
         <IconNewSection stroke={1} />
       </ToggleButton>
+      <ToggleButton value="brush">
+        <IconBrush stroke={1} />
+      </ToggleButton>
+      <ToggleButton value="bezier">
+        <IconVectorBezier2 stroke={1} />
+      </ToggleButton>
+
+      <ToggleButton value="square">
+        <IconSquare stroke={1} />
+      </ToggleButton>
+
       <ToggleButton value="zoom">
         <IconZoom stroke={1} />
       </ToggleButton>

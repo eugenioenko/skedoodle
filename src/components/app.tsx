@@ -4,17 +4,20 @@ import { Toolbar } from "./toolbar";
 import { Canvas } from "../canvas/canvas.comp";
 import { StatusBar } from "./status-bar";
 import { Layers } from "./layers";
+import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
 
 export const App = () => {
+  useWindowWheelPrevent();
+
   return (
     <main className="min-w-dvw min-h-dvh flex flex-col">
       <div className="bg-toolbar border-b border-border h-12">topbar</div>
       <div className="flex-grow flex">
-        <div className="bg-toolbar w-12 border-r border-border">
+        <div className="bg-toolbar w-14 border-r border-border">
           <Toolbar />
         </div>
         <Canvas />
-        <div className="bg-toolbar border-l border-border w-96">
+        <div className="bg-toolbar border-l border-border w-64">
           <Layers />
         </div>
       </div>

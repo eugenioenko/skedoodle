@@ -12,7 +12,6 @@ export const Canvas = () => {
     <div
       className="flex-grow bg-white overflow-hidden"
       ref={containerRef}
-      onWheel={(e) => handlers.doMouseWheel(e)}
       onMouseDown={(e) => handlers.doMouseDown(e)}
       onMouseMove={(e) => handlers.doMouseMove(e)}
       onMouseUp={(e) => handlers.doMouseUp(e)}

@@ -24,7 +24,7 @@ export const useBrushStore = create<BrushState>()(
       previousPosition: new Vector(),
       setPath: (path) => set((state) => ({ ...state, path })),
     }),
-    { name: "brushStore", enabled: envIsDevelopment }
+    { name: "brushStore", enabled: false || envIsDevelopment }
   )
 );
 

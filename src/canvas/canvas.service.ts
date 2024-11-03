@@ -1,4 +1,4 @@
-import { MouseEvent, WheelEvent } from "react";
+import { MouseEvent } from "react";
 import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
@@ -7,6 +7,7 @@ import { doDragStart, doDragMove } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
 import { Circle } from "two.js/src/shapes/circle";
+import { doZoom } from "./zoom.tool";
 
 export interface Coordinates {
   x: number;
@@ -33,12 +34,6 @@ export const ctx = (): Context => {
     cursor: state.cursor,
   };
 };
-
-function doMouseWheel(e: WheelEvent<HTMLDivElement>): void {
-  const { zui } = ctx();
-  var dy = -e.deltaY / 1000;
-  zui.zoomBy(dy, e.clientX, e.clientY);
-}
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool } = useCanvasStore.getState();
@@ -101,6 +96,17 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 function doMouseOut(e: MouseEvent<HTMLDivElement>) {
   const { setCursor } = useCanvasStore.getState();
   setCursor(undefined);
+}
+
+function doMouseWheel(e: WheelEvent): void {
+  e.preventDefault();
+  const { zui } = ctx();
+
+  if (e.shiftKey) {
+    doZoom(e);
+  } else {
+    zui.translateSurface(-e.deltaX, -e.deltaY);
+  }
 }
 
 export const handlers = {

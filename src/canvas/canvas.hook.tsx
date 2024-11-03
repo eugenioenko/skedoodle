@@ -3,6 +3,7 @@ import { MutableRefObject, useEffect } from "react";
 import Two from "two.js";
 import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
+import { handlers } from "./canvas.service";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>
@@ -28,12 +29,23 @@ export const useInitTwoCanvas = (
     setCanvas(canvasInstance as never);
     setZui(zuiInstance);
 
+    // adding a passive event listener for wheel to be able to prevent default
+    containerRef.current.addEventListener("wheel", handlers.doMouseWheel, {
+      passive: false,
+    });
+
     return () => {
       if (instance) {
         instance.remove();
       }
+      if (instance && containerRef.current) {
+        containerRef.current.removeEventListener(
+          "wheel",
+          handlers.doMouseWheel
+        );
+      }
     };
-  }, [containerRef.current]);
+  }, [containerRef]);
 
   return { two, canvas, zui };
 };
