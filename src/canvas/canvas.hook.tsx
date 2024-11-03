@@ -4,6 +4,7 @@ import Two from "two.js";
 import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
+import { debounce } from "./canvas.utils";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>
@@ -11,6 +12,7 @@ export const useInitTwoCanvas = (
   const two = useCanvasStore((state) => state.two);
   const canvas = useCanvasStore((state) => state.canvas);
   const zui = useCanvasStore((state) => state.zui);
+  const setContainer = useCanvasStore((state) => state.setContainer);
 
   useEffect(() => {
     if (!containerRef.current || two) {
@@ -28,17 +30,22 @@ export const useInitTwoCanvas = (
     setTwo(instance);
     setCanvas(canvasInstance as never);
     setZui(zuiInstance);
+    setContainer(containerRef.current);
 
     // adding a passive event listener for wheel to be able to prevent default
     containerRef.current.addEventListener("wheel", handlers.doMouseWheel, {
       passive: false,
     });
 
+    const debouncesWindowResize = debounce(handlers.doWindowResize, 250);
+    window.addEventListener("resize", debouncesWindowResize);
+
     return () => {
       if (instance) {
         instance.remove();
       }
       if (instance && containerRef.current) {
+        window.removeEventListener("resize", debouncesWindowResize);
         containerRef.current.removeEventListener(
           "wheel",
           handlers.doMouseWheel

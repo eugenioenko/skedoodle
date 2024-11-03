@@ -26,3 +26,11 @@ export function mouseEventToPosition(e: MouseEvent<HTMLDivElement>): {
     y: e.clientY - rect.top,
   };
 }
+
+export function debounce(func: (...args: unknown[]) => void, delay: number) {
+  let timeout: NodeJS.Timeout;
+  return (...args: unknown[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), delay);
+  };
+}

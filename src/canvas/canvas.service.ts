@@ -130,6 +130,22 @@ function doTouchStart(e: TouchEvent<HTMLDivElement>) {}
 function doTouchMove(e: TouchEvent<HTMLDivElement>) {}
 function doTouchEnd(e: TouchEvent<HTMLDivElement>) {}
 
+function doWindowResize() {
+  const { two, container } = useCanvasStore.getState();
+
+  if (!two || !container) {
+    return;
+  }
+
+  if (
+    container.clientWidth !== two.width ||
+    container.clientHeight !== two.height
+  ) {
+    two.width = container.clientWidth;
+    two.height = container.clientHeight;
+  }
+}
+
 export const handlers = {
   doMouseWheel,
   doMouseDown,
@@ -139,4 +155,5 @@ export const handlers = {
   doTouchStart,
   doTouchMove,
   doTouchEnd,
+  doWindowResize,
 };
