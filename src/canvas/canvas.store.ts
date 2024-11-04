@@ -5,6 +5,7 @@ import { Group } from "two.js/src/group";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { Coordinates } from "./canvas.service";
+import { RgbaColor } from "react-colorful";
 
 export type Tool = "hand" | "pointer" | "brush" | "square";
 
@@ -16,11 +17,9 @@ export interface CanvasState {
   canvas?: Group;
   cursor?: Coordinates;
   container?: HTMLDivElement;
-  fillColor?: string;
-  strokeColor?: string;
+  fillColor?: RgbaColor;
+  strokeColor?: RgbaColor;
   strokeWidth?: number;
-  fillOpacity?: number;
-  strokeOpacity?: number;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setTwo: (two?: Two) => void;
@@ -28,11 +27,9 @@ export interface CanvasState {
   setZui: (zui?: ZUI | undefined) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
   setCursor: (cursor?: Coordinates) => void;
-  setFillColor: (color: string) => void;
-  setStrokeColor: (color: string) => void;
+  setFillColor: (color: RgbaColor) => void;
+  setStrokeColor: (color: RgbaColor) => void;
   setStrokeWidth: (width: number) => void;
-  setFillOpacity: (opacity: number) => void;
-  setStrokeOpacity: (opacity: number) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -44,11 +41,9 @@ export const useCanvasStore = create<CanvasState>()(
       canvas: undefined,
       zui: undefined,
       cursor: undefined,
-      fillColor: "#000000",
-      strokeColor: "#222222",
+      fillColor: { r: 222, g: 0, b: 0, a: 1 },
+      strokeColor: { r: 22, g: 22, b: 22, a: 1 },
       strokeWidth: 30,
-      fillOpacity: 1,
-      strokeOpacity: 1,
       setSelectedTool: (selectedTool) =>
         set((state) => ({ ...state, selectedTool })),
       setActiveTool: (activeTool) => set((state) => ({ ...state, activeTool })),

@@ -1,6 +1,4 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { InputText } from "primereact/inputtext";
-import { Slider } from "primereact/slider";
 
 export const ToolOptions = () => {
   const strokeWidth = useCanvasStore((state) => state.strokeWidth);
@@ -12,18 +10,9 @@ export const ToolOptions = () => {
         <label>Width</label>
         <input
           value={strokeWidth}
-          className="px-2 py-1 max-w-14 rounded"
+          className="max-w-14"
           onChange={(e) => setStrokeWidth(e.target.value)}
         />
-        <div className="min-w-32">
-          <Slider
-            value={strokeWidth}
-            min={0}
-            max={100}
-            step={1}
-            onChange={(e) => setStrokeWidth(e.value)}
-          />
-        </div>
       </div>
     </>
   );

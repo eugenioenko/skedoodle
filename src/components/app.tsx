@@ -11,7 +11,7 @@ export const App = () => {
   useWindowWheelPrevent();
 
   return (
-    <main className="w-dvw h-dvh flex flex-col">
+    <main className="w-dvw h-dvh flex flex-col text-white">
       <div className="bg-toolbar border-b border-border min-h-12 h-12 flex items-center px-4">
         <ToolOptions />
       </div>

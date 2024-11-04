@@ -9,7 +9,7 @@ import {
   IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
-import { PickColor } from "./pick-color";
+import { PickColor } from "./color-picker";
 
 export const Toolbar = () => {
   return (

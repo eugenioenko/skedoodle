@@ -1,16 +1,6 @@
-@layer tailwind-base,
-  primereact, tailwind-utilities;
-
-/* IMPORTANT: In "styled" mode you must add the PrimeReact Theme here. Do NOT include in "unstyled" mode */
-
-@layer tailwind-base {
-  @tailwind base;
-}
-
-@layer tailwind-utilities {
-  @tailwind components;
-  @tailwind utilities;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --color-primary: #485277;
@@ -32,4 +22,16 @@
 
 body {
   font-weight: 100;
+}
+
+.canvas-container[data-selected="hand"] {
+  cursor: grab;
+}
+
+.canvas-container[data-selected="hand"][data-active="hand"] {
+  cursor: grabbing;
+}
+
+input {
+  @apply bg-toolbar border border-border text-white px-2 py-1 rounded;
 }

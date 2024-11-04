@@ -13,7 +13,11 @@ export const Panel = () => {
         isCollapsed ? "h-10" : "h-[calc(100%-56px)] md:h-full"
       }`}
     >
-      <div className="bg-toolbar border-l border-border  p-2 h-full">
+      <div
+        className={`bg-toolbar border-l border-border p-2 h-full ${
+          isCollapsed ? "rounded-bl-lg" : ""
+        }`}
+      >
         <div className="flex items-center">
           <button type="button" onClick={() => setIsCollapsed(!isCollapsed)}>
             <IconMenu2 stroke={1} />
