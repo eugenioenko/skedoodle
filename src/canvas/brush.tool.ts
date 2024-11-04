@@ -8,6 +8,7 @@ import { devtools } from "zustand/middleware";
 import { eventToGlobalPosition, mouseEventToPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Path } from "two.js/src/path";
+import { useCanvasStore } from "./canvas.store";
 
 export type Tool = "hand" | "pointer" | "brush";
 
@@ -31,12 +32,13 @@ export const useBrushStore = create<BrushState>()(
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { previousPosition, setPath } = useBrushStore.getState();
+  const { fillColor, strokeWidth } = useCanvasStore.getState();
   const position = zui.clientToSurface(mouseEventToPosition(e));
   previousPosition.set(position.x, position.y);
   setPath(undefined);
 
-  const circle = two.makeCircle(position.x, position.y, 10);
-  circle.fill = "#333";
+  const circle = two.makeCircle(position.x, position.y, strokeWidth / 2);
+  circle.fill = fillColor;
   circle.noStroke();
   canvas.add(circle);
 }
@@ -44,11 +46,12 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const { zui, canvas, two } = ctx();
   const { path, setPath, previousPosition } = useBrushStore.getState();
+  const { fillColor, strokeWidth } = useCanvasStore.getState();
   const position = eventToGlobalPosition(e, zui);
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
-    const circle = two.makeCircle(position.x, position.y, 10);
-    circle.fill = "#333";
+    const circle = two.makeCircle(position.x, position.y, strokeWidth / 2);
+    circle.fill = fillColor;
     circle.noStroke();
     canvas.add(circle);
 
@@ -56,8 +59,8 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
       [makeAnchor(previousPosition), makeAnchor(position)],
       true
     );
-    line.noFill().stroke = "#333";
-    line.linewidth = 20;
+    line.noFill().stroke = fillColor;
+    line.linewidth = strokeWidth;
     line.vertices.forEach(function (v) {
       v.addSelf(line.position);
     });
@@ -87,11 +90,12 @@ export function doBrushUp(e) {
   if (!path) {
     return;
   }
+  const { fillColor, strokeWidth } = useCanvasStore.getState();
   const position = zui.clientToSurface(mouseEventToPosition(e));
   path.vertices.push(makeAnchor(position));
 
-  const circle = two.makeCircle(position.x, position.y, 10);
-  circle.fill = "#333";
+  const circle = two.makeCircle(position.x, position.y, strokeWidth / 2);
+  circle.fill = fillColor;
   circle.noStroke();
   canvas.add(circle);
 }

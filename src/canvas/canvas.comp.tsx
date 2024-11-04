@@ -10,7 +10,7 @@ export const Canvas = () => {
 
   return (
     <div
-      className="flex-grow  overflow-hidden"
+      className="flex-grow overflow-hidden"
       ref={containerRef}
       onMouseDown={(e) => handlers.doMouseDown(e)}
       onMouseMove={(e) => handlers.doMouseMove(e)}

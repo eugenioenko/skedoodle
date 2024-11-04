@@ -9,7 +9,7 @@ import {
   IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
-import { ColorPicker } from "primereact/colorpicker";
+import { PickColor } from "./pick-color";
 
 export const Toolbar = () => {
   return (
@@ -42,8 +42,7 @@ export const Toolbar = () => {
         <ToggleButton value="picker">
           <IconColorPicker stroke={1} />
         </ToggleButton>
-        <ColorPicker />
-        <ColorPicker />
+        <PickColor />
         <Separator />
       </div>
     </div>

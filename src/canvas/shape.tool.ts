@@ -8,6 +8,7 @@ import { devtools } from "zustand/middleware";
 import { eventToGlobalPosition, mouseEventToPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
+import { useCanvasStore } from "./canvas.store";
 
 export type Tool = "hand" | "pointer" | "brush";
 
@@ -32,11 +33,13 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { setShape, origin } = useShapeState.getState();
   const position = zui.clientToSurface(mouseEventToPosition(e));
+  const { fillColor, strokeColor } = useCanvasStore.getState();
+
   origin.set(position.x, position.y);
 
-  const shape = two.makeRectangle(position.x + 50, position.y + 50, 100, 100);
-  shape.stroke = "#333";
-  shape.noFill();
+  const shape = two.makeRectangle(position.x, position.y, 1, 1);
+  shape.stroke = strokeColor;
+  shape.fill = fillColor;
   shape.linewidth = 5;
   canvas.add(shape);
   setShape(shape);

@@ -62,11 +62,12 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   const cursor = eventToGlobalPosition(e, zui);
   setCursor(cursor);
 
+  /*
   const circle = window["circle"] as Circle;
   if (circle) {
     circle.position.set(cursor.x, cursor.y);
   }
-
+*/
   if (!activeTool) {
     return;
   }
