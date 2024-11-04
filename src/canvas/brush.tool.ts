@@ -1,5 +1,5 @@
 import { MouseEvent } from "react";
-import { ctx } from "./canvas.service";
+import { Coordinates, ctx } from "./canvas.service";
 
 import { envIsDevelopment } from "@/environment";
 import Two from "two.js";
@@ -41,7 +41,7 @@ export const useBrushStore = create<BrushState>()(
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { previousPosition, setPath, setCircle } = useBrushStore.getState();
-  const { fillColor: fColor, strokeWidth } = useCanvasStore.getState();
+  const { fillColor: fColor, strokeWidth = 0 } = useCanvasStore.getState();
   const fillColor = colorToRgbaString(fColor);
   const position = zui.clientToSurface(mouseEventToPosition(e));
   previousPosition.set(position.x, position.y);
@@ -67,13 +67,13 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
     const line = two.makeCurve(
-      [makeAnchor(previousPosition), makeAnchor(position)],
-      true
+      [makeAnchor(previousPosition), makeAnchor(position)] as never,
+      true as never
     );
     line.cap = "round";
     line.noFill().stroke = fillColor;
-    line.linewidth = strokeWidth;
-    line.vertices.forEach(function (v) {
+    line.linewidth = strokeWidth || 0;
+    line.vertices.forEach(function (v: Vector) {
       v.addSelf(line.position);
     });
     line.position.clear();
@@ -88,7 +88,10 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     let skipVertices = false;
     if (path.vertices.length) {
       const lastVertices = path.vertices[path.vertices.length - 1];
-      const distance = Two.Vector.distanceBetween(lastVertices, position);
+      const distance = Two.Vector.distanceBetween(
+        lastVertices,
+        position as never
+      );
       if (distance < 10) {
         skipVertices = true;
       }
@@ -100,7 +103,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   previousPosition.set(position.x, position.y);
 }
 
-export function doBrushUp(e) {
+export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const { zui, canvas } = ctx();
   const { path, circle, setCircle } = useBrushStore.getState();
   if (!path) {
@@ -114,7 +117,7 @@ export function doBrushUp(e) {
   path.vertices.push(makeAnchor(position));
 }
 
-function makeAnchor({ x, y }) {
+function makeAnchor({ x, y }: Coordinates) {
   var anchor = new Two.Anchor(x, y);
   anchor.position = new Two.Vector().copy(anchor);
   return anchor;
