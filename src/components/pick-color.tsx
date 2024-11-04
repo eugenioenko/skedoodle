@@ -8,7 +8,7 @@ export const PickColor = () => {
   const setStrokeColor = useCanvasStore((state) => state.setStrokeColor);
 
   return (
-    <div className="flex flex-col gap-4 justify-center">
+    <div className="flex flex-row md:flex-col gap-4 justify-center">
       <ColorPicker
         value={fillColor}
         onChange={(e) => setFillColor(`#${e.value}`)}
