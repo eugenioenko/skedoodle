@@ -6,7 +6,6 @@ import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
-import { Circle } from "two.js/src/shapes/circle";
 import { doWheelZoom } from "./zoom.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 
@@ -58,7 +57,7 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, setCursor, zui, two } = useCanvasStore.getState();
+  const { activeTool, setCursor, zui } = useCanvasStore.getState();
   const cursor = eventToGlobalPosition(e, zui);
   setCursor(cursor);
 
@@ -89,24 +88,24 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
-  const activeTool = useCanvasStore.getState().activeTool;
+  const { activeTool, setActiveTool } = useCanvasStore.getState();
   if (!activeTool) {
     return;
   }
 
   if (activeTool === "hand") {
-    useCanvasStore.getState().setActiveTool(undefined);
+    setActiveTool(undefined);
   }
 
   if (activeTool === "brush") {
     doBrushUp(e);
-    useCanvasStore.getState().setActiveTool(undefined);
+    setActiveTool(undefined);
     return;
   }
 
   if (activeTool === "square") {
     doShapeUp();
-    useCanvasStore.getState().setActiveTool(undefined);
+    setActiveTool(undefined);
     return;
   }
 }
