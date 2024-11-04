@@ -119,6 +119,5 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
 
 function makeAnchor({ x, y }: Coordinates) {
   var anchor = new Two.Anchor(x, y);
-  anchor.position = new Two.Vector().copy(anchor);
   return anchor;
 }

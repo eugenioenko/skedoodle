@@ -12,20 +12,25 @@ export const useInitTwoCanvas = (
   const two = useCanvasStore((state) => state.two);
   const canvas = useCanvasStore((state) => state.canvas);
   const zui = useCanvasStore((state) => state.zui);
-  const setContainer = useCanvasStore((state) => state.setContainer);
 
   useEffect(() => {
-    if (!containerRef.current || two) {
+    const {
+      setTwo,
+      setCanvas,
+      setZui,
+      setContainer,
+      two: twoInstance,
+    } = useCanvasStore.getState();
+
+    if (!containerRef.current || twoInstance) {
       return;
     }
+
     console.info("Canvas initialized");
+
     const instance = createTwo(containerRef.current);
     const canvasInstance = createCanvas(instance);
     const zuiInstance = createZUI(canvasInstance);
-
-    const setTwo = useCanvasStore.getState().setTwo;
-    const setCanvas = useCanvasStore.getState().setCanvas;
-    const setZui = useCanvasStore.getState().setZui;
 
     setTwo(instance);
     setCanvas(canvasInstance as never);
@@ -33,23 +38,20 @@ export const useInitTwoCanvas = (
     setContainer(containerRef.current);
 
     // adding a passive event listener for wheel to be able to prevent default
-    containerRef.current.addEventListener("wheel", handlers.doMouseWheel, {
+    const currentContainer = containerRef.current;
+    currentContainer.addEventListener("wheel", handlers.doMouseWheel, {
       passive: false,
     });
 
     const debouncesWindowResize = debounce(handlers.doWindowResize, 250);
     window.addEventListener("resize", debouncesWindowResize);
-
     return () => {
       if (instance) {
         instance.remove();
       }
-      if (instance && containerRef.current) {
+      if (instance && currentContainer) {
         window.removeEventListener("resize", debouncesWindowResize);
-        containerRef.current.removeEventListener(
-          "wheel",
-          handlers.doMouseWheel
-        );
+        currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
       }
     };
   }, [containerRef]);
@@ -79,11 +81,6 @@ const createCanvas = (two: Two): Group => {
     shape.noStroke().fill = "#ccc";
     canvas.add(shape);
   }
-
-  let circle = two.makeCircle(0, 0, 10);
-  circle.fill = "#F00";
-  canvas.add(circle);
-  window.circle = circle;
 
   two.add(canvas);
   return canvas as never;

@@ -43,6 +43,8 @@ const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
   );
 };
 
+const blackColor = { r: 0, g: 0, b: 0, a: 1 };
+
 export const PickColor = () => {
   const fillColor = useCanvasStore((state) => state.fillColor);
   const strokeColor = useCanvasStore((state) => state.strokeColor);
@@ -51,9 +53,15 @@ export const PickColor = () => {
 
   return (
     <div className="flex flex-row md:flex-col gap-4 justify-center">
-      <ColorPicker color={fillColor} onChange={(e) => setFillColor(e)} />
+      <ColorPicker
+        color={fillColor}
+        onChange={(e) => setFillColor(e || blackColor)}
+      />
       <div className="relative">
-        <ColorPicker color={strokeColor} onChange={(e) => setStrokeColor(e)} />
+        <ColorPicker
+          color={strokeColor}
+          onChange={(e) => setStrokeColor(e || blackColor)}
+        />
         <div className="w-4 h-4 bg-toolbar rounded absolute left-2 top-2 pointer-events-none"></div>
       </div>
     </div>

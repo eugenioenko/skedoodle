@@ -1,4 +1,4 @@
-import { useCanvasStore } from "@/canvas/canvas.store";
+import { Tool, useCanvasStore } from "@/canvas/canvas.store";
 import {
   IconBrush,
   IconColorPicker,
@@ -69,7 +69,7 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
     <button
       type="button"
       className={`p-1 rounded ${current === value ? "bg-primary" : ""}`}
-      onClick={() => setTool(value)}
+      onClick={() => setTool(value as Tool)}
     >
       {children}
     </button>

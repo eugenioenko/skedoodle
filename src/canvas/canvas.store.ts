@@ -17,9 +17,9 @@ export interface CanvasState {
   canvas?: Group;
   cursor?: Coordinates;
   container?: HTMLDivElement;
-  fillColor?: RgbaColor;
-  strokeColor?: RgbaColor;
-  strokeWidth?: number;
+  fillColor: RgbaColor;
+  strokeColor: RgbaColor;
+  strokeWidth: number;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setTwo: (two?: Two) => void;
@@ -57,10 +57,6 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => ({ ...state, strokeColor })),
       setStrokeWidth: (strokeWidth) =>
         set((state) => ({ ...state, strokeWidth })),
-      setFillOpacity: (fillOpacity) =>
-        set((state) => ({ ...state, fillOpacity })),
-      setStrokeOpacity: (strokeOpacity) =>
-        set((state) => ({ ...state, strokeOpacity })),
     }),
     { name: "canvasStore", enabled: false || envIsDevelopment }
   )

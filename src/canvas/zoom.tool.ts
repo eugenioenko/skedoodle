@@ -35,11 +35,11 @@ export function doWheelZoom(e: WheelEvent): void {
   setZoom(Math.floor(zui.scale * 100));
 }
 
-export function onZoomStart(event): void {
+export function onZoomStart(e: TouchEvent): void {
   const { setInitialDistance } = useZoomStore.getState();
-  if (event.touches.length === 2) {
+  if (e.touches.length === 2) {
     // Calculate the initial distance between two fingers
-    const [touch1, touch2] = event.touches;
+    const [touch1, touch2] = e.touches;
     const initialDistance = Math.hypot(
       touch2.clientX - touch1.clientX,
       touch2.clientY - touch1.clientY
@@ -48,6 +48,7 @@ export function onZoomStart(event): void {
   }
 }
 
+/*
 function onZoomMove(event): void {
   const { initialDistance, setInitialDistance } = useZoomStore.getState();
   if (event.touches.length === 2 && initialDistance !== undefined) {
@@ -77,3 +78,4 @@ export function onZoomEnd(event): void {
     setInitialDistance(undefined);
   }
 }
+  */

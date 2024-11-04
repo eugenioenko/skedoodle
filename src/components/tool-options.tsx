@@ -11,7 +11,7 @@ export const ToolOptions = () => {
         <input
           value={strokeWidth}
           className="max-w-14"
-          onChange={(e) => setStrokeWidth(e.target.value)}
+          onChange={(e) => setStrokeWidth(Number(e.target.value) || 0)}
         />
       </div>
     </>
