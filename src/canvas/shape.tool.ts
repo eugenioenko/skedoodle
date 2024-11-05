@@ -2,7 +2,6 @@ import { MouseEvent } from "react";
 import { ctx } from "./canvas.service";
 
 import { envIsDevelopment } from "@/environment";
-import Two from "two.js";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import {
@@ -13,8 +12,6 @@ import {
 import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { useCanvasStore } from "./canvas.store";
-
-export type Tool = "hand" | "pointer" | "brush";
 
 export interface ShapeState {
   shape?: Rectangle;

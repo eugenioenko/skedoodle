@@ -7,7 +7,7 @@ import { devtools } from "zustand/middleware";
 import { Coordinates } from "./canvas.service";
 import { RgbaColor } from "react-colorful";
 
-export type Tool = "hand" | "pointer" | "brush" | "square";
+export type Tool = "hand" | "pointer" | "brush" | "square" | "eraser";
 
 export interface CanvasState {
   selectedTool?: Tool;

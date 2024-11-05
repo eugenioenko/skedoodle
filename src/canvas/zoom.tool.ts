@@ -3,8 +3,7 @@ import { ctx } from "./canvas.service";
 import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-
-export type Tool = "hand" | "pointer" | "brush";
+import { usePointerStore } from "./pointer.tool";
 
 export interface ZoomState {
   zoom: number;
@@ -33,6 +32,11 @@ export function doWheelZoom(e: WheelEvent): void {
 
   zui.zoomBy(dy, e.clientX, e.clientY);
   setZoom(Math.floor(zui.scale * 100));
+
+  const { selection } = usePointerStore.getState();
+  for (const item of selection) {
+    item.border.linewidth = 1 / zui.scale;
+  }
 }
 
 export function onZoomStart(e: TouchEvent): void {

@@ -8,6 +8,13 @@ import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
 import { doWheelZoom } from "./zoom.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
+import {
+  doPointerEnd,
+  doPointerMove,
+  doPointerStart,
+  usePointerStore,
+} from "./pointer.tool";
+import { doDeleteShape } from "./eraser.tool";
 
 export interface Coordinates {
   x: number;
@@ -45,6 +52,16 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
+  if (selectedTool === "pointer") {
+    doPointerStart(e);
+    return;
+  }
+
+  if (selectedTool === "eraser") {
+    doDeleteShape(e);
+    return;
+  }
+
   if (selectedTool === "brush") {
     doBrushStart(e);
     return;
@@ -76,6 +93,16 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
+  if (activeTool === "pointer") {
+    doPointerMove(e);
+    return;
+  }
+
+  if (activeTool === "eraser") {
+    doDeleteShape(e);
+    return;
+  }
+
   if (activeTool === "brush") {
     doBrushMove(e);
     return;
@@ -93,8 +120,14 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
-  if (activeTool === "hand") {
+  if (activeTool === "hand" || activeTool === "eraser") {
     setActiveTool(undefined);
+  }
+
+  if (activeTool === "pointer") {
+    doPointerEnd(e);
+    setActiveTool(undefined);
+    return;
   }
 
   if (activeTool === "brush") {
@@ -146,6 +179,24 @@ function doWindowResize() {
   }
 }
 
+let offset = 0;
+let frames = 0;
+function doUpdate(frameCount: number, deltaTime: number) {
+  frames += 1;
+  if (frames < 20) {
+    return;
+  }
+  frames = 0;
+  const { selection } = usePointerStore.getState();
+  for (const item of selection) {
+    item.border.dashes[0] = 10 + offset;
+    item.border.dashes[1] = 10;
+    item.border.dashes[2] = 10 + offset;
+    item.border.dashes[3] = 10 + offset;
+    offset = (offset + 1) % 5;
+  }
+}
+
 export const handlers = {
   doMouseWheel,
   doMouseDown,
@@ -156,4 +207,5 @@ export const handlers = {
   doTouchMove,
   doTouchEnd,
   doWindowResize,
+  doUpdate,
 };
