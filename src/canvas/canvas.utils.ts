@@ -42,3 +42,14 @@ export function colorToRgbaString(color?: RgbaColor): string {
   }
   return `rgba(${color.r},${color.g},${color.b},${color.a})`;
 }
+
+export function isPointInRect(
+  x: number,
+  y: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+) {
+  return x >= x1 && x <= x2 && y >= y1 && y <= y2;
+}

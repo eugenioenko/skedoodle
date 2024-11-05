@@ -2,6 +2,7 @@ import { Tool, useCanvasStore } from "@/canvas/canvas.store";
 import {
   IconBrush,
   IconColorPicker,
+  IconEraser,
   IconHandStop,
   IconNewSection,
   IconPointer,
@@ -23,6 +24,9 @@ export const Toolbar = () => {
         </ToggleButton>
         <ToggleButton value="selection">
           <IconNewSection stroke={1} />
+        </ToggleButton>
+        <ToggleButton value="eraser">
+          <IconEraser stroke={1} />
         </ToggleButton>
         <ToggleButton value="brush">
           <IconBrush stroke={1} />
