@@ -15,8 +15,6 @@ import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
 import { Circle } from "two.js/src/shapes/circle";
 
-export type Tool = "hand" | "pointer" | "brush";
-
 export interface BrushState {
   previousPosition: Vector;
   path?: Path;
@@ -60,19 +58,20 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const { zui, canvas, two } = ctx();
   const { path, setPath, previousPosition, circle } = useBrushStore.getState();
-  const { fillColor: fColor, strokeWidth } = useCanvasStore.getState();
+  const { fillColor: fColor, strokeWidth = 1 } = useCanvasStore.getState();
   const fillColor = colorToRgbaString(fColor);
 
   const position = eventToGlobalPosition(e, zui);
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
+    // TODO there is a type definition issue here, investigate why the mismatch
     const line = two.makeCurve(
       [makeAnchor(previousPosition), makeAnchor(position)] as never,
       true as never
     );
     line.cap = "round";
     line.noFill().stroke = fillColor;
-    line.linewidth = strokeWidth || 0;
+    line.linewidth = strokeWidth;
     line.vertices.forEach(function (v: Vector) {
       v.addSelf(line.position);
     });
@@ -92,7 +91,12 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
         lastVertices,
         position as never
       );
-      if (distance < 10) {
+
+      // TODO set stabilizer to  canvas local position
+      let stabilizer = strokeWidth / 2;
+      const minStabilizer = 2;
+      stabilizer = stabilizer < minStabilizer ? minStabilizer : stabilizer;
+      if (distance < strokeWidth / 2) {
         skipVertices = true;
       }
     }
