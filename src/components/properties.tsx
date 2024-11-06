@@ -6,8 +6,11 @@ import {
   IconDimensions,
   IconRulerMeasure,
   IconRulerMeasure2,
+  IconSkewX,
+  IconSkewY,
 } from "@tabler/icons-react";
 import { Rectangle } from "two.js/src/shapes/rectangle";
+import { degreesToRadians, radiansToDegrees } from "@/canvas/canvas.utils";
 
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selection);
@@ -39,19 +42,40 @@ export const Properties = () => {
       <div className="grid grid-cols-2 gap-2">
         <SlideInput
           icon={IconAngle}
-          min={0}
-          max={Math.PI * 2}
-          sensitivity={0.01}
+          min={-360}
+          max={360}
+          sensitivity={1}
           value={shape.rotation}
           onChange={(value) => (shape.rotation = value)}
+          convertFrom={radiansToDegrees}
+          convertTo={degreesToRadians}
         />
         <SlideInput
           icon={IconDimensions}
-          min={0}
-          max={100}
-          sensitivity={0.01}
+          min={-Infinity}
+          max={Infinity}
+          sensitivity={1}
           value={shape.scale}
           onChange={(value) => (shape.scale = value)}
+          convertFrom={(n) => n * 100}
+          convertTo={(n) => n / 100}
+        />
+
+        <SlideInput
+          icon={IconSkewX}
+          min={-Math.PI}
+          max={Math.PI}
+          sensitivity={0.01}
+          value={shape.skewX}
+          onChange={(value) => (shape.skewX = value)}
+        />
+        <SlideInput
+          icon={IconSkewY}
+          min={-Math.PI}
+          max={Math.PI}
+          sensitivity={0.01}
+          value={shape.skewY}
+          onChange={(value) => (shape.skewY = value)}
         />
       </div>
     </>

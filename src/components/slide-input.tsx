@@ -11,6 +11,8 @@ interface SlideInputProps {
   value: number;
   decimals?: number;
   icon?: Icon;
+  convertTo?: (value: number) => number;
+  convertFrom?: (value: number) => number;
   onChange: (value: number) => void;
 }
 
@@ -23,6 +25,8 @@ export const SlideInput = ({
   value,
   icon: Icon,
   onChange,
+  convertTo,
+  convertFrom,
 }: SlideInputProps) => {
   const { strValue, onMouseDown, doChange, doBlur } = useSliderInput({
     min,
@@ -31,6 +35,8 @@ export const SlideInput = ({
     decimals,
     value,
     onChange,
+    convertTo,
+    convertFrom,
   });
 
   return (

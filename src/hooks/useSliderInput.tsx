@@ -8,24 +8,37 @@ interface UseSliderProps {
   value: number;
   decimals?: number;
   onChange: (value: number) => void;
+  convertTo?: (value: number) => number;
+  convertFrom?: (value: number) => number;
 }
 
 export const useSliderInput = ({
   min = 0,
   max = 100,
   sensitivity = 1,
-  decimals = 3,
+  decimals = 4,
   value,
   onChange,
+  convertFrom,
+  convertTo,
 }: UseSliderProps) => {
   const [strValue, setStrValue] = useState("");
   const screenXRef = useRef(0);
   const lastValidValue = useRef(0);
 
   useEffect(() => {
-    if (!isNaN(value)) {
-      doChange(value.toString());
+    if (convertFrom) {
+      //debugger;
     }
+    if (isNaN(value)) {
+      return;
+    }
+    let initialValue = value;
+    if (convertFrom) {
+      initialValue = convertFrom(initialValue);
+    }
+    setStrValue(initialValue.toString());
+    //doChange(initialValue.toString());
   }, [value]);
 
   const onMouseDown = (x: number) => {
@@ -48,24 +61,26 @@ export const useSliderInput = ({
   };
 
   const updateInputValue = (numValue: number) => {
-    numValue = isNaN(numValue) ? 0 : truncateToDecimals(numValue, decimals);
     numValue = clamp(numValue, min, max);
+    numValue = truncateToDecimals(numValue, decimals);
     setStrValue(numValue.toString());
+    lastValidValue.current = numValue;
+    if (convertTo) {
+      numValue = convertTo(numValue);
+    }
     onChange(numValue);
   };
 
   const doChange = (newValue: string) => {
-    const numValue = Number(newValue);
+    let numValue = Number(newValue);
     if (newValue === "" || newValue.endsWith(".") || isNaN(numValue)) {
       setStrValue(newValue);
       return;
     }
     updateInputValue(numValue);
-    lastValidValue.current = numValue;
   };
 
   const doBlur = () => {
-    console.log(lastValidValue.current);
     updateInputValue(lastValidValue.current);
   };
 

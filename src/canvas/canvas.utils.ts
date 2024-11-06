@@ -62,3 +62,11 @@ export function truncateToDecimals(num: number, decimals: number) {
   const factor = Math.pow(10, decimals);
   return Math.floor(num * factor) / factor;
 }
+
+export function radiansToDegrees(radians: number): number {
+  return (radians * (180 / Math.PI)) % 360;
+}
+
+export function degreesToRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
