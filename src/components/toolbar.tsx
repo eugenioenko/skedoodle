@@ -72,7 +72,7 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
   return (
     <button
       type="button"
-      className={`p-1 rounded ${current === value ? "bg-primary" : ""}`}
+      className={`p-1 rounded ${current === value ? "bg-panel" : ""}`}
       onClick={() => setTool(value as Tool)}
     >
       {children}

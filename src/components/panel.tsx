@@ -2,6 +2,8 @@ import { useCanvasStore } from "@/canvas/canvas.store";
 import { useZoomStore } from "@/canvas/zoom.tool";
 import { IconMenu2 } from "@tabler/icons-react";
 import { useState } from "react";
+import { Layers } from "./layers";
+import { Properties } from "./properties";
 
 export const Panel = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -24,6 +26,7 @@ export const Panel = () => {
           </button>
           <div className="flex-grow text-right text-xs">{zoom}%</div>
         </div>
+        <Properties />
       </div>
     </div>
   );

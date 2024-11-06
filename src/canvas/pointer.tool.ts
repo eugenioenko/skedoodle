@@ -93,6 +93,5 @@ export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
   }
   if (selection.length) {
     setSelection(selection);
-    console.log(selection?.[0]);
   }
 }

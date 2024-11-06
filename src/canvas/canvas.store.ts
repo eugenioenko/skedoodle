@@ -6,6 +6,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { Coordinates } from "./canvas.service";
 import { RgbaColor } from "react-colorful";
+import { Shape } from "two.js/src/shape";
 
 export type Tool = "hand" | "pointer" | "brush" | "square" | "eraser";
 
@@ -20,6 +21,7 @@ export interface CanvasState {
   fillColor: RgbaColor;
   strokeColor: RgbaColor;
   strokeWidth: number;
+  shapes: Shape[];
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setTwo: (two?: Two) => void;
@@ -30,6 +32,8 @@ export interface CanvasState {
   setFillColor: (color: RgbaColor) => void;
   setStrokeColor: (color: RgbaColor) => void;
   setStrokeWidth: (width: number) => void;
+  addShape: (shape: Shape) => void;
+  removeShape: (shape: Shape) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()(
@@ -44,6 +48,7 @@ export const useCanvasStore = create<CanvasState>()(
       fillColor: { r: 222, g: 0, b: 0, a: 1 },
       strokeColor: { r: 22, g: 22, b: 22, a: 1 },
       strokeWidth: 30,
+      shapes: [],
       setSelectedTool: (selectedTool) =>
         set((state) => ({ ...state, selectedTool })),
       setActiveTool: (activeTool) => set((state) => ({ ...state, activeTool })),
@@ -57,6 +62,22 @@ export const useCanvasStore = create<CanvasState>()(
         set((state) => ({ ...state, strokeColor })),
       setStrokeWidth: (strokeWidth) =>
         set((state) => ({ ...state, strokeWidth })),
+      addShape: (shape) =>
+        set((state) => {
+          state.canvas?.add?.(shape);
+          return {
+            ...state,
+            shapes: [...state.shapes, shape],
+          };
+        }),
+      removeShape: (shape) =>
+        set((state) => {
+          state.canvas?.remove?.(shape);
+          return {
+            ...state,
+            shapes: state.shapes.filter((sh) => sh !== shape),
+          };
+        }),
     }),
     { name: "canvasStore", enabled: false || envIsDevelopment }
   )

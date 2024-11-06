@@ -2,8 +2,7 @@ import type { Config } from "tailwindcss";
 const defaultTheme = require("tailwindcss/resolveConfig")(
   require("tailwindcss/defaultConfig")
 ).theme;
-const sansFontFamily = ["Noto Sans Display", ...defaultTheme.fontFamily.sans];
-const headerFontFamily = ["Squada One", ...defaultTheme.fontFamily.sans];
+const sansFontFamily = ["Roboto", ...defaultTheme.fontFamily.sans];
 
 const config: Config = {
   content: [
@@ -14,7 +13,6 @@ const config: Config = {
   theme: {
     fontFamily: {
       sans: sansFontFamily,
-      header: headerFontFamily,
     },
     extend: {
       colors: {
@@ -30,6 +28,7 @@ const config: Config = {
         bg: "var(--color-bg)",
         toolbar: "var(--color-toolbar)",
         border: "var(--color-border)",
+        panel: "var(--color-panel)",
       },
       animation: {
         "fade-in-down": "fadeInDown 250ms linear",

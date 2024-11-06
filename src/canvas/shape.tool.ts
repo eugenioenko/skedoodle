@@ -34,7 +34,11 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { setShape, origin } = useShapeState.getState();
   const position = zui.clientToSurface(mouseEventToPosition(e));
-  const { fillColor: fColor, strokeColor: sColor } = useCanvasStore.getState();
+  const {
+    fillColor: fColor,
+    strokeColor: sColor,
+    addShape,
+  } = useCanvasStore.getState();
   const fillColor = colorToRgbaString(fColor);
   const strokeColor = colorToRgbaString(sColor);
 
@@ -44,7 +48,7 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   shape.stroke = strokeColor;
   shape.fill = fillColor;
   shape.linewidth = 5;
-  canvas.add(shape);
+  addShape(shape);
   setShape(shape);
 }
 

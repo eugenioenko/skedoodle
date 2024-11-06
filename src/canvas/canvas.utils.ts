@@ -53,3 +53,12 @@ export function isPointInRect(
 ) {
   return x >= x1 && x <= x2 && y >= y1 && y <= y2;
 }
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+export function truncateToDecimals(num: number, decimals: number) {
+  const factor = Math.pow(10, decimals);
+  return Math.floor(num * factor) / factor;
+}

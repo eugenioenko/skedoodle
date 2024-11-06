@@ -32,11 +32,11 @@ const ColorPicker = ({ color, onChange }: ColorPickerProps) => {
           color={color}
           onChange={(value) => onChange?.(value)}
         />
-        <div className="grid grid-cols-4 gap-2 w-48 pt-4">
-          <input type="number" readOnly={true} value={color?.r || 0} />
-          <input type="number" readOnly={true} value={color?.g || 0} />
-          <input type="number" readOnly={true} value={color?.g || 0} />
-          <input type="number" readOnly={true} value={color?.a || 1} />
+        <div className="grid grid-cols-4 gap-2 w-48 pt-4 text-xs">
+          <input type="text" readOnly={true} value={color?.r || 0} />
+          <input type="text" readOnly={true} value={color?.g || 0} />
+          <input type="text" readOnly={true} value={color?.g || 0} />
+          <input type="text" readOnly={true} value={color?.a || 1} />
         </div>
       </PopoverContent>
     </Popover>

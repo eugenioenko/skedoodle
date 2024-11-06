@@ -1,4 +1,6 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
+import { SlideInput } from "./slide-input";
+import { IconSquare } from "@tabler/icons-react";
 
 export const ToolOptions = () => {
   const strokeWidth = useCanvasStore((state) => state.strokeWidth);
@@ -8,10 +10,10 @@ export const ToolOptions = () => {
     <>
       <div className="flex flex-row gap-2 text-xs items-center">
         <label>Width</label>
-        <input
+        <SlideInput
           value={strokeWidth}
-          className="max-w-14"
-          onChange={(e) => setStrokeWidth(Number(e.target.value) || 0)}
+          onChange={(value) => setStrokeWidth(value)}
+          icon={IconSquare}
         />
       </div>
     </>

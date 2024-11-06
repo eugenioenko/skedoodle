@@ -3,9 +3,11 @@ import { ctx } from "./canvas.service";
 
 import { Path } from "two.js/src/path";
 import { isPointInRect, mouseEventToPosition } from "./canvas.utils";
+import { useCanvasStore } from "./canvas.store";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
   const { canvas } = ctx();
+  const { removeShape } = useCanvasStore.getState();
   const pointer = mouseEventToPosition(e);
   const shapes = canvas.children.filter(
     (shape) => (shape as Path).getBoundingClientRect
@@ -22,7 +24,7 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
       item.bottom
     );
     if (isShapeWithin) {
-      canvas.remove(shape);
+      removeShape(shape);
       return;
     }
   }

@@ -39,7 +39,11 @@ export const useBrushStore = create<BrushState>()(
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { previousPosition, setPath, setCircle } = useBrushStore.getState();
-  const { fillColor: fColor, strokeWidth = 0 } = useCanvasStore.getState();
+  const {
+    fillColor: fColor,
+    strokeWidth = 0,
+    addShape,
+  } = useCanvasStore.getState();
   const fillColor = colorToRgbaString(fColor);
   const position = zui.clientToSurface(mouseEventToPosition(e));
   previousPosition.set(position.x, position.y);
@@ -56,9 +60,13 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, canvas, two } = ctx();
+  const { zui, two } = ctx();
   const { path, setPath, previousPosition, circle } = useBrushStore.getState();
-  const { fillColor: fColor, strokeWidth = 1 } = useCanvasStore.getState();
+  const {
+    fillColor: fColor,
+    strokeWidth = 1,
+    addShape,
+  } = useCanvasStore.getState();
   const fillColor = colorToRgbaString(fColor);
 
   const position = eventToGlobalPosition(e, zui);
@@ -76,7 +84,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
       v.addSelf(line.position);
     });
     line.position.clear();
-    canvas.add(line);
+    addShape(line);
     setPath(line);
     // lighten starting point reference
     if (circle) {
@@ -109,6 +117,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const { zui, canvas } = ctx();
+  const { removeShape } = useCanvasStore.getState();
   const { path, circle, setCircle } = useBrushStore.getState();
   if (!path) {
     return;

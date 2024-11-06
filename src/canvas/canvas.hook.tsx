@@ -34,6 +34,7 @@ export const useInitTwoCanvas = (
 
     setTwo(instance);
     setCanvas(canvasInstance as never);
+    loadCanvas();
     setZui(zuiInstance);
     setContainer(containerRef.current);
 
@@ -75,22 +76,26 @@ const createTwo = (container: HTMLDivElement): Two => {
 const createCanvas = (two: Two): Group => {
   const canvas = new Two.Group();
 
-  for (var i = 0; i < 100; i++) {
+  two.add(canvas);
+  return canvas as never;
+};
+
+const loadCanvas = () => {
+  const { addShape } = useCanvasStore.getState();
+
+  for (var i = 0; i < 10; i++) {
     const x = i * 100; // Math.random() * two.width * 6 - two.width;
     const y = i * 100; // Math.random() * two.height * 6 - two.height;
     const size = 100; // Math.random() * 100;
     const shape = new Two.Rectangle(x, y, size, size);
     shape.rotation = Math.random() * Math.PI * 2;
     shape.noStroke().fill = "#ccc";
-    canvas.add(shape);
+    addShape(shape);
   }
 
   const circle = new Two.Circle(0, 0, 10);
   circle.fill = "#FF0000";
-  canvas.add(circle);
-
-  two.add(canvas);
-  return canvas as never;
+  addShape(circle);
 };
 
 const createZUI = (canvas: Two): ZUI => {
