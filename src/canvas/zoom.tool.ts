@@ -33,8 +33,8 @@ export function doWheelZoom(e: WheelEvent): void {
   zui.zoomBy(dy, e.clientX, e.clientY);
   setZoom(Math.floor(zui.scale * 100));
 
-  const { selection } = usePointerStore.getState();
-  for (const item of selection) {
+  const { selected } = usePointerStore.getState();
+  for (const item of selected) {
     item.border.linewidth = 1 / zui.scale;
   }
 }

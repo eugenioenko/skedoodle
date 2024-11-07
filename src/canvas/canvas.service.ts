@@ -179,23 +179,7 @@ function doWindowResize() {
   }
 }
 
-let offset = 0;
-let frames = 0;
-function doUpdate(frameCount: number, deltaTime: number) {
-  frames += 1;
-  if (frames < 20) {
-    return;
-  }
-  frames = 0;
-  const { selection } = usePointerStore.getState();
-  for (const item of selection) {
-    item.border.dashes[0] = 10 + offset;
-    item.border.dashes[1] = 10;
-    item.border.dashes[2] = 10 + offset;
-    item.border.dashes[3] = 10 + offset;
-    offset = (offset + 1) % 5;
-  }
-}
+function doUpdate(frameCount: number, deltaTime: number) {}
 
 export const handlers = {
   doMouseWheel,

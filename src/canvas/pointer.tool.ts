@@ -11,31 +11,45 @@ import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 
 interface PointerSelection {
-  shapes: Shape[];
+  shape: Shape;
   border: Rectangle;
 }
 
 export interface PointerState {
   origin: Vector;
-  selection: PointerSelection[];
-  setSelection: (selection: PointerSelection[]) => void;
+  selected: PointerSelection[];
+  setSelected: (selected: PointerSelection[]) => void;
+  addSelected: (selected: PointerSelection[]) => void;
 }
 
 export const usePointerStore = create<PointerState>()(
   devtools(
     (set) => ({
-      selection: [],
+      selected: [],
       origin: new Vector(),
-      setSelection: (selection) => set((state) => ({ ...state, selection })),
+      setSelected: (selected) => set((state) => ({ ...state, selected })),
+      addSelected: (selected) =>
+        set((state) => {
+          return { ...state, selected: [...state.selected, ...selected] };
+        }),
     }),
     { name: "pointerStore", enabled: false || envIsDevelopment }
   )
 );
 
 export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
-  const { origin } = usePointerStore.getState();
+  const { canvas } = ctx();
+  const { origin, selected, setSelected } = usePointerStore.getState();
   const pointer = mouseEventToPosition(e);
   origin.set(pointer.x, pointer.y);
+
+  // clear previously selected if not a join selection
+  if (!e.shiftKey) {
+    for (const item of selected) {
+      canvas.remove(item.border);
+    }
+    setSelected([]);
+  }
 }
 
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
@@ -44,17 +58,12 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
   const { zui, two, canvas } = ctx();
-  const { selection: selected, setSelection } = usePointerStore.getState();
+  const { selected, addSelected } = usePointerStore.getState();
 
-  for (const item of selected) {
-    canvas.remove(item.border);
-  }
-
-  setSelection([]);
   const pointer = mouseEventToPosition(e);
-  const shapes = canvas.children.filter(
+  const shapes: Path[] = canvas.children.filter(
     (shape) => (shape as Path).getBoundingClientRect
-  );
+  ) as Path[];
 
   const selection: PointerSelection[] = [];
   for (const shape of shapes) {
@@ -67,7 +76,11 @@ export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
       item.right,
       item.bottom
     );
-    if (isShapeWithin) {
+    const isShapeAlreadySelected = selected.find(
+      (sh) => sh.shape.id === shape.id
+    );
+
+    if (isShapeWithin && !isShapeAlreadySelected) {
       const pos = zui.clientToSurface({
         x: item.left + item.width / 2,
         y: item.top + item.height / 2,
@@ -78,20 +91,19 @@ export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
         item.width / zui.scale,
         item.height / zui.scale
       );
-      border.dashes = [10, 10, 10, 10];
       border.stroke = "#0ea5cf";
       border.noFill();
       border.linewidth = 1 / zui.scale;
       border.scale = 1.05;
       canvas.add(border);
       selection.push({
-        shapes: [shape],
+        shape,
         border,
       });
       break;
     }
   }
   if (selection.length) {
-    setSelection(selection);
+    addSelected(selection);
   }
 }
