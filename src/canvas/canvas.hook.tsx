@@ -83,18 +83,19 @@ const createCanvas = (two: Two): Group => {
 const loadCanvas = () => {
   const { addShape } = useCanvasStore.getState();
 
-  for (var i = 0; i < 10; i++) {
-    const x = i * 100; // Math.random() * two.width * 6 - two.width;
-    const y = i * 100; // Math.random() * two.height * 6 - two.height;
+  /*
+  for (var i = 0; i < 5000; i++) {
+    const x = Math.random() * 5000 * 6 - 5000;
+    const y = Math.random() * 5000 * 6 - 5000;
     const size = 100; // Math.random() * 100;
     const shape = new Two.Rectangle(x, y, size, size);
     shape.rotation = Math.random() * Math.PI * 2;
     shape.noStroke().fill = "#ccc";
     addShape(shape);
-  }
+  }*/
 
-  const circle = new Two.Circle(0, 0, 10);
-  circle.fill = "#FF0000";
+  const circle = new Two.Circle(0, 0, 3);
+  circle.fill = "#CCC";
   addShape(circle);
 };
 

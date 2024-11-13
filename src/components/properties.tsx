@@ -17,39 +17,40 @@ import { Rectangle } from "two.js/src/shapes/rectangle";
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selected);
 
-  function updateShape(field: keyof Shape, value: number): void {
+  function updateShape(field: keyof Shape | string, value: number): void {
     for (const item of usePointerStore.getState().selected) {
       const props = field.split(".");
       if (props.length == 2) {
-        item.shape[props[0]][props[1]] = value;
+        item.shape[props[0] as keyof Shape][props[1]] = value;
       } else {
-        (item.shape as Rectangle)[field] = value;
+        (item.shape as any)[field] = value;
       }
     }
   }
 
   const shape = selection?.[0]?.shape;
+
   return (
     <>
       <div className="pt-4 pb-1 text-sm">Size</div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-4">
         <SlideInput
           icon={IconRulerMeasure}
           min={1}
           max={5000}
-          value={shape?.width}
+          value={(shape as Rectangle)?.width}
           onChange={(value) => updateShape("width", value)}
         />
         <SlideInput
           icon={IconRulerMeasure2}
           min={1}
           max={5000}
-          value={shape?.height}
+          value={(shape as Rectangle)?.height}
           onChange={(value) => updateShape("height", value)}
         />
       </div>
       <div className="pt-4 pb-1 text-sm">Position</div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-4">
         <SlideInput
           icon={IconSquareLetterX}
           min={-5000}
@@ -66,7 +67,7 @@ export const Properties = () => {
         />
       </div>
       <div className="pt-4 pb-1 text-sm">Transform</div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-4">
         <SlideInput
           icon={IconAngle}
           min={-360}
@@ -82,7 +83,7 @@ export const Properties = () => {
           min={-Infinity}
           max={Infinity}
           sensitivity={1}
-          value={shape?.scale}
+          value={shape?.scale as number}
           onChange={(value) => updateShape("scale", value)}
           convertFrom={(n) => n * 100}
           convertTo={(n) => n / 100}

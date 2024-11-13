@@ -9,9 +9,13 @@ export function doDragStart(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doDragMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui } = ctx();
   var dx = e.clientX - mouse.x;
   var dy = e.clientY - mouse.y;
-  zui.translateSurface(dx, dy);
   mouse.set(e.clientX, e.clientY);
+  doDragTranslate(dx, dy);
+}
+
+export function doDragTranslate(dx: number, dy: number) {
+  const { zui } = ctx();
+  zui.translateSurface(dx, dy);
 }

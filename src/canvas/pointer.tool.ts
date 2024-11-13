@@ -5,13 +5,12 @@ import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { Path } from "two.js/src/path";
-import { Shape } from "two.js/src/shape";
 import { isPointInRect, mouseEventToPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 
 interface PointerSelection {
-  shape: Shape;
+  shape: Path;
   border: Rectangle;
 }
 

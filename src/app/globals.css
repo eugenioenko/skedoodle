@@ -45,7 +45,15 @@ button {
 }
 
 input.slider-input {
-  @apply pl-[26px] px-2 text-sm;
+  @apply px-[26px] text-sm max-w-32;
+}
+
+input.color-input {
+  @apply pl-[26px]  pr-1 text-sm max-w-24 rounded-r-none border-r-border;
+}
+
+input.alpha-input {
+  @apply pl-1  pr-[26px] text-sm rounded-l-none max-w-16;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -59,4 +67,12 @@ input[type="number"] {
 
 .center {
   @apply flex justify-center items-center;
+}
+
+.rc-slider-rail {
+  @apply !bg-panel;
+}
+.rc-slider-track,
+.rc-slider-tracks {
+  @apply !bg-white;
 }

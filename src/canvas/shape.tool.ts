@@ -1,6 +1,5 @@
 import { MouseEvent } from "react";
 import { ctx } from "./canvas.service";
-
 import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";

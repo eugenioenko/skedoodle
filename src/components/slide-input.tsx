@@ -2,6 +2,9 @@
 
 import { useSliderInput } from "@/hooks/useSliderInput";
 import { Icon, IconSelector } from "@tabler/icons-react";
+import Slider from "rc-slider";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { useState } from "react";
 
 interface SlideInputProps {
   min?: number;
@@ -28,7 +31,14 @@ export const SlideInput = ({
   convertTo,
   convertFrom,
 }: SlideInputProps) => {
-  const { strValue, onMouseDown, doChange, doBlur } = useSliderInput({
+  const {
+    strValue,
+    numValue,
+    onMouseDown,
+    doChange,
+    doBlur,
+    updateInputValue,
+  } = useSliderInput({
     min,
     max,
     sensitivity,
@@ -60,7 +70,50 @@ export const SlideInput = ({
           onChange={(e) => doChange(e.target.value)}
           onBlur={() => doBlur()}
         />
+        <SliderPopover
+          min={min}
+          max={max}
+          value={numValue}
+          setValue={updateInputValue}
+        />
       </div>
     </div>
+  );
+};
+
+interface SliderPopoverProps {
+  min?: number;
+  max?: number;
+  value: number;
+  setValue: (value: number) => void;
+}
+
+const SliderPopover = ({ min, max, value, setValue }: SliderPopoverProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Popover
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      placement="bottom"
+      initialOffset={10}
+    >
+      <PopoverTrigger
+        onClick={() => setIsOpen((v) => !v)}
+        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-white/65" ${
+          isOpen ? "border-highlight" : "border-transparent"
+        }`}
+      >
+        <IconSelector size={18} stroke={1} />
+      </PopoverTrigger>
+      <PopoverContent className="bg-toolbar px-4 py-2 rounded w-64 border border-white/10">
+        <Slider
+          min={min}
+          max={max}
+          value={value}
+          onChange={(val) => setValue(val as never)}
+        />
+      </PopoverContent>
+    </Popover>
   );
 };

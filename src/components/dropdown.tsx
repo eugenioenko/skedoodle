@@ -139,7 +139,7 @@ export const MenuComponent = React.forwardRef<
             <FloatingPortal>
               <div
                 ref={refs.setFloating}
-                className="card flex flex-col"
+                className="card flex flex-col border border-white/10 rounded overflow-hidden"
                 style={floatingStyles}
                 {...getFloatingProps()}
               >
@@ -173,7 +173,7 @@ export const DropdownItem = React.forwardRef<
       ref={useMergeRefs([item.ref, forwardedRef])}
       type="button"
       role="menuitem"
-      className="py-2 px-3 flex items-center gap-2 hover:bg-accent hover:text-inverse"
+      className="bg-toolbar py-2 px-3 flex items-center gap-2 text-white hover:bg-panel"
       tabIndex={isActive ? 0 : -1}
       disabled={disabled}
       {...menu.getItemProps({

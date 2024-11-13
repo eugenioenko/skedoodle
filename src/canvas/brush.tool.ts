@@ -14,13 +14,18 @@ import { Vector } from "two.js/src/vector";
 import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
 import { Circle } from "two.js/src/shapes/circle";
+import { RgbaColor } from "react-colorful";
 
 export interface BrushState {
   previousPosition: Vector;
   path?: Path;
   circle?: Circle;
+  strokeColor: RgbaColor;
+  strokeWidth: number;
   setPath: (path?: Path | undefined) => void;
   setCircle: (circle?: Circle | undefined) => void;
+  setStrokeWidth: (strokeWidth?: number) => void;
+  setStrokeColor: (strokeColor: RgbaColor) => void;
 }
 
 export const useBrushStore = create<BrushState>()(
@@ -29,8 +34,14 @@ export const useBrushStore = create<BrushState>()(
       path: undefined,
       circle: undefined,
       previousPosition: new Vector(),
+      strokeWidth: 5,
+      strokeColor: { r: 33, g: 33, b: 33, a: 1 },
+      setStrokeColor: (strokeColor) =>
+        set((state) => ({ ...state, strokeColor })),
       setPath: (path) => set((state) => ({ ...state, path })),
       setCircle: (circle) => set((state) => ({ ...state, circle })),
+      setStrokeWidth: (strokeWidth) =>
+        set((state) => ({ ...state, strokeWidth })),
     }),
     { name: "brushStore", enabled: false || envIsDevelopment }
   )
@@ -38,19 +49,15 @@ export const useBrushStore = create<BrushState>()(
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
-  const { previousPosition, setPath, setCircle } = useBrushStore.getState();
-  const {
-    fillColor: fColor,
-    strokeWidth = 0,
-    addShape,
-  } = useCanvasStore.getState();
-  const fillColor = colorToRgbaString(fColor);
+  const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
+    useBrushStore.getState();
+  const fillColor = colorToRgbaString(strokeColor);
   const position = zui.clientToSurface(mouseEventToPosition(e));
   previousPosition.set(position.x, position.y);
   setPath(undefined);
 
   // add dot for starting point reference only when no opacity
-  if (fColor?.a === 1) {
+  if (strokeColor?.a === 1) {
     const circle = two.makeCircle(position.x, position.y, strokeWidth / 2);
     circle.fill = fillColor;
     circle.noStroke();
@@ -61,13 +68,10 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two } = ctx();
-  const { path, setPath, previousPosition, circle } = useBrushStore.getState();
-  const {
-    fillColor: fColor,
-    strokeWidth = 1,
-    addShape,
-  } = useCanvasStore.getState();
-  const fillColor = colorToRgbaString(fColor);
+  const { path, setPath, previousPosition, strokeColor, strokeWidth } =
+    useBrushStore.getState();
+  const { addShape } = useCanvasStore.getState();
+  const fillColor = colorToRgbaString(strokeColor);
 
   const position = eventToGlobalPosition(e, zui);
   if (!path) {
@@ -86,10 +90,6 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     line.position.clear();
     addShape(line);
     setPath(line);
-    // lighten starting point reference
-    if (circle) {
-      circle.opacity = 0;
-    }
   } else {
     // continue drawing
     let skipVertices = false;
@@ -117,7 +117,6 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const { zui, canvas } = ctx();
-  const { removeShape } = useCanvasStore.getState();
   const { path, circle, setCircle } = useBrushStore.getState();
   if (!path) {
     return;

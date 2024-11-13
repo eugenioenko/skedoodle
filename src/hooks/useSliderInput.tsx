@@ -23,13 +23,11 @@ export const useSliderInput = ({
   convertTo,
 }: UseSliderProps) => {
   const [strValue, setStrValue] = useState("");
+  const [numValue, setNumValue] = useState(0);
   const screenXRef = useRef(0);
   const lastValidValue = useRef(0);
 
   useEffect(() => {
-    if (convertFrom) {
-      //debugger;
-    }
     if (isNaN(value)) {
       return;
     }
@@ -38,8 +36,8 @@ export const useSliderInput = ({
       initialValue = convertFrom(initialValue);
     }
     setStrValue(initialValue.toString());
-    //doChange(initialValue.toString());
-  }, [value]);
+    setNumValue(value);
+  }, [value, convertFrom]);
 
   const onMouseDown = (x: number) => {
     screenXRef.current = x;
@@ -65,6 +63,7 @@ export const useSliderInput = ({
     numValue = truncateToDecimals(numValue, decimals);
     setStrValue(numValue.toString());
     lastValidValue.current = numValue;
+    setNumValue(numValue);
     if (convertTo) {
       numValue = convertTo(numValue);
     }
@@ -86,6 +85,7 @@ export const useSliderInput = ({
 
   return {
     strValue,
+    numValue,
     onMouseDown,
     updateInputValue,
     doChange,

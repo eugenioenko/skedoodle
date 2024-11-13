@@ -1,16 +1,12 @@
 import { Tool, useCanvasStore } from "@/canvas/canvas.store";
 import {
   IconBrush,
-  IconColorPicker,
   IconEraser,
   IconHandStop,
-  IconNewSection,
   IconPointer,
   IconSquare,
-  IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
-import { PickColor } from "./color-picker";
 
 export const Toolbar = () => {
   return (
@@ -22,40 +18,19 @@ export const Toolbar = () => {
         <ToggleButton value="pointer">
           <IconPointer stroke={1} />
         </ToggleButton>
-        <ToggleButton value="selection">
-          <IconNewSection stroke={1} />
-        </ToggleButton>
         <ToggleButton value="eraser">
           <IconEraser stroke={1} />
         </ToggleButton>
         <ToggleButton value="brush">
           <IconBrush stroke={1} />
         </ToggleButton>
-        <ToggleButton value="bezier">
-          <IconVectorBezier2 stroke={1} />
-        </ToggleButton>
-
         <ToggleButton value="square">
           <IconSquare stroke={1} />
         </ToggleButton>
-
         <ToggleButton value="zoom">
           <IconZoom stroke={1} />
         </ToggleButton>
-        <Separator />
-        <ToggleButton value="picker">
-          <IconColorPicker stroke={1} />
-        </ToggleButton>
-        <PickColor />
       </div>
-    </div>
-  );
-};
-
-const Separator = () => {
-  return (
-    <div className="p-1 h-full md:h-auto md:w-full">
-      <div className="border-l md:border-t border-muted h-full md:h-auto md:w-full"></div>
     </div>
   );
 };

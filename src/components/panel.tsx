@@ -1,13 +1,12 @@
-import { useCanvasStore } from "@/canvas/canvas.store";
+"use client";
+
 import { useZoomStore } from "@/canvas/zoom.tool";
 import { IconMenu2 } from "@tabler/icons-react";
 import { useState } from "react";
-import { Layers } from "./layers";
 import { Properties } from "./properties";
 
 export const Panel = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const zoom = useZoomStore((state) => state.zoom);
 
   return (
     <div
@@ -20,14 +19,24 @@ export const Panel = () => {
           isCollapsed ? "rounded-bl-lg" : ""
         }`}
       >
-        <div className="flex items-center">
+        <div className="flex items-center w-full">
           <button type="button" onClick={() => setIsCollapsed(!isCollapsed)}>
             <IconMenu2 stroke={1} />
           </button>
-          <div className="flex-grow text-right text-xs">{zoom}%</div>
+          <CanvasBar />
         </div>
         <Properties />
       </div>
+    </div>
+  );
+};
+
+const CanvasBar = () => {
+  const zoom = useZoomStore((state) => state.zoom);
+
+  return (
+    <div className="text-sm flex justify-end w-full">
+      <div>{zoom}%</div>
     </div>
   );
 };

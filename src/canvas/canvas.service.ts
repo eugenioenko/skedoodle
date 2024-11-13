@@ -3,7 +3,7 @@ import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
 import { Tool, useCanvasStore } from "./canvas.store";
-import { doDragStart, doDragMove } from "./drag.tool";
+import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
 import { doWheelZoom } from "./zoom.tool";
@@ -150,12 +150,10 @@ function doMouseOut(e: MouseEvent<HTMLDivElement>) {
 
 function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
-  const { zui } = ctx();
-
   if (e.ctrlKey || e.metaKey || e.altKey) {
     doWheelZoom(e);
   } else {
-    zui.translateSurface(-e.deltaX, -e.deltaY);
+    doDragTranslate(-e.deltaX, -e.deltaY);
   }
 }
 
