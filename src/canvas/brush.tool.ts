@@ -5,16 +5,12 @@ import { envIsDevelopment } from "@/environment";
 import Two from "two.js";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import {
-  colorToRgbaString,
-  eventToGlobalPosition,
-  mouseEventToPosition,
-} from "./canvas.utils";
+import { eventToGlobalPosition, mouseEventToPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
 import { Circle } from "two.js/src/shapes/circle";
-import { RgbaColor } from "react-colorful";
+import { colord, RgbaColor } from "colord";
 
 export interface BrushState {
   previousPosition: Vector;
@@ -51,7 +47,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { zui, two, canvas } = ctx();
   const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
     useBrushStore.getState();
-  const fillColor = colorToRgbaString(strokeColor);
+  const fillColor = colord(strokeColor).toRgbString();
   const position = zui.clientToSurface(mouseEventToPosition(e));
   previousPosition.set(position.x, position.y);
   setPath(undefined);
@@ -71,7 +67,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const { path, setPath, previousPosition, strokeColor, strokeWidth } =
     useBrushStore.getState();
   const { addShape } = useCanvasStore.getState();
-  const fillColor = colorToRgbaString(strokeColor);
+  const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToGlobalPosition(e, zui);
   if (!path) {
@@ -84,9 +80,9 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     line.cap = "round";
     line.noFill().stroke = fillColor;
     line.linewidth = strokeWidth;
-    line.vertices.forEach(function (v: Vector) {
+    for (const v of line.vertices) {
       v.addSelf(line.position);
-    });
+    }
     line.position.clear();
     addShape(line);
     setPath(line);
@@ -127,6 +123,36 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   }
   const position = zui.clientToSurface(mouseEventToPosition(e));
   path.vertices.push(makeAnchor(position));
+  normalizePathToCenterPoint(path);
+}
+
+/**
+ * Adjusts the path so that its first vertex becomes the origin (0, 0),
+ * updating the path's translation and shifting all vertices accordingly.'
+ * This helps with transformations
+ */
+function normalizePathOrigin(path: Path): void {
+  const firstVertices = path.vertices[0].clone();
+  path.translation.add(firstVertices);
+  for (const v of (path as Path).vertices) {
+    v.subSelf(firstVertices);
+  }
+}
+
+/**
+ * Centers the vertices of a path while keeping its visual position unchanged on the canvas.
+ * This helps with transformations
+ */
+function normalizePathToCenterPoint(path: Path): void {
+  const oldPosition = path.getBoundingClientRect();
+  path.center();
+
+  const newPosition = path.getBoundingClientRect();
+  const offsetX = oldPosition.left - newPosition.left;
+  const offsetY = oldPosition.top - newPosition.top;
+
+  path.translation.x += offsetX;
+  path.translation.y += offsetY;
 }
 
 function makeAnchor({ x, y }: Coordinates) {

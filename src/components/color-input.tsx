@@ -2,13 +2,13 @@ import { RgbaColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { useState } from "react";
 import { useColorInput } from "@/hooks/useColorInput";
-import { RgbaColor } from "react-colorful";
+import { RgbaColor } from "colord";
 import { IconPercentage } from "@tabler/icons-react";
 import Slider from "rc-slider";
 
 interface ColorInputProps {
   value: RgbaColor;
-  onChange?: (value?: RgbaColor) => void;
+  onChange?: (value: RgbaColor) => void;
 }
 
 export const ColorInput = ({ value, onChange }: ColorInputProps) => {

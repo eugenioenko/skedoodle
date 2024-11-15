@@ -6,7 +6,6 @@ import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToGlobalPosition } from "./canvas.utils";
-import { doWheelZoom } from "./zoom.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 import {
   doPointerEnd,
@@ -15,6 +14,7 @@ import {
   usePointerStore,
 } from "./pointer.tool";
 import { doDeleteShape } from "./eraser.tool";
+import { doZoom } from "./zoom.tool";
 
 export interface Coordinates {
   x: number;
@@ -71,30 +71,34 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
     doShapeStart(e);
     return;
   }
+
+  if (selectedTool === "zoom") {
+    if (e.shiftKey) {
+      doZoom(e, -30);
+    } else {
+      doZoom(e, 30);
+    }
+    return;
+  }
 }
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, setCursor, zui } = useCanvasStore.getState();
+  const { activeTool, selectedTool, setCursor, zui } =
+    useCanvasStore.getState();
   const cursor = eventToGlobalPosition(e, zui);
   setCursor(cursor);
 
-  /*
-  const circle = window["circle"] as Circle;
-  if (circle) {
-    circle.position.set(cursor.x, cursor.y);
+  if (selectedTool === "pointer") {
+    doPointerMove(e);
+    return;
   }
-*/
+
   if (!activeTool) {
     return;
   }
 
   if (activeTool === "hand") {
     doDragMove(e);
-    return;
-  }
-
-  if (activeTool === "pointer") {
-    doPointerMove(e);
     return;
   }
 
@@ -151,7 +155,7 @@ function doMouseOut(e: MouseEvent<HTMLDivElement>) {
 function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
   if (e.ctrlKey || e.metaKey || e.altKey) {
-    doWheelZoom(e);
+    doZoom(e, -e.deltaY);
   } else {
     doDragTranslate(-e.deltaX, -e.deltaY);
   }
@@ -177,6 +181,10 @@ function doWindowResize() {
   }
 }
 
+function doKeyDown(e: KeyboardEvent): void {}
+
+function doKeyUp(e: KeyboardEvent): void {}
+
 function doUpdate(frameCount: number, deltaTime: number) {}
 
 export const handlers = {
@@ -190,4 +198,6 @@ export const handlers = {
   doTouchEnd,
   doWindowResize,
   doUpdate,
+  doKeyDown,
+  doKeyUp,
 };

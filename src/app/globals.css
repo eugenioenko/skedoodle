@@ -36,6 +36,14 @@ body {
   cursor: grabbing;
 }
 
+.canvas-container[data-selected="pointer"][data-option="moving"] {
+  cursor: grabbing;
+}
+
+.canvas-container[data-selected="zoom"] {
+  cursor: zoom-in;
+}
+
 input[type="text"] {
   @apply border border-transparent text-white px-2 py-0.5 rounded bg-panel shadow-sm hover:border-white/10 focus-visible:border-highlight focus-visible:outline-none w-full;
 }

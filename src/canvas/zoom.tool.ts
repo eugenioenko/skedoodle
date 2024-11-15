@@ -4,6 +4,7 @@ import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { usePointerStore } from "./pointer.tool";
+import { MouseEvent } from "react";
 
 export interface ZoomState {
   zoom: number;
@@ -12,32 +13,13 @@ export interface ZoomState {
   setInitialDistance: (initialDistance?: number) => void;
 }
 
-export const useZoomStore = create<ZoomState>()(
-  devtools(
-    (set) => ({
-      zoom: 100,
-      setZoom: (zoom) => set((state) => ({ ...state, zoom })),
-      initialDistance: undefined,
-      setInitialDistance: (initialDistance) =>
-        set((state) => ({ ...state, initialDistance })),
-    }),
-    { name: "zoomStore", enabled: false || envIsDevelopment }
-  )
-);
-
-export function doWheelZoom(e: WheelEvent): void {
-  const { zui } = ctx();
-  const { setZoom } = useZoomStore.getState();
-  var dy = -e.deltaY / 100;
-
-  zui.zoomBy(dy, e.clientX, e.clientY);
-  setZoom(Math.floor(zui.scale * 100));
-
-  const { selected } = usePointerStore.getState();
-  for (const item of selected) {
-    item.border.linewidth = 1 / zui.scale;
-  }
-}
+export const useZoomStore = create<ZoomState>()((set) => ({
+  zoom: 100,
+  setZoom: (zoom) => set((state) => ({ ...state, zoom })),
+  initialDistance: undefined,
+  setInitialDistance: (initialDistance) =>
+    set((state) => ({ ...state, initialDistance })),
+}));
 
 export function onZoomStart(e: TouchEvent): void {
   const { setInitialDistance } = useZoomStore.getState();
@@ -49,6 +31,28 @@ export function onZoomStart(e: TouchEvent): void {
       touch2.clientY - touch1.clientY
     );
     setInitialDistance(initialDistance);
+  }
+}
+
+export function doZoom(
+  e: WheelEvent | MouseEvent<HTMLDivElement>,
+  amount: number
+): void {
+  const { zui } = ctx();
+  const { setZoom } = useZoomStore.getState();
+  var dy = amount / 100;
+
+  zui.zoomBy(dy, e.clientX, e.clientY);
+  setZoom(Math.floor(zui.scale * 100));
+
+  const { selected, highlight } = usePointerStore.getState();
+
+  for (const item of selected) {
+    item.border.linewidth = 1.5 / zui.scale;
+  }
+
+  if (highlight) {
+    highlight.border.linewidth = 1.5 / zui.scale;
   }
 }
 

@@ -12,6 +12,7 @@ export type Tool = "hand" | "pointer" | "brush" | "square" | "eraser";
 export interface CanvasState {
   selectedTool?: Tool;
   activeTool?: Tool;
+  toolOption?: string;
   two?: Two;
   zui?: ZUI;
   canvas?: Group;
@@ -20,6 +21,7 @@ export interface CanvasState {
   shapes: Shape[];
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
+  setToolOption: (option: string) => void;
   setTwo: (two?: Two) => void;
   setCanvas: (canvas?: Group | undefined) => void;
   setZui: (zui?: ZUI | undefined) => void;
@@ -39,9 +41,11 @@ export const useCanvasStore = create<CanvasState>()(
       zui: undefined,
       cursor: undefined,
       shapes: [],
+      toolOption: "",
       setSelectedTool: (selectedTool) =>
         set((state) => ({ ...state, selectedTool })),
       setActiveTool: (activeTool) => set((state) => ({ ...state, activeTool })),
+      setToolOption: (toolOption) => set((state) => ({ ...state, toolOption })),
       setTwo: (two) => set((state) => ({ ...state, two })),
       setCanvas: (canvas) => set((state) => ({ ...state, canvas })),
       setZui: (zui) => set((state) => ({ ...state, zui })),

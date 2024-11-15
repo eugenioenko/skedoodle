@@ -2,7 +2,7 @@ import { MouseEvent } from "react";
 import { useCanvasStore } from "./canvas.store";
 import { Coordinates } from "./canvas.service";
 import { ZUI } from "two.js/extras/jsm/zui";
-import { RgbaColor } from "react-colorful";
+import { RgbaColor } from "colord";
 
 export function eventToGlobalPosition(
   e: MouseEvent<HTMLDivElement>,
@@ -34,13 +34,6 @@ export function debounce(func: (...args: unknown[]) => void, delay: number) {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), delay);
   };
-}
-
-export function colorToRgbaString(color?: RgbaColor): string {
-  if (!color) {
-    return "rgba(0,0,0,1)";
-  }
-  return `rgba(${color.r},${color.g},${color.b},${color.a})`;
 }
 
 export function isPointInRect(

@@ -3,7 +3,7 @@ import { colord, RgbaColor } from "colord";
 
 interface UseColorInputProps {
   value?: RgbaColor;
-  onChange?: (value?: RgbaColor) => void;
+  onChange?: (value: RgbaColor) => void;
 }
 
 export const useColorInput = ({ value, onChange }: UseColorInputProps) => {

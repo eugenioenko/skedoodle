@@ -1,5 +1,6 @@
 import { MouseEvent } from "react";
 import { ctx } from "./canvas.service";
+
 import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -11,49 +12,63 @@ import {
 import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { useCanvasStore } from "./canvas.store";
+import { colord, RgbaColor } from "colord";
 
 export interface ShapeState {
   shape?: Rectangle;
   origin: Vector;
+  strokeWidth: number;
+  strokeColor: RgbaColor;
+  fillColor: RgbaColor;
   setShape: (shape?: Rectangle | undefined) => void;
+  setStrokeColor: (strokeColor: RgbaColor) => void;
+  setFillColor: (strokeColor: RgbaColor) => void;
+  setStrokeWidth: (strokeWidth?: number) => void;
 }
 
-export const useShapeState = create<ShapeState>()(
+export const useShapeStore = create<ShapeState>()(
   devtools(
     (set) => ({
       shape: undefined,
       origin: new Vector(),
+      strokeWidth: 2,
+      strokeColor: { r: 0, g: 0, b: 0, a: 1 },
+      fillColor: { r: 255, g: 255, b: 255, a: 1 },
       setShape: (shape) => set((state) => ({ ...state, shape })),
+      setStrokeColor: (strokeColor) =>
+        set((state) => ({ ...state, strokeColor })),
+      setFillColor: (fillColor) => set((state) => ({ ...state, fillColor })),
+      setStrokeWidth: (strokeWidth) =>
+        set((state) => ({ ...state, strokeWidth })),
     }),
     { name: "brushStore", enabled: false || envIsDevelopment }
   )
 );
 
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two, canvas } = ctx();
-  const { setShape, origin } = useShapeState.getState();
-  const position = zui.clientToSurface(mouseEventToPosition(e));
-  const {
-    fillColor: fColor,
-    strokeColor: sColor,
-    addShape,
-  } = useCanvasStore.getState();
-  const fillColor = colorToRgbaString(fColor);
-  const strokeColor = colorToRgbaString(sColor);
+  const { zui, two } = ctx();
+  const { addShape } = useCanvasStore.getState();
+  const { setShape, origin, fillColor, strokeColor, strokeWidth } =
+    useShapeStore.getState();
 
+  const position = zui.clientToSurface(mouseEventToPosition(e));
   origin.set(position.x, position.y);
 
   const shape = two.makeRectangle(position.x, position.y, 1, 1);
-  shape.stroke = strokeColor;
-  shape.fill = fillColor;
-  shape.linewidth = 5;
+  shape.stroke = colord(strokeColor).toRgbString();
+  shape.fill = colord(fillColor).toRgbString();
+  if (strokeWidth) {
+    shape.linewidth = strokeWidth;
+  } else {
+    shape.noStroke();
+  }
   addShape(shape);
   setShape(shape);
 }
 
 export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
   const { zui } = ctx();
-  const { shape, origin } = useShapeState.getState();
+  const { shape, origin } = useShapeStore.getState();
   const position = eventToGlobalPosition(e, zui);
   if (shape) {
     const width = shape.width;
@@ -73,6 +88,6 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doShapeUp() {
-  const { setShape } = useShapeState.getState();
+  const { setShape } = useShapeStore.getState();
   setShape(undefined);
 }
