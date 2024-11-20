@@ -25,10 +25,15 @@ const config: Config = {
         body: "var(--color-body)",
         fg: "var(--color-fg)",
         inverse: "var(--color-inverse)",
-        bg: "var(--color-bg)",
-        toolbar: "var(--color-toolbar)",
-        border: "var(--color-border)",
-        panel: "var(--color-panel)",
+
+        default: {
+          0: "var(--color-default-0)",
+          1: "var(--color-default-1)",
+          2: "var(--color-default-2)",
+          3: "var(--color-default-3)",
+          4: "var(--color-default-4)",
+          5: "var(--color-default-5)",
+        },
       },
       animation: {
         "fade-in-down": "fadeInDown 250ms linear",

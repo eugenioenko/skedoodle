@@ -15,7 +15,7 @@ export const Panel = () => {
       }`}
     >
       <div
-        className={`bg-toolbar border-l border-border p-2 h-full ${
+        className={`bg-default-2 border-l border-default-1 px-4 pt-2 pb-12 h-full ${
           isCollapsed ? "rounded-bl-lg" : ""
         }`}
       >

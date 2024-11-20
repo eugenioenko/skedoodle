@@ -30,12 +30,12 @@ export const ColorInput = ({ value, onChange }: ColorInputProps) => {
     onChange,
   });
   return (
-    <div className="relative max-w-40">
+    <div className="relative max-w-40 ">
       <Popover
         open={isOpen}
         onOpenChange={setIsOpen}
-        placement="right"
-        initialOffset={30}
+        placement="bottom-start"
+        initialOffset={10}
       >
         <PopoverTrigger
           onClick={() => setIsOpen((v) => !v)}
@@ -46,7 +46,7 @@ export const ColorInput = ({ value, onChange }: ColorInputProps) => {
         >
           &nbsp;
         </PopoverTrigger>
-        <PopoverContent className="bg-toolbar border-border p-4 rounded">
+        <PopoverContent className="bg-default-2 border border-default-1 p-4 rounded-lg color-picker">
           <RgbaColorPicker
             color={rgbaValue}
             onChange={(value) => doChangePicker(value)}
@@ -103,7 +103,7 @@ const AlphaSliderPopover = ({ value, setValue }: AlphaSliderPopoverProps) => {
       >
         <IconPercentage size={18} stroke={1} />
       </PopoverTrigger>
-      <PopoverContent className="bg-toolbar px-4 py-2 rounded w-60 border border-white/10">
+      <PopoverContent className="bg-default-2 px-4 py-2 rounded w-60 border border-white/10">
         <Slider
           min={0}
           max={1}

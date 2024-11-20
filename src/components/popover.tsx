@@ -27,7 +27,7 @@ interface PopoverOptions {
 
 export function usePopover({
   initialOpen = false,
-  placement = "bottom",
+  placement = "top",
   modal,
   open: controlledOpen,
   onOpenChange: setControlledOpen,

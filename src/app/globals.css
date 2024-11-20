@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #485277;
+  --color-primary: #1f5fb2;
   --color-secondary: #485277;
   --color-accent: #d60b8b;
   --color-danger: #d60b0b;
@@ -19,6 +19,13 @@
   --color-border: #1a1a1a;
   --color-toolbar: #2b2b2b;
   --color-panel: #3c3c3c;
+
+  --color-default-0: #090909;
+  --color-default-1: #1a1a1a;
+  --color-default-2: #2b2b2b;
+  --color-default-3: #3c3c3c;
+  --color-default-4: #4d4d4d;
+  --color-default-5: #5e5e5e;
 
   --width-breakpoint: 768px;
 }
@@ -45,7 +52,7 @@ body {
 }
 
 input[type="text"] {
-  @apply border border-transparent text-white px-2 py-0.5 rounded bg-panel shadow-sm hover:border-white/10 focus-visible:border-highlight focus-visible:outline-none w-full;
+  @apply border border-transparent text-white px-2 py-0.5 rounded bg-default-3 shadow-sm hover:border-white/10 focus-visible:border-highlight focus-visible:outline-none w-full;
 }
 
 button {
@@ -57,7 +64,7 @@ input.slider-input {
 }
 
 input.color-input {
-  @apply pl-[26px]  pr-1 text-sm max-w-24 rounded-r-none border-r-border;
+  @apply pl-[26px]  pr-1 text-sm max-w-24 rounded-r-none border-r-default-1;
 }
 
 input.alpha-input {
@@ -78,9 +85,34 @@ input[type="number"] {
 }
 
 .rc-slider-rail {
-  @apply !bg-panel;
+  @apply !bg-default-3;
 }
 .rc-slider-track,
 .rc-slider-tracks {
   @apply !bg-white;
+}
+
+.color-picker .react-colorful {
+  height: 290px;
+  width: 220px;
+}
+
+.color-picker .react-colorful__hue {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.color-picker .react-colorful__alpha,
+.color-picker .react-colorful__hue {
+  height: 16px;
+}
+
+.color-picker .react-colorful__alpha,
+.color-picker .react-colorful__hue,
+.color-picker .react-colorful__saturation {
+  @apply rounded-lg;
+}
+
+.color-picker .react-colorful__pointer {
+  @apply cursor-pointer;
 }

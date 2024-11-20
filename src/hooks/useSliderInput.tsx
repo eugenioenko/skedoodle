@@ -24,6 +24,7 @@ export const useSliderInput = ({
 }: UseSliderProps) => {
   const [strValue, setStrValue] = useState("");
   const [numValue, setNumValue] = useState(0);
+  const [isHoverSliding, setIsHoverSliding] = useState(false);
   const screenXRef = useRef(0);
   const lastValidValue = useRef(0);
 
@@ -43,6 +44,7 @@ export const useSliderInput = ({
     screenXRef.current = x;
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    setIsHoverSliding(true);
   };
 
   const onMouseMove = (e: MouseEvent) => {
@@ -54,6 +56,7 @@ export const useSliderInput = ({
   };
 
   const onMouseUp = () => {
+    setIsHoverSliding(false);
     window.removeEventListener("mousemove", onMouseMove);
     window.removeEventListener("mouseup", onMouseUp);
   };
@@ -90,5 +93,6 @@ export const useSliderInput = ({
     updateInputValue,
     doChange,
     doBlur,
+    isHoverSliding,
   };
 };

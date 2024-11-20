@@ -48,102 +48,105 @@ export const Properties = () => {
   }
 
   return (
-    <>
-      {selection?.length && (
-        <div>
-          <div className="pt-4 pb-1 text-sm">Color {type}</div>
-          <div className="flex flex-col gap-4">
-            {strokeColor && (
-              <ColorInput
-                value={strokeColor}
-                onChange={(value) => updateShape("stroke", value)}
+    <div className="flex flex-col h-full">
+      <div className="flex-grow">
+        {!!selection?.length && (
+          <>
+            <div className="pt-4 pb-1 text-sm">Color {type}</div>
+            <div className="flex flex-col gap-4">
+              {strokeColor && (
+                <ColorInput
+                  value={strokeColor}
+                  onChange={(value) => updateShape("stroke", value)}
+                />
+              )}
+              {fillColor && (
+                <ColorInput
+                  value={fillColor}
+                  onChange={(value) => updateShape("fill", value)}
+                />
+              )}
+            </div>
+            <div className="pt-4 pb-1 text-sm">Size</div>
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                icon={IconRulerMeasure}
+                min={1}
+                max={5000}
+                value={(shape as Rectangle)?.width}
+                onChange={(value) => updateShape("width", value)}
               />
-            )}
-            {fillColor && (
-              <ColorInput
-                value={fillColor}
-                onChange={(value) => updateShape("fill", value)}
+              <SlideInput
+                icon={IconRulerMeasure2}
+                min={1}
+                max={5000}
+                value={(shape as Rectangle)?.height}
+                onChange={(value) => updateShape("height", value)}
               />
-            )}
-          </div>
-          <div className="pt-4 pb-1 text-sm">Size</div>
-          <div className="grid grid-cols-2 gap-4">
-            <SlideInput
-              icon={IconRulerMeasure}
-              min={1}
-              max={5000}
-              value={(shape as Rectangle)?.width}
-              onChange={(value) => updateShape("width", value)}
-            />
-            <SlideInput
-              icon={IconRulerMeasure2}
-              min={1}
-              max={5000}
-              value={(shape as Rectangle)?.height}
-              onChange={(value) => updateShape("height", value)}
-            />
-          </div>
-          <div className="pt-4 pb-1 text-sm">Position</div>
-          <div className="grid grid-cols-2 gap-4">
-            <SlideInput
-              icon={IconSquareLetterX}
-              min={-5000}
-              max={5000}
-              value={shape?.position.x}
-              onChange={(value) => updateShape("position.x", value)}
-            />
-            <SlideInput
-              icon={IconSquareLetterY}
-              min={-5000}
-              max={5000}
-              value={shape?.position.y}
-              onChange={(value) => updateShape("position.y", value)}
-            />
-          </div>
-          <div className="pt-4 pb-1 text-sm">Transform</div>
-          <div className="grid grid-cols-2 gap-4">
-            <SlideInput
-              icon={IconAngle}
-              min={-360}
-              max={360}
-              sensitivity={1}
-              value={shape?.rotation}
-              onChange={(value) => updateShape("rotation", value)}
-              convertFrom={radiansToDegrees}
-              convertTo={degreesToRadians}
-            />
-            <SlideInput
-              icon={IconDimensions}
-              min={-Infinity}
-              max={Infinity}
-              sensitivity={1}
-              value={shape?.scale as number}
-              onChange={(value) => updateShape("scale", value)}
-              convertFrom={(n) => n * 100}
-              convertTo={(n) => n / 100}
-            />
+            </div>
+            <div className="pt-4 pb-1 text-sm">Position</div>
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                icon={IconSquareLetterX}
+                min={-5000}
+                max={5000}
+                value={shape?.position.x}
+                onChange={(value) => updateShape("position.x", value)}
+              />
+              <SlideInput
+                icon={IconSquareLetterY}
+                min={-5000}
+                max={5000}
+                value={shape?.position.y}
+                onChange={(value) => updateShape("position.y", value)}
+              />
+            </div>
+            <div className="pt-4 pb-1 text-sm">Transform</div>
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                icon={IconAngle}
+                min={-360}
+                max={360}
+                sensitivity={1}
+                value={shape?.rotation}
+                onChange={(value) => updateShape("rotation", value)}
+                convertFrom={radiansToDegrees}
+                convertTo={degreesToRadians}
+              />
+              <SlideInput
+                icon={IconDimensions}
+                min={-Infinity}
+                max={Infinity}
+                sensitivity={1}
+                value={shape?.scale as number}
+                onChange={(value) => updateShape("scale", value)}
+                convertFrom={(n) => n * 100}
+                convertTo={(n) => n / 100}
+              />
 
-            <SlideInput
-              icon={IconSkewX}
-              min={-Math.PI}
-              max={Math.PI}
-              sensitivity={0.01}
-              value={shape?.skewX}
-              onChange={(value) => updateShape("skewX", value)}
-            />
-            <SlideInput
-              icon={IconSkewY}
-              min={-Math.PI}
-              max={Math.PI}
-              sensitivity={0.01}
-              value={shape?.skewY}
-              onChange={(value) => updateShape("skewY", value)}
-            />
-          </div>
-        </div>
-      )}
-      <Layers />
-      <SelectedShapes />
-    </>
+              <SlideInput
+                icon={IconSkewX}
+                min={-Math.PI}
+                max={Math.PI}
+                sensitivity={0.01}
+                value={shape?.skewX}
+                onChange={(value) => updateShape("skewX", value)}
+              />
+              <SlideInput
+                icon={IconSkewY}
+                min={-Math.PI}
+                max={Math.PI}
+                sensitivity={0.01}
+                value={shape?.skewY}
+                onChange={(value) => updateShape("skewY", value)}
+              />
+            </div>
+          </>
+        )}
+      </div>
+      <div>
+        <Layers />
+      </div>
+    </div>
   );
 };

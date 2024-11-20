@@ -38,6 +38,7 @@ export const SlideInput = ({
     doChange,
     doBlur,
     updateInputValue,
+    isHoverSliding,
   } = useSliderInput({
     min,
     max,
@@ -56,7 +57,9 @@ export const SlideInput = ({
       )}
       <div className="relative">
         <button
-          className="absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-white/65"
+          className={`absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-white/65 border ${
+            isHoverSliding ? "border-highlight" : "border-transparent"
+          }`}
           onMouseDown={(e) => onMouseDown(e.screenX)}
         >
           {Icon && <Icon size={18} stroke={1} />}
@@ -106,7 +109,7 @@ const SliderPopover = ({ min, max, value, setValue }: SliderPopoverProps) => {
       >
         <IconSelector size={18} stroke={1} />
       </PopoverTrigger>
-      <PopoverContent className="bg-toolbar px-4 py-2 rounded w-64 border border-white/10">
+      <PopoverContent className="bg-default-2 px-4 py-2 rounded w-64 border border-white/10">
         <Slider
           min={min}
           max={max}

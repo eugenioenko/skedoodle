@@ -12,7 +12,7 @@ export const App = () => {
 
   return (
     <main className="w-dvw h-dvh flex flex-col text-white">
-      <div className="bg-toolbar border-b border-border min-h-12 h-12 flex items-center px-4">
+      <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4">
         <ToolOptions />
       </div>
       <div className="flex-grow flex relative bg-gray-50 overflow-hidden">
@@ -20,7 +20,7 @@ export const App = () => {
         <Canvas />
         <Panel />
       </div>
-      <div className="zzz bg-toolbar border-t border-border h-6 overflow-hidden">
+      <div className="bg-default-2 border-t border-default-1 h-6 overflow-hidden">
         <StatusBar />
       </div>
     </main>
