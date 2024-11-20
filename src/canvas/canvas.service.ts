@@ -5,7 +5,7 @@ import { Group } from "two.js/src/group";
 import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
-import { eventToGlobalPosition } from "./canvas.utils";
+import { eventToSurfacePosition } from "./canvas.utils";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 import {
   doPointerEnd,
@@ -85,7 +85,7 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   const { activeTool, selectedTool, setCursor, zui } =
     useCanvasStore.getState();
-  const cursor = eventToGlobalPosition(e, zui);
+  const cursor = eventToSurfacePosition(e, zui);
   setCursor(cursor);
 
   if (selectedTool === "pointer") {
@@ -148,7 +148,14 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseOut(e: MouseEvent<HTMLDivElement>) {
-  const { setCursor } = useCanvasStore.getState();
+  const { setCursor, activeTool, setActiveTool } = useCanvasStore.getState();
+
+  if (activeTool === "brush") {
+    doBrushUp(e);
+    setActiveTool(undefined);
+    return;
+  }
+
   setCursor(undefined);
 }
 

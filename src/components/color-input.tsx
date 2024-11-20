@@ -30,7 +30,7 @@ export const ColorInput = ({ value, onChange }: ColorInputProps) => {
     onChange,
   });
   return (
-    <div className="relative">
+    <div className="relative max-w-40">
       <Popover
         open={isOpen}
         onOpenChange={setIsOpen}

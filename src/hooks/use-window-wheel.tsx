@@ -9,6 +9,8 @@ export const useWindowWheelPrevent = () => {
   }, []);
 };
 
-function doPreventDefault(e: Event): void {
-  e?.preventDefault?.();
+function doPreventDefault(e: WheelEvent): void {
+  if (e.deltaX !== 0) {
+    e?.preventDefault?.();
+  }
 }

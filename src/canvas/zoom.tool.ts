@@ -1,8 +1,6 @@
 import { ctx } from "./canvas.service";
 
-import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 import { usePointerStore } from "./pointer.tool";
 import { MouseEvent } from "react";
 
@@ -45,14 +43,16 @@ export function doZoom(
   zui.zoomBy(dy, e.clientX, e.clientY);
   setZoom(Math.floor(zui.scale * 100));
 
-  const { selected, highlight } = usePointerStore.getState();
+  const { selected, outlines } = usePointerStore.getState();
 
   for (const item of selected) {
-    item.border.linewidth = 1.5 / zui.scale;
+    // item.border.linewidth = 1.5 / zui.scale;
   }
 
-  if (highlight) {
-    highlight.border.linewidth = 1.5 / zui.scale;
+  for (const outline of Object.values(outlines)) {
+    if (outline) {
+      outline.linewidth = 1.5 / zui.scale;
+    }
   }
 }
 

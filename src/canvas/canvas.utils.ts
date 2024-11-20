@@ -2,9 +2,9 @@ import { MouseEvent } from "react";
 import { useCanvasStore } from "./canvas.store";
 import { Coordinates } from "./canvas.service";
 import { ZUI } from "two.js/extras/jsm/zui";
-import { RgbaColor } from "colord";
+import { BoundingBox } from "two.js";
 
-export function eventToGlobalPosition(
+export function eventToSurfacePosition(
   e: MouseEvent<HTMLDivElement>,
   zui?: ZUI
 ): Coordinates {
@@ -17,7 +17,7 @@ export function eventToGlobalPosition(
   return zui.clientToSurface(position);
 }
 
-export function mouseEventToPosition(e: MouseEvent<HTMLDivElement>): {
+export function eventToClientPosition(e: MouseEvent<HTMLDivElement>): {
   x: number;
   y: number;
 } {
@@ -36,6 +36,19 @@ export function debounce(func: (...args: unknown[]) => void, delay: number) {
   };
 }
 
+export function isPointInBoundingBox(
+  point: { x: number; y: number },
+  box: BoundingBox
+): boolean {
+  return isPointInRect(
+    point.x,
+    point.y,
+    box.left,
+    box.top,
+    box.right,
+    box.bottom
+  );
+}
 export function isPointInRect(
   x: number,
   y: number,

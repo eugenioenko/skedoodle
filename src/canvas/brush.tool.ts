@@ -5,7 +5,7 @@ import { envIsDevelopment } from "@/environment";
 import Two from "two.js";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { eventToGlobalPosition, mouseEventToPosition } from "./canvas.utils";
+import { eventToSurfacePosition, eventToClientPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
@@ -48,7 +48,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
     useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
-  const position = zui.clientToSurface(mouseEventToPosition(e));
+  const position = zui.clientToSurface(eventToClientPosition(e));
   previousPosition.set(position.x, position.y);
   setPath(undefined);
 
@@ -69,7 +69,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const { addShape } = useCanvasStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
-  const position = eventToGlobalPosition(e, zui);
+  const position = eventToSurfacePosition(e, zui);
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
     // TODO there is a type definition issue here, investigate why the mismatch
@@ -121,9 +121,9 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     canvas.remove(circle);
     setCircle(undefined);
   }
-  const position = zui.clientToSurface(mouseEventToPosition(e));
+  const position = zui.clientToSurface(eventToClientPosition(e));
   path.vertices.push(makeAnchor(position));
-  normalizePathToCenterPoint(path);
+  normalizePathOrigin(path);
 }
 
 /**
@@ -144,6 +144,7 @@ function normalizePathOrigin(path: Path): void {
  * This helps with transformations
  */
 function normalizePathToCenterPoint(path: Path): void {
+  // TODO: fix zui
   const oldPosition = path.getBoundingClientRect();
   path.center();
 

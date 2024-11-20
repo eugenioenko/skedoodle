@@ -4,11 +4,7 @@ import { ctx } from "./canvas.service";
 import { envIsDevelopment } from "@/environment";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import {
-  colorToRgbaString,
-  eventToGlobalPosition,
-  mouseEventToPosition,
-} from "./canvas.utils";
+import { eventToSurfacePosition, eventToClientPosition } from "./canvas.utils";
 import { Vector } from "two.js/src/vector";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { useCanvasStore } from "./canvas.store";
@@ -51,7 +47,7 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const { setShape, origin, fillColor, strokeColor, strokeWidth } =
     useShapeStore.getState();
 
-  const position = zui.clientToSurface(mouseEventToPosition(e));
+  const position = zui.clientToSurface(eventToClientPosition(e));
   origin.set(position.x, position.y);
 
   const shape = two.makeRectangle(position.x, position.y, 1, 1);
@@ -69,7 +65,7 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
 export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
   const { zui } = ctx();
   const { shape, origin } = useShapeStore.getState();
-  const position = eventToGlobalPosition(e, zui);
+  const position = eventToSurfacePosition(e, zui);
   if (shape) {
     const width = shape.width;
     const height = shape.height;

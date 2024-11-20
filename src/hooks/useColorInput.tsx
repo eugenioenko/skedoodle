@@ -18,7 +18,7 @@ export const useColorInput = ({ value, onChange }: UseColorInputProps) => {
     const color = rgbaToRgbStr(rgbaValue);
     setRgbStrValue(color);
     setAlphaValue(`${Math.round((rgbaValue.a || 0) * 100)}`);
-  }, [value]);
+  }, [value, rgbaValue]);
 
   const doChange = (rgba: RgbaColor): void => {
     setRgbaValue(rgba);
@@ -33,6 +33,8 @@ export const useColorInput = ({ value, onChange }: UseColorInputProps) => {
       rgba.a = 1;
     }
     doChange(rgba);
+    const rgbColor = colord({ r: rgba.r, b: rgba.b, g: rgba.g }).toHex();
+    doChangeRgbValue(rgbColor);
   };
 
   const doChangeRgbValue = (rgb: string): void => {

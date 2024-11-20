@@ -1,14 +1,14 @@
 import { MouseEvent } from "react";
 import { ctx } from "./canvas.service";
 
-import { isPointInRect, mouseEventToPosition } from "./canvas.utils";
+import { isPointInRect, eventToClientPosition } from "./canvas.utils";
 import { useCanvasStore } from "./canvas.store";
 import { Path } from "two.js/src/path";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
   const { canvas } = ctx();
   const { removeShape } = useCanvasStore.getState();
-  const pointer = mouseEventToPosition(e);
+  const pointer = eventToClientPosition(e);
 
   const shapes: Path[] = canvas.children.filter(
     (shape) => (shape as Path).getBoundingClientRect
