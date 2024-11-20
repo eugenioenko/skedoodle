@@ -32,9 +32,9 @@ export const useColorInput = ({ value, onChange }: UseColorInputProps) => {
     if (rgba.a > 0.95) {
       rgba.a = 1;
     }
+    setRgbaValue(rgba);
     doChange(rgba);
-    const rgbColor = colord({ r: rgba.r, b: rgba.b, g: rgba.g }).toHex();
-    doChangeRgbValue(rgbColor);
+    setRgbStrValue(rgbaToRgbStr(rgbaValue));
   };
 
   const doChangeRgbValue = (rgb: string): void => {
