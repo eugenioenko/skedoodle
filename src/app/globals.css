@@ -32,7 +32,7 @@ body {
   cursor: grab;
 }
 
-.canvas-container[data-selected="hand"][data-active="hand"] {
+.canvas-container[data-active="hand"] {
   cursor: grabbing;
 }
 

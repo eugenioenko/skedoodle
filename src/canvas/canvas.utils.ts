@@ -4,6 +4,12 @@ import { Coordinates } from "./canvas.service";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { BoundingBox } from "two.js";
 
+export enum MouseButton {
+  Left = 0,
+  Middle = 1,
+  Right = 2,
+}
+
 export function eventToSurfacePosition(
   e: MouseEvent<HTMLDivElement>,
   zui?: ZUI

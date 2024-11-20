@@ -5,14 +5,9 @@ import { Group } from "two.js/src/group";
 import { Tool, useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
-import { eventToSurfacePosition } from "./canvas.utils";
+import { eventToSurfacePosition, MouseButton } from "./canvas.utils";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
-import {
-  doPointerEnd,
-  doPointerMove,
-  doPointerStart,
-  usePointerStore,
-} from "./pointer.tool";
+import { doPointerEnd, doPointerMove, doPointerStart } from "./pointer.tool";
 import { doDeleteShape } from "./eraser.tool";
 import { doZoom } from "./zoom.tool";
 
@@ -43,7 +38,16 @@ export const ctx = (): Context => {
 };
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
-  const { selectedTool, setActiveTool } = useCanvasStore.getState();
+  const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
+    useCanvasStore.getState();
+
+  if (e.button === MouseButton.Middle) {
+    setRestoreTool(selectedTool);
+    setActiveTool("hand");
+    setSelectedTool("hand");
+    doDragStart(e);
+    return;
+  }
 
   setActiveTool(selectedTool || "hand");
 
@@ -119,9 +123,20 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, setActiveTool } = useCanvasStore.getState();
+  const {
+    activeTool,
+    setActiveTool,
+    restoreTool,
+    setRestoreTool,
+    setSelectedTool,
+  } = useCanvasStore.getState();
   if (!activeTool) {
     return;
+  }
+
+  if (restoreTool) {
+    setSelectedTool(restoreTool);
+    setRestoreTool(undefined);
   }
 
   if (activeTool === "hand" || activeTool === "eraser") {
@@ -150,9 +165,8 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 function doMouseOut(e: MouseEvent<HTMLDivElement>) {
   const { setCursor, activeTool, setActiveTool } = useCanvasStore.getState();
 
-  if (activeTool === "brush") {
-    doBrushUp(e);
-    setActiveTool(undefined);
+  if (activeTool) {
+    doMouseUp(e);
     return;
   }
 

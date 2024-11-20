@@ -187,13 +187,17 @@ function startMoveSelection(): void {
 export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   const { origin, addHighlightToSelection, clearSelected, outlines } =
     usePointerStore.getState();
-  const pointer = eventToSurfacePosition(e);
-  origin.set(pointer.x, pointer.y);
+  // pointer to measure distance fro movement within the surface
+  const surfacePointer = eventToSurfacePosition(e);
+  // pointer to calculate if a client rect is within
+  const clientPointer = eventToClientPosition(e);
+
+  origin.set(surfacePointer.x, surfacePointer.y);
 
   let isClickWithinHighlight = false;
   if (outlines.highlight && outlines.highlight.visible) {
     const box = outlines.highlight.getBoundingClientRect();
-    isClickWithinHighlight = isPointInBoundingBox(pointer, box);
+    isClickWithinHighlight = isPointInBoundingBox(clientPointer, box);
   }
 
   if (isClickWithinHighlight) {
@@ -208,7 +212,7 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   let isClickWithinSelected = false;
   if (outlines.selected && outlines.selected.visible) {
     const box = outlines.selected.getBoundingClientRect();
-    isClickWithinSelected = isPointInBoundingBox(pointer, box);
+    isClickWithinSelected = isPointInBoundingBox(clientPointer, box);
   }
 
   if (isClickWithinSelected) {
