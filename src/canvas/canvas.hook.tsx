@@ -34,6 +34,9 @@ export const useInitTwoCanvas = (
 
     setTwo(instance);
     setCanvas(canvasInstance as never);
+    if (typeof window !== "undefined") {
+      window.canvas = canvasInstance;
+    }
     loadCanvas();
     setZui(zuiInstance);
     setContainer(containerRef.current);
@@ -69,7 +72,7 @@ const createTwo = (container: HTMLDivElement): Two => {
     fitted: true,
     width: container.clientWidth,
     height: container.clientHeight,
-    type: Two.Types.canvas,
+    type: Two.Types.svg,
   }).appendTo(container);
 };
 

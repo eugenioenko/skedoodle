@@ -10,6 +10,7 @@ import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 import { doPointerEnd, doPointerMove, doPointerStart } from "./pointer.tool";
 import { doDeleteShape } from "./eraser.tool";
 import { doZoom } from "./zoom.tool";
+import { doTryHighlight } from "./shared.utils";
 
 export interface Coordinates {
   x: number;
@@ -92,6 +93,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   const cursor = eventToSurfacePosition(e, zui);
   setCursor(cursor);
 
+  // highlight the shapes but only when not actively erasing
+  if (selectedTool === "eraser" && activeTool !== "eraser") {
+    doTryHighlight(e);
+  }
+
   if (selectedTool === "pointer") {
     doPointerMove(e);
     return;
@@ -166,8 +172,11 @@ function doMouseOut(e: MouseEvent<HTMLDivElement>) {
   const { setCursor, activeTool, setActiveTool } = useCanvasStore.getState();
 
   if (activeTool) {
-    doMouseUp(e);
-    return;
+    // TODO enable this
+    // when moving out of the canvas active tool should be terminated but w
+    // when rendering svg, moving on a shape is considered mouse out
+    // doMouseUp(e);
+    // return;
   }
 
   setCursor(undefined);
