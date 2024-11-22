@@ -11,6 +11,7 @@ import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
 import { Circle } from "two.js/src/shapes/circle";
 import { colord, RgbaColor } from "colord";
+import { simplifyPath } from "@/utils/simplify-path";
 
 export interface BrushState {
   previousPosition: Vector;
@@ -18,10 +19,12 @@ export interface BrushState {
   circle?: Circle;
   strokeColor: RgbaColor;
   strokeWidth: number;
+  tolerance: number;
   setPath: (path?: Path | undefined) => void;
   setCircle: (circle?: Circle | undefined) => void;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
+  setTolerance: (tolerance: number) => void;
 }
 
 export const useBrushStore = create<BrushState>()(
@@ -31,6 +34,7 @@ export const useBrushStore = create<BrushState>()(
       circle: undefined,
       previousPosition: new Vector(),
       strokeWidth: 5,
+      tolerance: 0,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       setStrokeColor: (strokeColor) =>
         set((state) => ({ ...state, strokeColor })),
@@ -38,13 +42,14 @@ export const useBrushStore = create<BrushState>()(
       setCircle: (circle) => set((state) => ({ ...state, circle })),
       setStrokeWidth: (strokeWidth) =>
         set((state) => ({ ...state, strokeWidth })),
+      setTolerance: (tolerance) => set((state) => ({ ...state, tolerance })),
     }),
     { name: "brushStore", enabled: false || envIsDevelopment }
   )
 );
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two, canvas } = ctx();
+  const { zui, two, canvas, doodler } = ctx();
   const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
     useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
@@ -60,10 +65,11 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
     canvas.add(circle);
     setCircle(circle);
   }
+  doodler.throttledTwoUpdate();
 }
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two } = ctx();
+  const { zui, two, doodler } = ctx();
   const { path, setPath, previousPosition, strokeColor, strokeWidth } =
     useBrushStore.getState();
   const { addShape } = useCanvasStore.getState();
@@ -96,11 +102,11 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
         position as never
       );
 
-      // TODO set stabilizer to  canvas local position
-      let stabilizer = strokeWidth / 2;
-      const minStabilizer = 2;
-      stabilizer = stabilizer < minStabilizer ? minStabilizer : stabilizer;
-      if (distance < strokeWidth / 2) {
+      // TODO set stabilizer to a percentage and make it an option
+      let stabilizer = strokeWidth / 4;
+      const maxStabilizer = 10;
+      stabilizer = stabilizer > maxStabilizer ? maxStabilizer : stabilizer;
+      if (distance < stabilizer) {
         skipVertices = true;
       }
     }
@@ -109,11 +115,12 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     }
   }
   previousPosition.set(position.x, position.y);
+  doodler.throttledTwoUpdate();
 }
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
-  const { zui, canvas } = ctx();
-  const { path, circle, setCircle } = useBrushStore.getState();
+  const { zui, canvas, doodler } = ctx();
+  const { path, circle, setCircle, tolerance } = useBrushStore.getState();
   if (!path) {
     return;
   }
@@ -123,7 +130,15 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   }
   const position = zui.clientToSurface(eventToClientPosition(e));
   path.vertices.push(makeAnchor(position));
+
   normalizePathOrigin(path);
+
+  if (tolerance !== 0) {
+    const simplified = simplifyPath(path.vertices, tolerance, false);
+    path.vertices = simplified;
+  }
+
+  doodler.throttledTwoUpdate();
 }
 
 /**
