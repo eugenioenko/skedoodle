@@ -33,7 +33,7 @@ const BrushToolOptions = () => {
         value={strokeColor}
         onChange={(value) => setStrokeColor(value)}
       />
-      <label className="pl-2">Width</label>
+      <label className="pl-2">Stroke</label>
       <SlideInput
         className="max-w-24"
         value={strokeWidth}
@@ -45,10 +45,10 @@ const BrushToolOptions = () => {
       <label className="pl-2">Smoothing</label>
       <SlideInput
         className="max-w-24"
-        value={tolerance * 10}
+        value={tolerance}
         min={0}
         max={100}
-        onChange={(value) => setTolerance(value / 10)}
+        onChange={(value) => setTolerance(value)}
         icon={IconWaveSine}
       />
     </div>

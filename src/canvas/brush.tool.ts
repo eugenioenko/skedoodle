@@ -11,6 +11,12 @@ import { Path } from "two.js/src/path";
 import { useCanvasStore } from "./canvas.store";
 import { Circle } from "two.js/src/shapes/circle";
 import { colord, RgbaColor } from "colord";
+import {
+  angleWeight,
+  areaOfTriangle,
+  perpendicularDistance,
+  simplifyEdge,
+} from "@/utils/simplify-edge";
 import { simplifyPath } from "@/utils/simplify-path";
 
 export interface BrushState {
@@ -34,7 +40,7 @@ export const useBrushStore = create<BrushState>()(
       circle: undefined,
       previousPosition: new Vector(),
       strokeWidth: 5,
-      tolerance: 0,
+      tolerance: 25,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       setStrokeColor: (strokeColor) =>
         set((state) => ({ ...state, strokeColor })),
@@ -134,7 +140,13 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   normalizePathOrigin(path);
 
   if (tolerance !== 0) {
-    const simplified = simplifyPath(path.vertices, tolerance, false);
+    // Area of Triangle:	Smooth and general-purpose; preserves curves and shape.
+    // Perpendicular Distance:	Prioritizes straight-line segments, sharper results on straight paths.
+    // Angle:	Retains sharp corners, may oversimplify smooth curves.
+    const limit = Math.floor(((100 - tolerance) * path.vertices.length) / 100);
+    console.log(`${path.vertices.length} - ${limit}`);
+    //let simplified = simplifyEdge(perpendicularDistance, path.vertices, limit);
+    const simplified = simplifyPath(path.vertices, tolerance / 10, false);
     path.vertices = simplified;
   }
 

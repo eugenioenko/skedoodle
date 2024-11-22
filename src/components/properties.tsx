@@ -2,6 +2,7 @@ import { usePointerStore } from "@/canvas/pointer.tool";
 import { SlideInput } from "./slide-input";
 import {
   IconAngle,
+  IconBrush,
   IconDimensions,
   IconRulerMeasure,
   IconRulerMeasure2,
@@ -48,7 +49,7 @@ export const Properties = () => {
       <div className="flex-grow">
         {!!selection?.length && (
           <>
-            <div className="pt-4 pb-1 text-sm">Color </div>
+            <div className="pt-4 pb-1 text-sm">Color</div>
             <div className="flex flex-col gap-4">
               {strokeColor && (
                 <ColorInput
@@ -62,6 +63,16 @@ export const Properties = () => {
                   onChange={(value) => updateShape("fill", value)}
                 />
               )}
+            </div>
+            <div className="pt-4 pb-1 text-sm">Stroke</div>
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                icon={IconBrush}
+                min={1}
+                max={5000}
+                value={(shape as Rectangle)?.linewidth}
+                onChange={(value) => updateShape("linewidth", value)}
+              />
             </div>
             <div className="pt-4 pb-1 text-sm">Size</div>
             <div className="grid grid-cols-2 gap-4">
