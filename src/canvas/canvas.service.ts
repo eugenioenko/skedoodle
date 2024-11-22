@@ -7,10 +7,15 @@ import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToSurfacePosition, MouseButton } from "./canvas.utils";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
-import { doPointerEnd, doPointerMove, doPointerStart } from "./pointer.tool";
+import {
+  doPointerEnd,
+  doPointerMove,
+  doPointerStart,
+  doTryHighlight,
+} from "./pointer.tool";
 import { doDeleteShape } from "./eraser.tool";
 import { doZoom } from "./zoom.tool";
-import { doTryHighlight } from "./shared.utils";
+import { Doodler } from "./doodle.service";
 
 export interface Coordinates {
   x: number;
@@ -21,22 +26,18 @@ interface Context {
   two: Two;
   canvas: Group;
   zui: ZUI;
-  selectedTool?: Tool;
-  activeTool?: Tool;
-  cursor?: Coordinates;
+  doodler: Doodler;
 }
 
-export const ctx = (): Context => {
+export function ctx(): Context {
   const state = useCanvasStore.getState();
   return {
     two: state.two as Two,
     canvas: state.canvas as Group,
     zui: state.zui as ZUI,
-    selectedTool: state.selectedTool,
-    activeTool: state.activeTool,
-    cursor: state.cursor,
+    doodler: state.doodler as Doodler,
   };
-};
+}
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
@@ -182,6 +183,8 @@ function doMouseOut(e: MouseEvent<HTMLDivElement>) {
   setCursor(undefined);
 }
 
+function doMouseOver(e: MouseEvent<HTMLDivElement>) {}
+
 function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
   if (e.ctrlKey || e.metaKey || e.altKey) {
@@ -196,7 +199,7 @@ function doTouchMove(e: TouchEvent<HTMLDivElement>) {}
 function doTouchEnd(e: TouchEvent<HTMLDivElement>) {}
 
 function doWindowResize() {
-  const { two, container } = useCanvasStore.getState();
+  const { two, container, doodler } = useCanvasStore.getState();
 
   if (!two || !container) {
     return;
@@ -209,6 +212,8 @@ function doWindowResize() {
     two.width = container.clientWidth;
     two.height = container.clientHeight;
   }
+
+  doodler?.throttledTwoUpdate();
 }
 
 function doKeyDown(e: KeyboardEvent): void {}
@@ -223,6 +228,7 @@ export const handlers = {
   doMouseMove,
   doMouseUp,
   doMouseOut,
+  doMouseOver,
   doTouchStart,
   doTouchMove,
   doTouchEnd,

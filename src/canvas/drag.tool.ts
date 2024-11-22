@@ -16,6 +16,7 @@ export function doDragMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doDragTranslate(dx: number, dy: number) {
-  const { zui } = ctx();
+  const { zui, two, doodler } = ctx();
   zui.translateSurface(dx, dy);
+  doodler.throttledTwoUpdate();
 }

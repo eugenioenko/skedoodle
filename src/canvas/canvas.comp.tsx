@@ -24,6 +24,7 @@ export const Canvas = () => {
       onMouseMove={(e) => handlers.doMouseMove(e)}
       onMouseUp={(e) => handlers.doMouseUp(e)}
       onMouseOut={(e) => handlers.doMouseOut(e)}
+      onMouseOver={(e) => handlers.doMouseOver(e)}
       onTouchStart={(e) => handlers.doTouchStart(e)}
       onTouchMove={(e) => handlers.doTouchMove(e)}
       onTouchEnd={(e) => handlers.doTouchEnd(e)}

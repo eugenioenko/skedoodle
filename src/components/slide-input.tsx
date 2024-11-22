@@ -14,6 +14,7 @@ interface SlideInputProps {
   value: number;
   decimals?: number;
   icon?: Icon;
+  className?: string;
   convertTo?: (value: number) => number;
   convertFrom?: (value: number) => number;
   onChange: (value: number) => void;
@@ -30,6 +31,7 @@ export const SlideInput = ({
   onChange,
   convertTo,
   convertFrom,
+  className = "",
 }: SlideInputProps) => {
   const {
     strValue,
@@ -55,7 +57,7 @@ export const SlideInput = ({
       {label && (
         <label className="text-xs font-light opacity-65">{label}</label>
       )}
-      <div className="relative">
+      <div className={`relative ${className}`}>
         <button
           className={`absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-white/65 border ${
             isHoverSliding ? "border-highlight" : "border-transparent"

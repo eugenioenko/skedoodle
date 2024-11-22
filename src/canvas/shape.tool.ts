@@ -42,7 +42,7 @@ export const useShapeStore = create<ShapeState>()(
 );
 
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two } = ctx();
+  const { zui, two, doodler } = ctx();
   const { addShape } = useCanvasStore.getState();
   const { setShape, origin, fillColor, strokeColor, strokeWidth } =
     useShapeStore.getState();
@@ -60,10 +60,11 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   }
   addShape(shape);
   setShape(shape);
+  doodler.throttledTwoUpdate();
 }
 
 export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui } = ctx();
+  const { zui, doodler } = ctx();
   const { shape, origin } = useShapeStore.getState();
   const position = eventToSurfacePosition(e, zui);
   if (shape) {
@@ -80,6 +81,8 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 
     shape.position.x += offset.x;
     shape.position.y += offset.y;
+
+    doodler.throttledTwoUpdate();
   }
 }
 

@@ -15,7 +15,8 @@ import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { ColorInput } from "./color-input";
 import { colord } from "colord";
-import { Layers, SelectedShapes } from "./layers";
+import { Layers } from "./layers";
+import { ctx } from "@/canvas/canvas.service";
 
 type ShapeType = "path" | "shape" | "none";
 
@@ -24,14 +25,8 @@ export const Properties = () => {
   const shape = selection?.[0];
   const strokeColor = colord(shape?.stroke as string).toRgb();
   const fillColor = colord(shape?.fill as string).toRgb();
-  let type: ShapeType = "none";
-  if (shape) {
-    if (shape instanceof Rectangle) {
-      type = "shape";
-    } else {
-      type = "path";
-    }
-  }
+
+  const { doodler } = ctx();
 
   function updateShape(field: keyof Shape | string, value: any): void {
     for (const item of usePointerStore.getState().selected) {
@@ -45,6 +40,7 @@ export const Properties = () => {
         (item as any)[field] = value;
       }
     }
+    doodler.throttledTwoUpdate();
   }
 
   return (
@@ -52,7 +48,7 @@ export const Properties = () => {
       <div className="flex-grow">
         {!!selection?.length && (
           <>
-            <div className="pt-4 pb-1 text-sm">Color {type}</div>
+            <div className="pt-4 pb-1 text-sm">Color </div>
             <div className="flex flex-col gap-4">
               {strokeColor && (
                 <ColorInput

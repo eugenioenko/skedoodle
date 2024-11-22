@@ -12,8 +12,8 @@ import {
   eventToClientPosition,
   eventToSurfacePosition,
   isPointInBoundingBox,
+  isPointInRect,
 } from "./canvas.utils";
-import { doTryHighlight } from "./shared.utils";
 
 interface Outlines {
   highlight?: Rectangle;
@@ -71,10 +71,6 @@ export const usePointerStore = create<PointerState>()(
     { name: "pointerStore", enabled: true || envIsDevelopment }
   )
 );
-
-if (typeof window !== "undefined") {
-  window.ps = usePointerStore;
-}
 
 function highlightShape(
   state: PointerState,
@@ -189,6 +185,7 @@ function startMoveSelection(): void {
 }
 
 export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
+  const { two, doodler } = ctx();
   const { origin, addHighlightToSelection, clearSelected, outlines } =
     usePointerStore.getState();
   // pointer to measure distance fro movement within the surface
@@ -209,6 +206,7 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
     const selected = usePointerStore.getState().selected;
     if (selected.length) {
       startMoveSelection();
+      doodler.throttledTwoUpdate();
       return;
     }
   }
@@ -221,12 +219,15 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
 
   if (isClickWithinSelected) {
     startMoveSelection();
+    doodler.throttledTwoUpdate();
     return;
   }
 
   if (!e.shiftKey) {
     clearSelected();
   }
+
+  doodler.throttledTwoUpdate();
 }
 
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
@@ -241,9 +242,11 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
   const { setIsMoving } = usePointerStore.getState();
   const { setToolOption } = useCanvasStore.getState();
+  const { doodler } = ctx();
 
   setIsMoving(false);
   setToolOption("");
+  doodler.throttledTwoUpdate();
 }
 
 function makeBorder(
@@ -265,6 +268,7 @@ function makeBorder(
 }
 
 function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
+  const { doodler } = ctx();
   const { outlines, origins, origin, selected } = usePointerStore.getState();
   const pointer = eventToSurfacePosition(e);
   if (selected.length !== origins.length) {
@@ -283,4 +287,52 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
     outlines.selected.translation.x = outlines.origin.x + dx;
     outlines.selected.translation.y = outlines.origin.y + dy;
   }
+  doodler.throttledTwoUpdate();
+}
+
+export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
+  const { zui, canvas, doodler } = ctx();
+  const { highlighted, setHighlight, clearHighlight } =
+    usePointerStore.getState();
+
+  const pointer = eventToClientPosition(e);
+  const shapes: Path[] = canvas.children.filter(
+    (shape) => (shape as Path).getBoundingClientRect && (shape as Path).visible
+  ) as Path[];
+
+  for (const shape of shapes) {
+    const item = shape.getBoundingClientRect(false);
+    const isShapeWithin = isPointInRect(
+      pointer.x,
+      pointer.y,
+      item.left,
+      item.top,
+      item.right,
+      item.bottom
+    );
+
+    if (!isShapeWithin || (shape as any).isHighlight) {
+      continue;
+    }
+
+    if (highlighted === shape) {
+      return;
+    }
+
+    const pos = zui.clientToSurface({
+      x: item.left + item.width / 2,
+      y: item.top + item.height / 2,
+    });
+
+    const border = {
+      x: pos.x,
+      y: pos.y,
+      width: item.width / zui.scale,
+      height: item.height / zui.scale,
+    };
+    setHighlight(shape, border);
+    doodler.throttledTwoUpdate();
+    return;
+  }
+  clearHighlight();
 }

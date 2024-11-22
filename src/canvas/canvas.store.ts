@@ -5,6 +5,7 @@ import { Group } from "two.js/src/group";
 import { create } from "zustand";
 import { Coordinates } from "./canvas.service";
 import { Shape } from "two.js/src/shape";
+import { Doodler } from "./doodle.service";
 
 export type Tool = "hand" | "pointer" | "brush" | "square" | "eraser";
 
@@ -15,6 +16,7 @@ export interface CanvasState {
   restoreTool?: Tool;
   two?: Two;
   zui?: ZUI;
+  doodler?: Doodler;
   canvas?: Group;
   cursor?: Coordinates;
   container?: HTMLDivElement;
@@ -26,6 +28,7 @@ export interface CanvasState {
   setTwo: (two?: Two) => void;
   setCanvas: (canvas?: Group | undefined) => void;
   setZui: (zui?: ZUI | undefined) => void;
+  setDoodler: (doodler: Doodler) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
   setCursor: (cursor?: Coordinates) => void;
   addShape: (shape: Shape) => void;
@@ -39,6 +42,7 @@ export const useCanvasStore = create<CanvasState>()((set) => ({
   two: undefined,
   canvas: undefined,
   zui: undefined,
+  doodler: undefined,
   cursor: undefined,
   shapes: [],
   toolOption: "",
@@ -50,6 +54,7 @@ export const useCanvasStore = create<CanvasState>()((set) => ({
   setTwo: (two) => set((state) => ({ ...state, two })),
   setCanvas: (canvas) => set((state) => ({ ...state, canvas })),
   setZui: (zui) => set((state) => ({ ...state, zui })),
+  setDoodler: (doodler) => set((state) => ({ ...state, doodler })),
   setContainer: (container) => set((state) => ({ ...state, container })),
   setCursor: (cursor) => set((state) => ({ ...state, cursor })),
   addShape: (shape) =>

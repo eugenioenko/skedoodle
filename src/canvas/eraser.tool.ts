@@ -7,7 +7,7 @@ import { Path } from "two.js/src/path";
 import { usePointerStore } from "./pointer.tool";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
-  const { canvas } = ctx();
+  const { doodler } = ctx();
   const { removeShape, shapes: canvasShapes } = useCanvasStore.getState();
   const { clearHighlight } = usePointerStore.getState();
   const pointer = eventToClientPosition(e);
@@ -30,6 +30,8 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
     if (isShapeWithin) {
       removeShape(shape);
       clearHighlight();
+      // TODO recalculate selection when deleted shape is from the selection
+      doodler.throttledTwoUpdate();
       return;
     }
   }

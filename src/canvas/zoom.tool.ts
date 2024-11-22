@@ -36,7 +36,7 @@ export function doZoom(
   e: WheelEvent | MouseEvent<HTMLDivElement>,
   amount: number
 ): void {
-  const { zui } = ctx();
+  const { zui, doodler } = ctx();
   const { setZoom } = useZoomStore.getState();
   var dy = amount / 100;
 
@@ -54,6 +54,8 @@ export function doZoom(
       outline.linewidth = 1.5 / zui.scale;
     }
   }
+
+  doodler.throttledTwoUpdate();
 }
 
 /*

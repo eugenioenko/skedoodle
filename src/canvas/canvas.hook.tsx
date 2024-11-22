@@ -1,17 +1,20 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import Two from "two.js";
 import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
+import { Doodler } from "./doodle.service";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>
 ) => {
-  const two = useCanvasStore((state) => state.two);
-  const canvas = useCanvasStore((state) => state.canvas);
-  const zui = useCanvasStore((state) => state.zui);
+  const [instances, setInstances] = useState<any>([
+    undefined,
+    undefined,
+    undefined,
+  ]);
 
   useEffect(() => {
     const {
@@ -19,6 +22,7 @@ export const useInitTwoCanvas = (
       setCanvas,
       setZui,
       setContainer,
+      setDoodler,
       two: twoInstance,
     } = useCanvasStore.getState();
 
@@ -34,12 +38,18 @@ export const useInitTwoCanvas = (
 
     setTwo(instance);
     setCanvas(canvasInstance as never);
-    if (typeof window !== "undefined") {
-      window.canvas = canvasInstance;
-    }
     loadCanvas();
     setZui(zuiInstance);
     setContainer(containerRef.current);
+    setInstances([instance, canvasInstance, zuiInstance]);
+    setDoodler(
+      new Doodler({
+        two: instance,
+        canvas: canvasInstance as never,
+        zui: zuiInstance,
+        sketchId: "1",
+      })
+    );
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
@@ -61,14 +71,14 @@ export const useInitTwoCanvas = (
         currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
       }
     };
-  }, [containerRef]);
+  }, [containerRef, setInstances]);
 
-  return { two, canvas, zui };
+  return { two: instances[0], canvas: instances[1], zui: instances[2] };
 };
 
 const createTwo = (container: HTMLDivElement): Two => {
   return new Two({
-    autostart: true,
+    autostart: false,
     fitted: true,
     width: container.clientWidth,
     height: container.clientHeight,

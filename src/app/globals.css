@@ -60,7 +60,7 @@ button {
 }
 
 input.slider-input {
-  @apply px-[26px] text-sm max-w-32;
+  @apply px-[26px] text-sm;
 }
 
 input.color-input {

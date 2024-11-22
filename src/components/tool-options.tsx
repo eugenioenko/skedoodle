@@ -1,5 +1,5 @@
 import { SlideInput } from "./slide-input";
-import { IconBrush, IconSquare } from "@tabler/icons-react";
+import { IconBrush, IconSquare, IconWaveSine } from "@tabler/icons-react";
 import { useBrushStore } from "@/canvas/brush.tool";
 import { ColorInput } from "./color-input";
 import { useCanvasStore } from "@/canvas/canvas.store";
@@ -21,8 +21,10 @@ export const ToolOptions = () => {
 
 const BrushToolOptions = () => {
   const strokeWidth = useBrushStore((state) => state.strokeWidth);
+  const tolerance = useBrushStore((state) => state.tolerance);
   const strokeColor = useBrushStore((state) => state.strokeColor);
-  const { setStrokeColor, setStrokeWidth } = useBrushStore.getState();
+  const { setStrokeColor, setStrokeWidth, setTolerance } =
+    useBrushStore.getState();
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
@@ -33,11 +35,21 @@ const BrushToolOptions = () => {
       />
       <label className="pl-2">Width</label>
       <SlideInput
+        className="max-w-24"
         value={strokeWidth}
         min={1}
         max={256}
         onChange={(value) => setStrokeWidth(value)}
         icon={IconBrush}
+      />
+      <label className="pl-2">Smoothing</label>
+      <SlideInput
+        className="max-w-24"
+        value={tolerance * 10}
+        min={0}
+        max={100}
+        onChange={(value) => setTolerance(value / 10)}
+        icon={IconWaveSine}
       />
     </div>
   );
@@ -61,6 +73,7 @@ const SquareToolOptions = () => {
       />
       <label className="pl-2">Width</label>
       <SlideInput
+        className="max-w-24"
         value={strokeWidth}
         min={0}
         max={100}
