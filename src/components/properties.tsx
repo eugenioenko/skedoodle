@@ -1,5 +1,5 @@
 import { usePointerStore } from "@/canvas/pointer.tool";
-import { SlideInput } from "./slide-input";
+import { SlideInput } from "./ui/slide-input";
 import {
   IconAngle,
   IconBrush,
@@ -14,7 +14,7 @@ import {
 import { degreesToRadians, radiansToDegrees } from "@/canvas/canvas.utils";
 import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
-import { ColorInput } from "./color-input";
+import { ColorInput } from "./ui/color-input";
 import { colord } from "colord";
 import { Layers } from "./layers";
 import { ctx } from "@/canvas/canvas.service";
@@ -154,6 +154,7 @@ export const Properties = () => {
       <div>
         <Layers />
       </div>
+      <div className="pt-16"></div>
     </div>
   );
 };

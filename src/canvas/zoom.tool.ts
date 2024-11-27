@@ -58,6 +58,18 @@ export function doZoom(
   doodler.throttledTwoUpdate();
 }
 
+export function doZoomReset(): void {
+  const { doodler } = ctx();
+  const { setZoom } = useZoomStore.getState();
+
+  doodler.zui.reset();
+  doodler.canvas.position.x = 0;
+  doodler.canvas.position.y = 0;
+  doodler.zui.translateSurface(0, 0);
+  setZoom(100);
+  doodler.throttledTwoUpdate();
+}
+
 /*
 function onZoomMove(event): void {
   const { initialDistance, setInitialDistance } = useZoomStore.getState();

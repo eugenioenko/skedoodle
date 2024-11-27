@@ -1,7 +1,7 @@
-import { SlideInput } from "./slide-input";
+import { SlideInput } from "./ui/slide-input";
 import { IconBrush, IconSquare, IconWaveSine } from "@tabler/icons-react";
 import { useBrushStore } from "@/canvas/brush.tool";
-import { ColorInput } from "./color-input";
+import { ColorInput } from "./ui/color-input";
 import { useCanvasStore } from "@/canvas/canvas.store";
 import { useShapeStore } from "@/canvas/shape.tool";
 

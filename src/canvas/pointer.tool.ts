@@ -335,4 +335,5 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
     return;
   }
   clearHighlight();
+  doodler.throttledTwoUpdate();
 }

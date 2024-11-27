@@ -31,6 +31,12 @@ export class Doodler {
   throttledTwoUpdate = throttle(() => {
     this.two.update();
   }, 1);
+
+  doCenterCanvas(): void {
+    this.canvas.position.x = 0;
+    this.canvas.position.y = 0;
+    this.throttledTwoUpdate();
+  }
 }
 
 type DoodleType = "brush" | "rect" | "highlight";
