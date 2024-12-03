@@ -82,7 +82,7 @@ const createTwo = (container: HTMLDivElement): Two => {
     fitted: true,
     width: container.clientWidth,
     height: container.clientHeight,
-    type: Two.Types.svg,
+    type: Two.Types.canvas,
   }).appendTo(container);
 };
 
@@ -95,20 +95,8 @@ const createCanvas = (two: Two): Group => {
 
 const loadCanvas = () => {
   const { addShape } = useCanvasStore.getState();
-
-  /*
-  for (var i = 0; i < 5000; i++) {
-    const x = Math.random() * 5000 * 6 - 5000;
-    const y = Math.random() * 5000 * 6 - 5000;
-    const size = 100; // Math.random() * 100;
-    const shape = new Two.Rectangle(x, y, size, size);
-    shape.rotation = Math.random() * Math.PI * 2;
-    shape.noStroke().fill = "#ccc";
-    addShape(shape);
-  }*/
-
-  const circle = new Two.Circle(0, 0, 3);
-  circle.fill = "#CCC";
+  const circle = new Two.Circle(0, 0, 11);
+  circle.fill = "#333";
   addShape(circle);
 };
 

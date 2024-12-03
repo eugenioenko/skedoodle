@@ -43,6 +43,10 @@ body {
   cursor: grabbing;
 }
 
+.canvas-container[data-selected="brush"] {
+  cursor: crosshair;
+}
+
 .canvas-container[data-selected="pointer"][data-option="moving"] {
   cursor: grabbing;
 }
