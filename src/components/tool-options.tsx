@@ -6,7 +6,11 @@ import { useCanvasStore } from "@/canvas/canvas.store";
 import { useShapeStore } from "@/canvas/shape.tool";
 
 export const ToolOptions = () => {
-  const selectedTool = useCanvasStore((state) => state.selectedTool);
+  let selectedTool = useCanvasStore((state) => state.selectedTool);
+  const restoreTool = useCanvasStore((state) => state.restoreTool);
+  if (restoreTool) {
+    selectedTool = restoreTool;
+  }
 
   if (selectedTool === "brush") {
     return <BrushToolOptions />;

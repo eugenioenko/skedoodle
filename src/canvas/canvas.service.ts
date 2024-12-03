@@ -2,7 +2,7 @@ import { MouseEvent, TouchEvent } from "react";
 import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
-import { Tool, useCanvasStore } from "./canvas.store";
+import { useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import { eventToSurfacePosition, MouseButton } from "./canvas.utils";
@@ -218,8 +218,6 @@ function doWindowResize() {
 
 function doKeyDown(e: KeyboardEvent): void {}
 
-function doKeyUp(e: KeyboardEvent): void {}
-
 function doUpdate(frameCount: number, deltaTime: number) {}
 
 export const handlers = {
@@ -235,5 +233,4 @@ export const handlers = {
   doWindowResize,
   doUpdate,
   doKeyDown,
-  doKeyUp,
 };

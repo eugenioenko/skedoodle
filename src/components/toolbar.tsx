@@ -41,14 +41,19 @@ interface ToggleButtonProps {
 }
 
 const ToggleButton = ({ value, children }: ToggleButtonProps) => {
-  const current = useCanvasStore((state) => state.selectedTool);
+  let current = useCanvasStore((state) => state.selectedTool);
+  const restoreTool = useCanvasStore((state) => state.restoreTool);
+  if (restoreTool) {
+    current = restoreTool;
+  }
   const setTool = useCanvasStore((state) => state.setSelectedTool);
+  const isActive = current === value;
 
   return (
     <button
       type="button"
       className={`p-1 rounded  ${
-        current === value ? "bg-primary" : "hover:bg-default-3"
+        isActive ? "bg-primary" : "hover:bg-default-3"
       }`}
       onClick={() => setTool(value as Tool)}
     >
