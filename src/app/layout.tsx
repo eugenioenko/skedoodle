@@ -5,7 +5,7 @@ import { AxiosProvider } from "@/contexts/axios-instance";
 import { Toasts } from "@/components/toasts";
 
 export const metadata: Metadata = {
-  title: "Canvas",
+  title: "Skedoodle",
 };
 
 export default function RootLayout({

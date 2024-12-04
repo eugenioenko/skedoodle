@@ -1,6 +1,6 @@
 # Skedoodle
 
-**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm, ideate, and visually collaborate, this app provides a fluid, intuitive experience for sketching and sharing ideas. Built with Next.js, WebSocket, Prisma, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
+**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm, ideate, and visually collaborate, this app provides a fluid, intuitive experience for sketching and sharing ideas. Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
 
 ## Table of Contents
 
@@ -15,14 +15,13 @@
 
 - **Real-time Collaboration**: Multiple users can draw on the same board in real-time.
 - **Sketch & Draw**: Offers tools for freehand sketching, shapes, and lines with Two.js for smooth vector graphics.
-- **Persistent Data**: User contributions are saved and synced using Prisma, ensuring board updates remain intact for future sessions.
+- **Persistent Data**: TBD.
 - **Scalable**: Designed for scalability with WebSocket handling real-time data, powered by Next.js for optimal performance.
 
 ## Tech Stack
 
 - **Frontend**: [Next.js](https://nextjs.org/) for server-side rendering and optimized React components.
 - **Backend**: [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) for real-time data synchronization.
-- **Database**: [Prisma](https://www.prisma.io/) as the ORM to manage data models and database connectivity.
 - **Graphics**: [Two.js](https://two.js.org/) for rendering smooth and interactive vector graphics.
 
 ## Getting Started
@@ -32,7 +31,6 @@
 Make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/) v14+
-- [Prisma](https://www.prisma.io/) CLI for database migrations
 - [Next.js](https://nextjs.org/)
 - Database (SQLite/PostgreSQL/MySQL, etc.)
 
@@ -49,12 +47,6 @@ Make sure you have the following installed:
 
    ```bash
    npm install
-   ```
-
-3. **Set Up Prisma Database**:
-   Configure your `.env` file with the appropriate database connection URL. Then, run:
-   ```bash
-   npx prisma migrate dev --name init
    ```
 
 ## Usage
