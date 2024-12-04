@@ -1,4 +1,4 @@
-import { MouseEvent } from "react";
+import { MouseEvent, TouchEvent } from "react";
 import { useCanvasStore } from "./canvas.store";
 import { Coordinates } from "./canvas.service";
 import { ZUI } from "two.js/extras/jsm/zui";
@@ -23,10 +23,9 @@ export function eventToSurfacePosition(
   return zui.clientToSurface(position);
 }
 
-export function eventToClientPosition(e: MouseEvent<HTMLDivElement>): {
-  x: number;
-  y: number;
-} {
+export function eventToClientPosition(
+  e: MouseEvent<HTMLDivElement>
+): Coordinates {
   const rect = e.currentTarget.getBoundingClientRect();
   return {
     x: e.clientX - rect.left,
@@ -81,4 +80,13 @@ export function radiansToDegrees(radians: number): number {
 
 export function degreesToRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
+}
+
+export function touchEventToMouseEvent(
+  e: TouchEvent<HTMLDivElement>
+): MouseEvent<HTMLDivElement> {
+  const event = e as unknown as MouseEvent<HTMLDivElement>;
+  event.clientX = e.touches[0].clientX;
+  event.clientY = e.touches[0].clientY;
+  return event;
 }

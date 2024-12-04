@@ -138,7 +138,6 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     // Perpendicular Distance:	Prioritizes straight-line segments, sharper results on straight paths.
     // Angle:	Retains sharp corners, may oversimplify smooth curves.
     const limit = Math.floor(((100 - tolerance) * path.vertices.length) / 100);
-    console.log(`${path.vertices.length} - ${limit}`);
     const simplified = simplifyEdge(areaOfTriangle, path.vertices, limit);
     path.vertices = simplified;
   }

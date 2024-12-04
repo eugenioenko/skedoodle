@@ -255,7 +255,6 @@ function makeBorder(
   width: number,
   height: number
 ): Rectangle {
-  console.log("make border");
   const { two, zui, canvas } = ctx();
   const rect = two.makeRectangle(x, y, width, height);
   rect.stroke = "#0ea5cf";

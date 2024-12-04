@@ -5,7 +5,11 @@ import { Group } from "two.js/src/group";
 import { useCanvasStore } from "./canvas.store";
 import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
 import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
-import { eventToSurfacePosition, MouseButton } from "./canvas.utils";
+import {
+  eventToSurfacePosition,
+  MouseButton,
+  touchEventToMouseEvent,
+} from "./canvas.utils";
 import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
 import {
   doPointerEnd,
@@ -194,9 +198,24 @@ function doMouseWheel(e: WheelEvent): void {
   }
 }
 
-function doTouchStart(e: TouchEvent<HTMLDivElement>) {}
-function doTouchMove(e: TouchEvent<HTMLDivElement>) {}
-function doTouchEnd(e: TouchEvent<HTMLDivElement>) {}
+function doTouchStart(e: TouchEvent<HTMLDivElement>) {
+  if (e.touches.length !== 1) {
+    return;
+  }
+  doMouseDown(touchEventToMouseEvent(e));
+}
+function doTouchMove(e: TouchEvent<HTMLDivElement>) {
+  if (e.touches.length !== 1) {
+    return;
+  }
+  doMouseMove(touchEventToMouseEvent(e));
+}
+function doTouchEnd(e: TouchEvent<HTMLDivElement>) {
+  if (e.touches.length !== 1) {
+    return;
+  }
+  doMouseUp(touchEventToMouseEvent(e));
+}
 
 function doWindowResize() {
   const { two, container, doodler } = useCanvasStore.getState();
