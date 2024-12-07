@@ -6,12 +6,12 @@
     "dev": "next dev --port=4200",
     "build": "next build",
     "start": "next start --port=3001",
-    "db": "docker-compose up -d",
     "lint": "next lint",
-    "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
-    "deploy:dev": "pm2 start ecosystem.config.js --only dev",
     "test": "npx vitest",
-    "test:headless": "npx vitest --run --browser.headless"
+    "test:headless": "npx vitest --run --browser.headless",
+    "docker:build": "docker build -t skedoodle .",
+    "docker:clean": "docker stop skedoodle && docker rm skedoodle && docker rmi skedoodle",
+    "docker:deploy": "docker run -d -p 3001:3001 --restart unless-stopped --name skedoodle skedoodle"
   },
   "dependencies": {
     "next": "15.0.2",
