@@ -1,9 +1,19 @@
 import { SlideInput } from "./ui/slide-input";
-import { IconBrush, IconSquare, IconWaveSine } from "@tabler/icons-react";
-import { useBrushStore } from "@/canvas/brush.tool";
+import {
+  IconAngle,
+  IconBrush,
+  IconSquare,
+  IconVectorBezier,
+  IconVectorSpline,
+  IconVectorTriangle,
+  IconWaveSine,
+} from "@tabler/icons-react";
+import { useBrushStore } from "@/canvas/tools/brush.tool";
 import { ColorInput } from "./ui/color-input";
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { useShapeStore } from "@/canvas/shape.tool";
+import { useShapeStore } from "@/canvas/tools/shape.tool";
+import { Button, ToggleButton, ToggleGroup } from "./ui/button";
+import { WithTooltip } from "./ui/tooltip";
 
 export const ToolOptions = () => {
   let selectedTool = useCanvasStore((state) => state.selectedTool);
@@ -27,7 +37,9 @@ const BrushToolOptions = () => {
   const strokeWidth = useBrushStore((state) => state.strokeWidth);
   const tolerance = useBrushStore((state) => state.tolerance);
   const strokeColor = useBrushStore((state) => state.strokeColor);
-  const { setStrokeColor, setStrokeWidth, setTolerance } =
+  const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
+
+  const { setStrokeColor, setStrokeWidth, setTolerance, setSimplifyAlgo } =
     useBrushStore.getState();
 
   return (
@@ -55,6 +67,40 @@ const BrushToolOptions = () => {
         onChange={(value) => setTolerance(value)}
         icon={IconWaveSine}
       />
+      <ToggleGroup>
+        <WithTooltip tooltip="Area of Triangle smoothing: General-purpose line simplification, especially for preserving visual shapes and smooth curves. The number represents the percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
+          <ToggleButton
+            isSelected={simplifyAlgo === "triangle"}
+            onClick={() => setSimplifyAlgo("triangle")}
+          >
+            <IconVectorTriangle size={20} stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Angle smoothing: Best for straight-line approximations and paths where deviations from linearity are critical to detect. The number represents the percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
+          <ToggleButton
+            isSelected={simplifyAlgo === "angle"}
+            onClick={() => setSimplifyAlgo("angle")}
+          >
+            <IconAngle size={20} stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Perpendicular Distance smoothing: Best for straight-line approximations and paths where deviations from linearity are critical to detect. The number the represents percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
+          <ToggleButton
+            isSelected={simplifyAlgo === "distance"}
+            onClick={() => setSimplifyAlgo("distance")}
+          >
+            <IconVectorBezier size={20} stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Douglas-Peucker: High-performance general-purpose simplification. Preserves the path's overall shape efficiently. The number represents the acceptable tolerance x 10 times">
+          <ToggleButton
+            isSelected={simplifyAlgo === "douglas"}
+            onClick={() => setSimplifyAlgo("douglas")}
+          >
+            <IconVectorSpline size={20} stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+      </ToggleGroup>
     </div>
   );
 };

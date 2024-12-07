@@ -2,12 +2,14 @@ import { pop, push, replace } from "mnemonist/heap";
 
 // Visvalingam-Whyatt
 
+export type PathSimplifyType = "douglas" | "triangle" | "angle" | "distance";
+
 interface Point {
   x: number;
   y: number;
 }
 
-export function areaOfTriangle([v0, v1, v2]: [Point, Point, Point]) {
+export function areaOfTriangle([v0, v1, v2]: [Point, Point, Point]): number {
   return Math.abs(
     (v0.x - v2.x) * (v1.y - v0.y) - (v0.x - v1.x) * (v2.y - v0.y)
   );
@@ -164,4 +166,13 @@ export function simplifyEdge<T extends object>(
 
   // Collect
   return points.filter((it) => !removed.has(it));
+}
+
+export function pathSimplifyTypeToFunc<T extends object>(
+  type: PathSimplifyType
+): WeightFn<T> {
+  if (type === "triangle") return areaOfTriangle as WeightFn<T>;
+  if (type === "distance") return perpendicularDistance as WeightFn<T>;
+  if (type === "angle") return angleWeight as WeightFn<T>;
+  return null as never;
 }
