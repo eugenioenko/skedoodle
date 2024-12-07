@@ -1,6 +1,6 @@
 "use client";
 
-import { doZoomReset, useZoomStore } from "@/canvas/zoom.tool";
+import { doZoomReset, useZoomStore } from "@/canvas/tools/zoom.tool";
 import { IconFocus2, IconMenu2 } from "@tabler/icons-react";
 import { useState } from "react";
 import { Properties } from "./properties";

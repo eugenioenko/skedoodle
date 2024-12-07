@@ -5,28 +5,15 @@ import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
-import { Doodler } from "./doodle.service";
+import { Doodler, setDoodlerInstance } from "./doodle.service";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>
 ) => {
-  const [instances, setInstances] = useState<any>([
-    undefined,
-    undefined,
-    undefined,
-  ]);
-
   useEffect(() => {
-    const {
-      setTwo,
-      setCanvas,
-      setZui,
-      setContainer,
-      setDoodler,
-      two: twoInstance,
-    } = useCanvasStore.getState();
+    const { doodler, setContainer, setDoodler } = useCanvasStore.getState();
 
-    if (!containerRef.current || twoInstance) {
+    if (!containerRef.current || doodler) {
       return;
     }
 
@@ -35,21 +22,17 @@ export const useInitTwoCanvas = (
     const instance = createTwo(containerRef.current);
     const canvasInstance = createCanvas(instance);
     const zuiInstance = createZUI(canvasInstance);
+    const doodlerInstance = new Doodler({
+      two: instance,
+      canvas: canvasInstance as never,
+      zui: zuiInstance,
+      sketchId: "1",
+    });
 
-    setTwo(instance);
-    setCanvas(canvasInstance as never);
     loadCanvas();
-    setZui(zuiInstance);
     setContainer(containerRef.current);
-    setInstances([instance, canvasInstance, zuiInstance]);
-    setDoodler(
-      new Doodler({
-        two: instance,
-        canvas: canvasInstance as never,
-        zui: zuiInstance,
-        sketchId: "1",
-      })
-    );
+    setDoodler(doodlerInstance);
+    setDoodlerInstance(doodlerInstance);
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
@@ -71,9 +54,7 @@ export const useInitTwoCanvas = (
         currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
       }
     };
-  }, [containerRef, setInstances]);
-
-  return { two: instances[0], canvas: instances[1], zui: instances[2] };
+  }, [containerRef]);
 };
 
 const createTwo = (container: HTMLDivElement): Two => {

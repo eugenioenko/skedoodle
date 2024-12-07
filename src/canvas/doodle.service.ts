@@ -39,12 +39,27 @@ export class Doodler {
   }
 }
 
+let doodlerInstance: Doodler | undefined;
+
+export function setDoodlerInstance(doodler: Doodler) {
+  doodlerInstance = doodler;
+}
+
+// doodler() is only called after instance is initialized
+export function getDoodler(): Doodler {
+  if (!doodlerInstance) {
+    throw new Error("Doodler instance is not set yet.");
+  }
+  return doodlerInstance as Doodler;
+}
+
 type DoodleType = "brush" | "rect" | "highlight";
 
 interface DoodleProps {
   shape: Path;
   type: DoodleType;
 }
+
 export class Doodle {
   shape: Path;
   type: DoodleType;

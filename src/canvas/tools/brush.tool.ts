@@ -1,17 +1,21 @@
 import { MouseEvent } from "react";
-import { Coordinates, ctx } from "./canvas.service";
-
-import { envIsDevelopment } from "@/environment";
-import Two from "two.js";
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import { eventToSurfacePosition, eventToClientPosition } from "./canvas.utils";
-import { Vector } from "two.js/src/vector";
-import { Path } from "two.js/src/path";
-import { useCanvasStore } from "./canvas.store";
-import { Circle } from "two.js/src/shapes/circle";
+import { Coordinates } from "../canvas.service";
+import {
+  areaOfTriangle,
+  PathSimplifyType,
+  pathSimplifyTypeToFunc,
+  simplifyEdge,
+} from "@/utils/simplify-edge";
 import { colord, RgbaColor } from "colord";
-import { areaOfTriangle, simplifyEdge } from "@/utils/simplify-edge";
+import Two from "two.js";
+import { Path } from "two.js/src/path";
+import { Circle } from "two.js/src/shapes/circle";
+import { Vector } from "two.js/src/vector";
+import { create } from "zustand";
+import { useCanvasStore } from "../canvas.store";
+import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
+import { getDoodler } from "../doodle.service";
+import { simplifyPath } from "@/utils/simplify-path";
 
 export interface BrushState {
   previousPosition: Vector;
@@ -20,66 +24,67 @@ export interface BrushState {
   strokeColor: RgbaColor;
   strokeWidth: number;
   tolerance: number;
+  simplifyAlgo: PathSimplifyType;
   setPath: (path?: Path | undefined) => void;
   setCircle: (circle?: Circle | undefined) => void;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
+  setSimplifyAlgo: (algo: PathSimplifyType) => void;
 }
 
-export const useBrushStore = create<BrushState>()(
-  devtools(
-    (set) => ({
-      path: undefined,
-      circle: undefined,
-      previousPosition: new Vector(),
-      strokeWidth: 5,
-      tolerance: 10,
-      strokeColor: { r: 33, g: 33, b: 33, a: 1 },
-      setStrokeColor: (strokeColor) =>
-        set((state) => ({ ...state, strokeColor })),
-      setPath: (path) => set((state) => ({ ...state, path })),
-      setCircle: (circle) => set((state) => ({ ...state, circle })),
-      setStrokeWidth: (strokeWidth) =>
-        set((state) => ({ ...state, strokeWidth })),
-      setTolerance: (tolerance) => set((state) => ({ ...state, tolerance })),
-    }),
-    { name: "brushStore", enabled: false || envIsDevelopment }
-  )
-);
+export const useBrushStore = create<BrushState>()((set) => ({
+  path: undefined,
+  circle: undefined,
+  previousPosition: new Vector(),
+  strokeWidth: 5,
+  tolerance: 10,
+  strokeColor: { r: 33, g: 33, b: 33, a: 1 },
+  simplifyAlgo: "triangle",
+  setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
+  setPath: (path) => set(() => ({ path })),
+  setCircle: (circle) => set(() => ({ circle })),
+  setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
+  setTolerance: (tolerance) => set(() => ({ tolerance })),
+  setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
+}));
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two, canvas, doodler } = ctx();
+  const doodler = getDoodler();
   const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
     useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
-  const position = zui.clientToSurface(eventToClientPosition(e));
+  const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   previousPosition.set(position.x, position.y);
   setPath(undefined);
 
   // add dot for starting point reference only when no opacity
   if (strokeColor?.a === 1) {
-    const circle = two.makeCircle(position.x, position.y, strokeWidth / 2);
+    const circle = doodler.two.makeCircle(
+      position.x,
+      position.y,
+      strokeWidth / 2
+    );
     circle.fill = fillColor;
     circle.noStroke();
-    canvas.add(circle);
+    doodler.canvas.add(circle);
     setCircle(circle);
   }
   doodler.throttledTwoUpdate();
 }
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two, doodler } = ctx();
+  const doodler = getDoodler();
   const { path, setPath, previousPosition, strokeColor, strokeWidth } =
     useBrushStore.getState();
   const { addShape } = useCanvasStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
-  const position = eventToSurfacePosition(e, zui);
+  const position = eventToSurfacePosition(e, doodler.zui);
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
     // TODO there is a type definition issue here, investigate why the mismatch
-    const line = two.makeCurve(
+    const line = doodler.two.makeCurve(
       [makeAnchor(previousPosition), makeAnchor(position)] as never,
       true as never
     );
@@ -119,16 +124,17 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
-  const { zui, canvas, doodler } = ctx();
-  const { path, circle, setCircle, tolerance } = useBrushStore.getState();
+  const doodler = getDoodler();
+  const { path, circle, setCircle, tolerance, simplifyAlgo } =
+    useBrushStore.getState();
   if (!path) {
     return;
   }
   if (circle) {
-    canvas.remove(circle);
+    doodler.canvas.remove(circle);
     setCircle(undefined);
   }
-  const position = zui.clientToSurface(eventToClientPosition(e));
+  const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   path.vertices.push(makeAnchor(position));
 
   normalizePathOrigin(path);
@@ -137,9 +143,22 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     // Area of Triangle:	Smooth and general-purpose; preserves curves and shape.
     // Perpendicular Distance:	Prioritizes straight-line segments, sharper results on straight paths.
     // Angle:	Retains sharp corners, may oversimplify smooth curves.
-    const limit = Math.floor(((100 - tolerance) * path.vertices.length) / 100);
-    const simplified = simplifyEdge(areaOfTriangle, path.vertices, limit);
-    path.vertices = simplified;
+    if (simplifyAlgo === "douglas") {
+      const limit = tolerance / 10;
+      const simplified = simplifyPath(path.vertices, limit, true);
+      path.vertices = simplified;
+    } else {
+      const limit = Math.floor(
+        ((100 - tolerance) * path.vertices.length) / 100
+      );
+      //const limit = tolerance / 10;
+      const simplified = simplifyEdge(
+        pathSimplifyTypeToFunc(simplifyAlgo),
+        path.vertices,
+        limit
+      );
+      path.vertices = simplified;
+    }
   }
 
   doodler.throttledTwoUpdate();

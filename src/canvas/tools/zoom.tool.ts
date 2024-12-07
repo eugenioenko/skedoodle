@@ -1,8 +1,7 @@
-import { ctx } from "./canvas.service";
-
-import { create } from "zustand";
-import { usePointerStore } from "./pointer.tool";
 import { MouseEvent } from "react";
+import { create } from "zustand";
+import { getDoodler } from "../doodle.service";
+import { usePointerStore } from "./pointer.tool";
 
 export interface ZoomState {
   zoom: number;
@@ -36,22 +35,18 @@ export function doZoom(
   e: WheelEvent | MouseEvent<HTMLDivElement>,
   amount: number
 ): void {
-  const { zui, doodler } = ctx();
+  const doodler = getDoodler();
   const { setZoom } = useZoomStore.getState();
   var dy = amount / 100;
 
-  zui.zoomBy(dy, e.clientX, e.clientY);
-  setZoom(Math.floor(zui.scale * 100));
+  doodler.zui.zoomBy(dy, e.clientX, e.clientY);
+  setZoom(Math.floor(doodler.zui.scale * 100));
 
-  const { selected, outlines } = usePointerStore.getState();
-
-  for (const item of selected) {
-    // item.border.linewidth = 1.5 / zui.scale;
-  }
+  const { outlines } = usePointerStore.getState();
 
   for (const outline of Object.values(outlines)) {
     if (outline) {
-      outline.linewidth = 1.5 / zui.scale;
+      outline.linewidth = 1.5 / doodler.zui.scale;
     }
   }
 
@@ -59,14 +54,13 @@ export function doZoom(
 }
 
 export function doZoomReset(): void {
-  const { doodler } = ctx();
+  const doodler = getDoodler();
   const { setZoom } = useZoomStore.getState();
 
   doodler.zui.reset();
-  doodler.canvas.position.x = 0;
-  doodler.canvas.position.y = 0;
   doodler.zui.translateSurface(0, 0);
   setZoom(100);
+  doodler.two.update();
   doodler.throttledTwoUpdate();
 }
 

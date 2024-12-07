@@ -1,14 +1,14 @@
 import { MouseEvent } from "react";
-import { ctx } from "./canvas.service";
 
 import { envIsDevelopment } from "@/environment";
+import { colord, RgbaColor } from "colord";
+import { Rectangle } from "two.js/src/shapes/rectangle";
+import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { eventToSurfacePosition, eventToClientPosition } from "./canvas.utils";
-import { Vector } from "two.js/src/vector";
-import { Rectangle } from "two.js/src/shapes/rectangle";
-import { useCanvasStore } from "./canvas.store";
-import { colord, RgbaColor } from "colord";
+import { useCanvasStore } from "../canvas.store";
+import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
+import { getDoodler } from "../doodle.service";
 
 export interface ShapeState {
   shape?: Rectangle;
@@ -42,15 +42,15 @@ export const useShapeStore = create<ShapeState>()(
 );
 
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, two, doodler } = ctx();
+  const doodler = getDoodler();
   const { addShape } = useCanvasStore.getState();
   const { setShape, origin, fillColor, strokeColor, strokeWidth } =
     useShapeStore.getState();
 
-  const position = zui.clientToSurface(eventToClientPosition(e));
+  const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   origin.set(position.x, position.y);
 
-  const shape = two.makeRectangle(position.x, position.y, 1, 1);
+  const shape = doodler.two.makeRectangle(position.x, position.y, 1, 1);
   shape.stroke = colord(strokeColor).toRgbString();
   shape.fill = colord(fillColor).toRgbString();
   if (strokeWidth) {
@@ -64,9 +64,9 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
-  const { zui, doodler } = ctx();
+  const doodler = getDoodler();
   const { shape, origin } = useShapeStore.getState();
-  const position = eventToSurfacePosition(e, zui);
+  const position = eventToSurfacePosition(e, doodler.zui);
   if (shape) {
     const width = shape.width;
     const height = shape.height;

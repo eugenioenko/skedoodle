@@ -1,5 +1,5 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { useZoomStore } from "@/canvas/zoom.tool";
+import { useZoomStore } from "@/canvas/tools/zoom.tool";
 
 export const StatusBar = () => {
   const cursor = useCanvasStore((state) => state.cursor);

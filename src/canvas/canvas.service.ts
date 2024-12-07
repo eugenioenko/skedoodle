@@ -1,46 +1,27 @@
 import { MouseEvent, TouchEvent } from "react";
-import Two from "two.js";
-import { ZUI } from "two.js/extras/jsm/zui";
-import { Group } from "two.js/src/group";
 import { useCanvasStore } from "./canvas.store";
-import { doDragStart, doDragMove, doDragTranslate } from "./drag.tool";
-import { doBrushMove, doBrushStart, doBrushUp } from "./brush.tool";
 import {
   eventToSurfacePosition,
   MouseButton,
   touchEventToMouseEvent,
 } from "./canvas.utils";
-import { doShapeMove, doShapeStart, doShapeUp } from "./shape.tool";
+import { Doodler, getDoodler } from "./doodle.service";
+import { doBrushMove, doBrushStart, doBrushUp } from "./tools/brush.tool";
+import { doDragMove, doDragStart, doDragTranslate } from "./tools/drag.tool";
+import { doDeleteShape } from "./tools/eraser.tool";
 import {
   doPointerEnd,
   doPointerMove,
   doPointerStart,
   doTryHighlight,
-} from "./pointer.tool";
-import { doDeleteShape } from "./eraser.tool";
-import { doZoom } from "./zoom.tool";
-import { Doodler } from "./doodle.service";
+} from "./tools/pointer.tool";
+import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
+import { doZoom } from "./tools/zoom.tool";
+import { throttle } from "@/utils/throttle";
 
 export interface Coordinates {
   x: number;
   y: number;
-}
-
-interface Context {
-  two: Two;
-  canvas: Group;
-  zui: ZUI;
-  doodler: Doodler;
-}
-
-export function ctx(): Context {
-  const state = useCanvasStore.getState();
-  return {
-    two: state.two as Two,
-    canvas: state.canvas as Group,
-    zui: state.zui as ZUI,
-    doodler: state.doodler as Doodler,
-  };
 }
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
@@ -92,11 +73,20 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   }
 }
 
-function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, selectedTool, setCursor, zui } =
-    useCanvasStore.getState();
-  const cursor = eventToSurfacePosition(e, zui);
+const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
+  if (!e.currentTarget) {
+    return;
+  }
+  const doodler = getDoodler();
+  const cursor = eventToSurfacePosition(e, doodler?.zui);
+  const { setCursor } = useCanvasStore.getState();
   setCursor(cursor);
+}, 16);
+
+function doMouseMove(e: MouseEvent<HTMLDivElement>) {
+  const { activeTool, selectedTool } = useCanvasStore.getState();
+
+  throttledCursorUpdate(e);
 
   // highlight the shapes but only when not actively erasing
   if (selectedTool === "eraser" && activeTool !== "eraser") {
@@ -174,7 +164,7 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseOut(e: MouseEvent<HTMLDivElement>) {
-  const { setCursor, activeTool, setActiveTool } = useCanvasStore.getState();
+  const { setCursor, activeTool } = useCanvasStore.getState();
 
   if (activeTool) {
     // TODO enable this
@@ -211,25 +201,23 @@ function doTouchMove(e: TouchEvent<HTMLDivElement>) {
   doMouseMove(touchEventToMouseEvent(e));
 }
 function doTouchEnd(e: TouchEvent<HTMLDivElement>) {
-  if (e.touches.length !== 1) {
-    return;
-  }
   doMouseUp(touchEventToMouseEvent(e));
 }
 
 function doWindowResize() {
-  const { two, container, doodler } = useCanvasStore.getState();
+  const { container } = useCanvasStore.getState();
+  const doodler = getDoodler();
 
-  if (!two || !container) {
+  if (!doodler.two || !container) {
     return;
   }
 
   if (
-    container.clientWidth !== two.width ||
-    container.clientHeight !== two.height
+    container.clientWidth !== doodler.two.width ||
+    container.clientHeight !== doodler.two.height
   ) {
-    two.width = container.clientWidth;
-    two.height = container.clientHeight;
+    doodler.two.width = container.clientWidth;
+    doodler.two.height = container.clientHeight;
   }
 
   doodler?.throttledTwoUpdate();

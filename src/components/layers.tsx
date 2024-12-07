@@ -1,5 +1,5 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { usePointerStore } from "@/canvas/pointer.tool";
+import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import { useMemo } from "react";
 import { Shape } from "two.js/src/shape";
 

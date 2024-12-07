@@ -1,8 +1,8 @@
 import { MouseEvent, TouchEvent } from "react";
-import { useCanvasStore } from "./canvas.store";
 import { Coordinates } from "./canvas.service";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { BoundingBox } from "two.js";
+import { getDoodler } from "./doodle.service";
 
 export enum MouseButton {
   Left = 0,
@@ -14,7 +14,7 @@ export function eventToSurfacePosition(
   e: MouseEvent<HTMLDivElement>,
   zui?: ZUI
 ): Coordinates {
-  zui = zui || (useCanvasStore.getState().zui as ZUI);
+  zui = zui || getDoodler().zui;
   const rect = e.currentTarget.getBoundingClientRect();
   const position = {
     x: e.clientX - rect.left,
@@ -86,7 +86,9 @@ export function touchEventToMouseEvent(
   e: TouchEvent<HTMLDivElement>
 ): MouseEvent<HTMLDivElement> {
   const event = e as unknown as MouseEvent<HTMLDivElement>;
-  event.clientX = e.touches[0].clientX;
-  event.clientY = e.touches[0].clientY;
+  const touches = e.touches?.[0] ||
+    e.changedTouches?.[0] || { clientX: 0, clientY: 0 };
+  event.clientX = touches.clientX;
+  event.clientY = touches.clientY;
   return event;
 }

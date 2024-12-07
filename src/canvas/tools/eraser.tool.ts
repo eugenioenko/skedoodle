@@ -1,13 +1,13 @@
 import { MouseEvent } from "react";
-import { ctx } from "./canvas.service";
 
-import { isPointInRect, eventToClientPosition } from "./canvas.utils";
-import { useCanvasStore } from "./canvas.store";
 import { Path } from "two.js/src/path";
+import { useCanvasStore } from "../canvas.store";
+import { eventToClientPosition, isPointInRect } from "../canvas.utils";
+import { getDoodler } from "../doodle.service";
 import { usePointerStore } from "./pointer.tool";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
-  const { doodler } = ctx();
+  const doodler = getDoodler();
   const { removeShape, shapes: canvasShapes } = useCanvasStore.getState();
   const { clearHighlight } = usePointerStore.getState();
   const pointer = eventToClientPosition(e);
