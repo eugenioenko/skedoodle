@@ -1,12 +1,12 @@
-import { MouseEvent } from "react";
-import { Coordinates } from "../canvas.service";
+import { Point } from "@/models/point.model";
 import {
-  areaOfTriangle,
   PathSimplifyType,
   pathSimplifyTypeToFunc,
   simplifyEdge,
 } from "@/utils/simplify-edge";
+import { simplifyPath } from "@/utils/simplify-path";
 import { colord, RgbaColor } from "colord";
+import { MouseEvent } from "react";
 import Two from "two.js";
 import { Path } from "two.js/src/path";
 import { Circle } from "two.js/src/shapes/circle";
@@ -15,7 +15,6 @@ import { create } from "zustand";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodle.service";
-import { simplifyPath } from "@/utils/simplify-path";
 
 export interface BrushState {
   previousPosition: Vector;
@@ -194,7 +193,7 @@ function normalizePathToCenterPoint(path: Path): void {
   path.translation.y += offsetY;
 }
 
-function makeAnchor({ x, y }: Coordinates) {
+function makeAnchor({ x, y }: Point) {
   var anchor = new Two.Anchor(x, y);
   return anchor;
 }

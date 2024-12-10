@@ -5,6 +5,8 @@ import {
   IconHandStop,
   IconPointer,
   IconSquare,
+  IconVectorBezier,
+  IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
 import { WithTooltip } from "./ui/tooltip";
@@ -31,6 +33,11 @@ export const Toolbar = () => {
         <WithTooltip tooltip="Brush tool [B]">
           <ToggleButton value="brush">
             <IconBrush stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Bezier tool [Z]">
+          <ToggleButton value="bezier">
+            <IconVectorBezier2 stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Rectangle tool [R]">

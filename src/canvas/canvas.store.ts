@@ -1,9 +1,16 @@
 import { create } from "zustand";
-import { Coordinates } from "./canvas.service";
 import { Shape } from "two.js/src/shape";
 import { Doodler } from "./doodle.service";
+import { Point } from "@/models/point.model";
 
-export type Tool = "hand" | "pointer" | "brush" | "square" | "eraser";
+export type Tool =
+  | "hand"
+  | "pointer"
+  | "brush"
+  | "square"
+  | "eraser"
+  | "zoom"
+  | "bezier";
 
 export interface CanvasState {
   selectedTool?: Tool;
@@ -11,7 +18,7 @@ export interface CanvasState {
   toolOption?: string;
   restoreTool?: Tool;
   doodler?: Doodler;
-  cursor?: Coordinates;
+  cursor?: Point;
   container?: HTMLDivElement;
   shapes: Shape[];
   setSelectedTool: (tool?: Tool) => void;
@@ -20,7 +27,7 @@ export interface CanvasState {
   setToolOption: (option: string) => void;
   setDoodler: (doodler: Doodler) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
-  setCursor: (cursor?: Coordinates) => void;
+  setCursor: (cursor?: Point) => void;
   addShape: (shape: Shape) => void;
   removeShape: (shape: Shape) => void;
 }

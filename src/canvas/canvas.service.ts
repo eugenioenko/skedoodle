@@ -18,11 +18,7 @@ import {
 import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
-
-export interface Coordinates {
-  x: number;
-  y: number;
-}
+import { doBezierMove, doBezierStart, doBezierUp } from "./tools/bezier.tool";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
@@ -55,6 +51,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "brush") {
     doBrushStart(e);
+    return;
+  }
+
+  if (selectedTool === "bezier") {
+    doBezierStart(e);
     return;
   }
 
@@ -117,6 +118,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
+  if (activeTool === "bezier") {
+    doBezierMove(e);
+    return;
+  }
+
   if (activeTool === "square") {
     doShapeMove(e);
     return;
@@ -152,6 +158,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "brush") {
     doBrushUp(e);
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "bezier") {
+    doBezierUp();
     setActiveTool(undefined);
     return;
   }
