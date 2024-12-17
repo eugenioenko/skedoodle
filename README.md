@@ -3,7 +3,7 @@
 **Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate. 
 Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
 
-### > [Live Preview Here](https://skedoodle.yy-dev.top)
+### > [Live Preview Here](http://skedoodle.yy-dev.top)
 
 
 ## Table of Contents
