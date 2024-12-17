@@ -1,6 +1,10 @@
 # Skedoodle
 
-**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm, ideate, and visually collaborate, this app provides a fluid, intuitive experience for sketching and sharing ideas. Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
+**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate. 
+Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
+
+### > [Live Preview Here](https://skedoodle.yy-dev.top)
+
 
 ## Table of Contents
 
@@ -49,9 +53,15 @@ Make sure you have the following installed:
    npm install
    ```
 
+2. **Install Dependencies**:
+
+   ```bash
+   npm run dev
+   ```
+   
 ## Usage
 
-- Open a Board: Navigate to http://localhost:3000 and create a new board or join an existing one.
+- Open a Board: Navigate to http://localhost:4200 and create a new board or join an existing one.
 - Collaborate: Invite others to join the board via a unique URL. All participants can draw, erase, and edit in real-time.
 - Persist Data: Board data will be saved and synced to the database, making it accessible for future sessions.
 
