@@ -1,6 +1,7 @@
 import { SlideInput } from "./ui/slide-input";
 import {
   IconAngle,
+  IconBorderCornerRounded,
   IconBrush,
   IconSquare,
   IconVectorBezier,
@@ -109,7 +110,8 @@ const SquareToolOptions = () => {
   const strokeWidth = useShapeStore((state) => state.strokeWidth);
   const strokeColor = useShapeStore((state) => state.strokeColor);
   const fillColor = useShapeStore((state) => state.fillColor);
-  const { setStrokeColor, setStrokeWidth, setFillColor } =
+  const radius = useShapeStore((state) => state.radius);
+  const { setStrokeColor, setStrokeWidth, setFillColor, setRadius } =
     useShapeStore.getState();
 
   return (
@@ -129,6 +131,15 @@ const SquareToolOptions = () => {
         max={100}
         onChange={(value) => setStrokeWidth(value)}
         icon={IconSquare}
+      />
+      <label className="pl-2">Radius</label>
+      <SlideInput
+        className="max-w-24"
+        value={radius}
+        min={0}
+        max={100}
+        onChange={(value) => setRadius(value)}
+        icon={IconBorderCornerRounded}
       />
     </div>
   );

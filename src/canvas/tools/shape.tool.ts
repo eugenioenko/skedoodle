@@ -9,17 +9,21 @@ import { devtools } from "zustand/middleware";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodle.service";
+import { Events } from "two.js/src/events";
+import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
 export interface ShapeState {
-  shape?: Rectangle;
+  shape?: RoundedRectangle;
   origin: Vector;
   strokeWidth: number;
+  radius: number;
   strokeColor: RgbaColor;
   fillColor: RgbaColor;
-  setShape: (shape?: Rectangle | undefined) => void;
+  setShape: (shape?: RoundedRectangle | undefined) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setFillColor: (strokeColor: RgbaColor) => void;
   setStrokeWidth: (strokeWidth?: number) => void;
+  setRadius: (radius?: number) => void;
 }
 
 export const useShapeStore = create<ShapeState>()(
@@ -28,14 +32,14 @@ export const useShapeStore = create<ShapeState>()(
       shape: undefined,
       origin: new Vector(),
       strokeWidth: 2,
+      radius: 0,
       strokeColor: { r: 0, g: 0, b: 0, a: 1 },
       fillColor: { r: 255, g: 255, b: 255, a: 1 },
-      setShape: (shape) => set((state) => ({ ...state, shape })),
-      setStrokeColor: (strokeColor) =>
-        set((state) => ({ ...state, strokeColor })),
-      setFillColor: (fillColor) => set((state) => ({ ...state, fillColor })),
-      setStrokeWidth: (strokeWidth) =>
-        set((state) => ({ ...state, strokeWidth })),
+      setShape: (shape) => set(() => ({ shape })),
+      setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
+      setFillColor: (fillColor) => set(() => ({ fillColor })),
+      setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
+      setRadius: (radius) => set(() => ({ radius })),
     }),
     { name: "brushStore", enabled: false || envIsDevelopment }
   )
@@ -44,13 +48,20 @@ export const useShapeStore = create<ShapeState>()(
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
   const { addShape } = useCanvasStore.getState();
-  const { setShape, origin, fillColor, strokeColor, strokeWidth } =
+  const { setShape, origin, fillColor, strokeColor, strokeWidth, radius } =
     useShapeStore.getState();
 
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   origin.set(position.x, position.y);
 
-  const shape = doodler.two.makeRectangle(position.x, position.y, 1, 1);
+  const shape = doodler.two.makeRoundedRectangle(
+    position.x,
+    position.y,
+    1,
+    1,
+    radius
+  );
+
   shape.stroke = colord(strokeColor).toRgbString();
   shape.fill = colord(fillColor).toRgbString();
   if (strokeWidth) {
@@ -58,6 +69,17 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   } else {
     shape.noStroke();
   }
+  shape.on(Events.Types.change, () => {
+    console.log("change");
+  });
+
+  shape.on(Events.Types.render, () => {
+    console.log("render");
+  });
+
+  shape.on(Events.Types.update, () => {
+    console.log("update");
+  });
   addShape(shape);
   setShape(shape);
   doodler.throttledTwoUpdate();

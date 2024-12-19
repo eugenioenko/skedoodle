@@ -3,6 +3,7 @@ import { getDoodler } from "@/canvas/doodle.service";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
   IconAngle,
+  IconBorderCornerRounded,
   IconBrush,
   IconDimensions,
   IconRulerMeasure,
@@ -18,6 +19,7 @@ import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Layers } from "./layers";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
+import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
 type ShapeType = "path" | "shape" | "none";
 
@@ -71,6 +73,13 @@ export const Properties = () => {
                 max={5000}
                 value={(shape as Rectangle)?.linewidth}
                 onChange={(value) => updateShape("linewidth", value)}
+              />
+              <SlideInput
+                icon={IconBorderCornerRounded}
+                min={1}
+                max={100}
+                value={(shape as RoundedRectangle)?.radius}
+                onChange={(value) => updateShape("radius", value)}
               />
             </div>
             <div className="pt-4 pb-1 text-sm">Size</div>
