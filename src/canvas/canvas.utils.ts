@@ -2,7 +2,7 @@ import { Point } from "@/models/point.model";
 import { MouseEvent, TouchEvent } from "react";
 import { BoundingBox } from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
-import { getDoodler } from "./doodle.service";
+import { getDoodler } from "./doodle.client";
 
 export const ColorHighlight = "#0ea5cf";
 

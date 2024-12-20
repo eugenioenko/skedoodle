@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Shape } from "two.js/src/shape";
-import { Doodler } from "./doodle.service";
+import { Doodler } from "./doodle.client";
 import { Point } from "@/models/point.model";
 import { RgbaColor } from "colord";
 import { persist } from "zustand/middleware";

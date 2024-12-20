@@ -14,7 +14,7 @@ import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
-import { getDoodler } from "../doodle.service";
+import { getDoodler } from "../doodle.client";
 import { persist } from "zustand/middleware";
 
 export interface BrushState {

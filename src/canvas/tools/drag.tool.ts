@@ -1,6 +1,6 @@
 import { MouseEvent } from "react";
 import Two from "two.js";
-import { getDoodler } from "../doodle.service";
+import { getDoodler } from "../doodle.client";
 
 let mouse = new Two.Vector();
 

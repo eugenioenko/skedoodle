@@ -5,7 +5,7 @@ import {
   MouseButton,
   touchEventToMouseEvent,
 } from "./canvas.utils";
-import { getDoodler } from "./doodle.service";
+import { getDoodler } from "./doodle.client";
 import { doBrushMove, doBrushStart, doBrushUp } from "./tools/brush.tool";
 import { doDragMove, doDragStart, doDragTranslate } from "./tools/drag.tool";
 import { doDeleteShape } from "./tools/eraser.tool";

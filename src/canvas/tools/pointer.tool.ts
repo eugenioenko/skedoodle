@@ -13,7 +13,7 @@ import {
   isPointInBoundingBox,
   isPointInRect,
 } from "../canvas.utils";
-import { getDoodler } from "../doodle.service";
+import { getDoodler } from "../doodle.client";
 
 interface Outlines {
   highlight?: Rectangle;

@@ -3,7 +3,7 @@ import { MouseEvent } from "react";
 import { Path } from "two.js/src/path";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, isPointInRect } from "../canvas.utils";
-import { getDoodler } from "../doodle.service";
+import { getDoodler } from "../doodle.client";
 import { usePointerStore } from "./pointer.tool";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {

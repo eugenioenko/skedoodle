@@ -8,7 +8,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
-import { getDoodler } from "../doodle.service";
+import { getDoodler } from "../doodle.client";
 import { Events } from "two.js/src/events";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
