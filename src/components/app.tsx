@@ -15,7 +15,7 @@ export const App = () => {
       <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4">
         <ToolOptions />
       </div>
-      <div className="flex-grow flex relative bg-gray-50 overflow-hidden">
+      <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <Canvas />
         <Panel />

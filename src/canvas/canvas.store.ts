@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { Shape } from "two.js/src/shape";
 import { Doodler } from "./doodle.service";
 import { Point } from "@/models/point.model";
+import { RgbaColor } from "colord";
+import { persist } from "zustand/middleware";
 
 export type Tool =
   | "hand"
@@ -33,7 +35,7 @@ export interface CanvasState {
 }
 
 export const useCanvasStore = create<CanvasState>()((set) => ({
-  selectedTool: "brush",
+  selectedTool: "bezier",
   activeTool: undefined,
   restoreTool: undefined,
   doodler: undefined,
@@ -62,3 +64,22 @@ export const useCanvasStore = create<CanvasState>()((set) => ({
       };
     }),
 }));
+
+export interface SettingsState {
+  canvasColor: RgbaColor;
+  throttleRate: number;
+  setCanvasColor: (canvasColor: RgbaColor) => void;
+  setThrottleRate: (throttleRate: number) => void;
+}
+
+export const useSettingsStore = create<SettingsState>()(
+  persist(
+    (set) => ({
+      canvasColor: { r: 249, g: 250, b: 251, a: 1 },
+      throttleRate: 1,
+      setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
+      setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
+    }),
+    { name: "settings", version: 1 }
+  )
+);
