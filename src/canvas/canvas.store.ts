@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { Shape } from "two.js/src/shape";
-import { Doodler } from "./doodle.client";
+import { Doodle, Doodler } from "./doodle.client";
 import { Point } from "@/models/point.model";
 import { RgbaColor } from "colord";
 import { persist } from "zustand/middleware";
@@ -18,36 +18,21 @@ export interface CanvasState {
   doodler?: Doodler;
   cursor?: Point;
   container?: HTMLDivElement;
-  shapes: Shape[];
+  doodles: Doodle[];
   setDoodler: (doodler: Doodler) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
   setCursor: (cursor?: Point) => void;
-  addShape: (shape: Shape) => void;
-  removeShape: (shape: Shape) => void;
+  setDoodles: (doodles: Doodle[]) => void;
 }
 
 export const useCanvasStore = create<CanvasState>()((set) => ({
   doodler: undefined,
   cursor: undefined,
-  shapes: [],
-
+  doodles: [],
   setDoodler: (doodler) => set(() => ({ doodler })),
   setContainer: (container) => set(() => ({ container })),
   setCursor: (cursor) => set(() => ({ cursor })),
-  addShape: (shape) =>
-    set((state) => {
-      state.doodler?.canvas?.add?.(shape);
-      return {
-        shapes: [...state.shapes, shape],
-      };
-    }),
-  removeShape: (shape) =>
-    set((state) => {
-      state.doodler?.canvas?.remove?.(shape);
-      return {
-        shapes: state.shapes.filter((sh) => sh !== shape),
-      };
-    }),
+  setDoodles: (doodles) => set(() => ({ doodles })),
 }));
 
 export interface OptionsState {

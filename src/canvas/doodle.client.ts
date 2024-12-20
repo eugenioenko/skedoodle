@@ -3,6 +3,7 @@ import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
 import { Path } from "two.js/src/path";
+import { useCanvasStore } from "./canvas.store";
 
 interface DoodlerProps {
   two: Two;
@@ -37,6 +38,22 @@ export class Doodler {
     this.canvas.position.y = 0;
     this.throttledTwoUpdate();
   }
+
+  addDoodle(doodle: Doodle): void {
+    // TODO update ID generation
+    // doodle.shape.id = generateId();
+    const { doodles, setDoodles } = useCanvasStore.getState();
+    const newDoodles = [...doodles, doodle];
+    setDoodles(newDoodles);
+    this.canvas.add(doodle.shape);
+  }
+
+  removeDoodle(doodle: Doodle): void {
+    const { doodles, setDoodles } = useCanvasStore.getState();
+    const newDoodles = doodles.filter((d) => d !== doodle);
+    setDoodles(newDoodles);
+    this.canvas.remove(doodle.shape);
+  }
 }
 
 let doodlerInstance: Doodler | undefined;
@@ -53,7 +70,7 @@ export function getDoodler(): Doodler {
   return doodlerInstance as Doodler;
 }
 
-type DoodleType = "brush" | "rect" | "highlight";
+export type DoodleType = "brush" | "rect" | "ellipse" | "circle";
 
 interface DoodleProps {
   shape: Path;

@@ -69,7 +69,6 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
   const { strokeColor, strokeWidth } = useBrushStore.getState();
-  const { addShape } = useCanvasStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToSurfacePosition(e, doodler.zui);
@@ -87,7 +86,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
       v.addSelf(path.position);
     }
     path.position.clear();
-    addShape(path);
+    doodler.addDoodle({ shape: path, type: "brush" });
   } else {
     // continue drawing
     let skipVertices = false;

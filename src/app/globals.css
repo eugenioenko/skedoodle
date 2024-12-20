@@ -120,3 +120,7 @@ input[type="number"] {
 .color-picker .react-colorful__pointer {
   @apply cursor-pointer;
 }
+
+.flex-center {
+  @apply justify-center items-center;
+}

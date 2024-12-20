@@ -47,7 +47,6 @@ export const useShapeStore = create<ShapeState>()(
 
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { addShape } = useCanvasStore.getState();
   const { setShape, origin, fillColor, strokeColor, strokeWidth, radius } =
     useShapeStore.getState();
 
@@ -69,18 +68,7 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   } else {
     shape.noStroke();
   }
-  shape.on(Events.Types.change, () => {
-    console.log("change");
-  });
-
-  shape.on(Events.Types.render, () => {
-    console.log("render");
-  });
-
-  shape.on(Events.Types.update, () => {
-    console.log("update");
-  });
-  addShape(shape);
+  doodler.addDoodle({ shape: shape, type: "rect" });
   setShape(shape);
   doodler.throttledTwoUpdate();
 }

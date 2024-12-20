@@ -8,17 +8,12 @@ import { usePointerStore } from "./pointer.tool";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
-  const { removeShape, shapes: canvasShapes } = useCanvasStore.getState();
+  const { doodles } = useCanvasStore.getState();
   const { clearHighlight } = usePointerStore.getState();
   const pointer = eventToClientPosition(e);
 
-  const shapes: Path[] = canvasShapes.filter(
-    (shape) =>
-      (shape as Path).getBoundingClientRect && !(shape as any).isHighlight
-  ) as Path[];
-
-  for (const shape of shapes) {
-    const item = shape.getBoundingClientRect(false);
+  for (const doodle of doodles) {
+    const item = doodle.shape.getBoundingClientRect(false);
     const isShapeWithin = isPointInRect(
       pointer.x,
       pointer.y,
@@ -28,7 +23,7 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
       item.bottom
     );
     if (isShapeWithin) {
-      removeShape(shape);
+      doodler.removeDoodle(doodle);
       clearHighlight();
       // TODO recalculate selection when deleted shape is from the selection
       doodler.throttledTwoUpdate();

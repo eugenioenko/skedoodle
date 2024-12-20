@@ -5,7 +5,7 @@ import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
-import { Doodler, setDoodlerInstance } from "./doodle.client";
+import { Doodler, getDoodler, setDoodlerInstance } from "./doodle.client";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>
@@ -29,10 +29,10 @@ export const useInitTwoCanvas = (
       sketchId: "1",
     });
 
-    loadCanvas();
-    setContainer(containerRef.current);
     setDoodler(doodlerInstance);
+    setContainer(containerRef.current);
     setDoodlerInstance(doodlerInstance);
+    loadCanvas();
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
@@ -75,10 +75,10 @@ const createCanvas = (two: Two): Group => {
 };
 
 const loadCanvas = () => {
-  const { addShape } = useCanvasStore.getState();
+  const doodler = getDoodler();
   const circle = new Two.Circle(0, 0, 11);
   circle.fill = "#333";
-  addShape(circle);
+  doodler.addDoodle({ shape: circle, type: "circle" });
 };
 
 const createZUI = (canvas: Two): ZUI => {

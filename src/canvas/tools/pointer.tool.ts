@@ -291,17 +291,15 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
 
 export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
+  const { doodles } = useCanvasStore.getState();
   const { highlighted, setHighlight, clearHighlight } =
     usePointerStore.getState();
 
   const pointer = eventToClientPosition(e);
-  const shapes: Path[] = doodler.canvas.children.filter(
-    (shape) => (shape as Path).getBoundingClientRect && (shape as Path).visible
-  ) as Path[];
 
-  for (const shape of shapes) {
+  for (const doodle of doodles) {
+    const shape = doodle.shape;
     if (!shape.getBoundingClientRect) {
-      // TODO: fix collection issue
       continue;
     }
     const item = shape.getBoundingClientRect(false);
