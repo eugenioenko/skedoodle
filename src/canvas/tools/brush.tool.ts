@@ -58,11 +58,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 
   // add dot for starting point reference only when no opacity
   if (strokeColor?.a === 1) {
-    const circle = doodler.two.makeCircle(
-      position.x,
-      position.y,
-      strokeWidth / 2
-    );
+    circle = doodler.two.makeCircle(position.x, position.y, strokeWidth / 2);
     circle.fill = fillColor;
     circle.noStroke();
     doodler.canvas.add(circle);
@@ -124,6 +120,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   if (!path) {
     return;
   }
+
   if (circle) {
     doodler.canvas.remove(circle);
     circle = undefined;
