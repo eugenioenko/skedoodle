@@ -15,47 +15,46 @@ import { create } from "zustand";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodle.service";
+import { persist } from "zustand/middleware";
 
 export interface BrushState {
-  previousPosition: Vector;
-  path?: Path;
-  circle?: Circle;
   strokeColor: RgbaColor;
   strokeWidth: number;
   tolerance: number;
   simplifyAlgo: PathSimplifyType;
-  setPath: (path?: Path | undefined) => void;
-  setCircle: (circle?: Circle | undefined) => void;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
   setSimplifyAlgo: (algo: PathSimplifyType) => void;
 }
 
-export const useBrushStore = create<BrushState>()((set) => ({
-  path: undefined,
-  circle: undefined,
-  previousPosition: new Vector(),
-  strokeWidth: 5,
-  tolerance: 10,
-  strokeColor: { r: 33, g: 33, b: 33, a: 1 },
-  simplifyAlgo: "triangle",
-  setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
-  setPath: (path) => set(() => ({ path })),
-  setCircle: (circle) => set(() => ({ circle })),
-  setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
-  setTolerance: (tolerance) => set(() => ({ tolerance })),
-  setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
-}));
+export const useBrushStore = create<BrushState>()(
+  persist(
+    (set) => ({
+      strokeWidth: 5,
+      tolerance: 10,
+      strokeColor: { r: 33, g: 33, b: 33, a: 1 },
+      simplifyAlgo: "triangle",
+      setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
+      setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
+      setTolerance: (tolerance) => set(() => ({ tolerance })),
+      setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
+    }),
+    { name: "brush-tool", version: 1 }
+  )
+);
+
+let previousPosition = new Vector();
+let circle: Circle | undefined;
+let path: Path | undefined;
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { previousPosition, setPath, setCircle, strokeWidth, strokeColor } =
-    useBrushStore.getState();
+  const { strokeWidth, strokeColor } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   previousPosition.set(position.x, position.y);
-  setPath(undefined);
+  path = undefined;
 
   // add dot for starting point reference only when no opacity
   if (strokeColor?.a === 1) {
@@ -67,15 +66,13 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
     circle.fill = fillColor;
     circle.noStroke();
     doodler.canvas.add(circle);
-    setCircle(circle);
   }
   doodler.throttledTwoUpdate();
 }
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { path, setPath, previousPosition, strokeColor, strokeWidth } =
-    useBrushStore.getState();
+  const { strokeColor, strokeWidth } = useBrushStore.getState();
   const { addShape } = useCanvasStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
@@ -83,19 +80,18 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   if (!path) {
     // make new line, each line starts with a circle and ends with a circle
     // TODO there is a type definition issue here, investigate why the mismatch
-    const line = doodler.two.makeCurve(
+    path = doodler.two.makeCurve(
       [makeAnchor(previousPosition), makeAnchor(position)] as never,
       true as never
     );
-    line.cap = "round";
-    line.noFill().stroke = fillColor;
-    line.linewidth = strokeWidth;
-    for (const v of line.vertices) {
-      v.addSelf(line.position);
+    path.cap = "round";
+    path.noFill().stroke = fillColor;
+    path.linewidth = strokeWidth;
+    for (const v of path.vertices) {
+      v.addSelf(path.position);
     }
-    line.position.clear();
-    addShape(line);
-    setPath(line);
+    path.position.clear();
+    addShape(path);
   } else {
     // continue drawing
     let skipVertices = false;
@@ -124,14 +120,13 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
-  const { path, circle, setCircle, tolerance, simplifyAlgo } =
-    useBrushStore.getState();
+  const { tolerance, simplifyAlgo } = useBrushStore.getState();
   if (!path) {
     return;
   }
   if (circle) {
     doodler.canvas.remove(circle);
-    setCircle(undefined);
+    circle = undefined;
   }
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   path.vertices.push(makeAnchor(position));
