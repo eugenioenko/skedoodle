@@ -4,6 +4,8 @@ import { BoundingBox } from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { getDoodler } from "./doodle.service";
 
+export const ColorHighlight = "#0ea5cf";
+
 export enum MouseButton {
   Left = 0,
   Middle = 1,

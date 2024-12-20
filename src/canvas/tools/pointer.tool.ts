@@ -6,7 +6,7 @@ import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { useCanvasStore } from "../canvas.store";
+import { useCanvasStore, useOptionsStore } from "../canvas.store";
 import {
   eventToClientPosition,
   eventToSurfacePosition,
@@ -166,7 +166,7 @@ function clearSelected(state: PointerState): PointerState {
 }
 
 function startMoveSelection(): void {
-  const { setToolOption } = useCanvasStore.getState();
+  const { setToolOption } = useOptionsStore.getState();
   const { setIsMoving, setOrigins, outlines } = usePointerStore.getState();
   const selected = usePointerStore.getState().selected;
   setIsMoving(true);
@@ -241,7 +241,7 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
   const { setIsMoving } = usePointerStore.getState();
-  const { setToolOption } = useCanvasStore.getState();
+  const { setToolOption } = useOptionsStore.getState();
   const doodler = getDoodler();
 
   setIsMoving(false);

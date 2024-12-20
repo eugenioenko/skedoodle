@@ -1,11 +1,11 @@
 import { MouseEvent, TouchEvent } from "react";
-import { useCanvasStore } from "./canvas.store";
+import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   eventToSurfacePosition,
   MouseButton,
   touchEventToMouseEvent,
 } from "./canvas.utils";
-import { Doodler, getDoodler } from "./doodle.service";
+import { getDoodler } from "./doodle.service";
 import { doBrushMove, doBrushStart, doBrushUp } from "./tools/brush.tool";
 import { doDragMove, doDragStart, doDragTranslate } from "./tools/drag.tool";
 import { doDeleteShape } from "./tools/eraser.tool";
@@ -18,11 +18,11 @@ import {
 import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
-import { doBezierMove, doBezierStart, doBezierUp } from "./tools/bezier.tool";
+import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
-    useCanvasStore.getState();
+    useOptionsStore.getState();
 
   if (e.button === MouseButton.Middle) {
     setRestoreTool(selectedTool);
@@ -55,7 +55,7 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   }
 
   if (selectedTool === "bezier") {
-    doBezierStart(e);
+    doBezierNext(e);
     return;
   }
 
@@ -85,7 +85,7 @@ const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
 }, 16);
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
-  const { activeTool, selectedTool } = useCanvasStore.getState();
+  const { activeTool, selectedTool } = useOptionsStore.getState();
 
   throttledCursorUpdate(e);
 
@@ -99,7 +99,8 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
-  if (!activeTool) {
+  if (selectedTool === "bezier") {
+    doBezierMove(e);
     return;
   }
 
@@ -118,11 +119,6 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
-  if (activeTool === "bezier") {
-    doBezierMove(e);
-    return;
-  }
-
   if (activeTool === "square") {
     doShapeMove(e);
     return;
@@ -136,7 +132,7 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
     restoreTool,
     setRestoreTool,
     setSelectedTool,
-  } = useCanvasStore.getState();
+  } = useOptionsStore.getState();
   if (!activeTool) {
     return;
   }
@@ -176,7 +172,8 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseOut(e: MouseEvent<HTMLDivElement>) {
-  const { setCursor, activeTool } = useCanvasStore.getState();
+  const { setCursor } = useCanvasStore.getState();
+  const { activeTool } = useOptionsStore.getState();
 
   if (activeTool) {
     // TODO enable this

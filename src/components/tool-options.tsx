@@ -11,14 +11,14 @@ import {
 } from "@tabler/icons-react";
 import { useBrushStore } from "@/canvas/tools/brush.tool";
 import { ColorInput } from "./ui/color-input";
-import { useCanvasStore } from "@/canvas/canvas.store";
+import { useOptionsStore } from "@/canvas/canvas.store";
 import { useShapeStore } from "@/canvas/tools/shape.tool";
-import { Button, ToggleButton, ToggleGroup } from "./ui/button";
+import { ToggleButton, ToggleGroup } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 
 export const ToolOptions = () => {
-  let selectedTool = useCanvasStore((state) => state.selectedTool);
-  const restoreTool = useCanvasStore((state) => state.restoreTool);
+  let selectedTool = useOptionsStore((state) => state.selectedTool);
+  const restoreTool = useOptionsStore((state) => state.restoreTool);
   if (restoreTool) {
     selectedTool = restoreTool;
   }

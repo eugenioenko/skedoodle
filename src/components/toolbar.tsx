@@ -1,11 +1,10 @@
-import { Tool, useCanvasStore } from "@/canvas/canvas.store";
+import { Tool, useOptionsStore } from "@/canvas/canvas.store";
 import {
   IconBrush,
   IconEraser,
   IconHandStop,
   IconPointer,
   IconSquare,
-  IconVectorBezier,
   IconVectorBezier2,
   IconZoom,
 } from "@tabler/icons-react";
@@ -61,12 +60,12 @@ interface ToggleButtonProps {
 }
 
 const ToggleButton = ({ value, children }: ToggleButtonProps) => {
-  let current = useCanvasStore((state) => state.selectedTool);
-  const restoreTool = useCanvasStore((state) => state.restoreTool);
+  let current = useOptionsStore((state) => state.selectedTool);
+  const restoreTool = useOptionsStore((state) => state.restoreTool);
   if (restoreTool) {
     current = restoreTool;
   }
-  const setTool = useCanvasStore((state) => state.setSelectedTool);
+  const setTool = useOptionsStore((state) => state.setSelectedTool);
   const isActive = current === value;
 
   return (

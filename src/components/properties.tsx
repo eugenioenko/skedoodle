@@ -20,17 +20,15 @@ import { Layers } from "./layers";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
-import { useSettingsStore } from "@/canvas/canvas.store";
-
-type ShapeType = "path" | "shape" | "none";
+import { useOptionsStore } from "@/canvas/canvas.store";
 
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selected);
   const shape = selection?.[0];
   const strokeColor = colord(shape?.stroke as string).toRgb();
   const fillColor = colord(shape?.fill as string).toRgb();
-  const canvasColor = useSettingsStore((state) => state.canvasColor);
-  const setCanvasColor = useSettingsStore.getState().setCanvasColor;
+  const canvasColor = useOptionsStore((state) => state.canvasColor);
+  const setCanvasColor = useOptionsStore.getState().setCanvasColor;
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();

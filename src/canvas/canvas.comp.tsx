@@ -3,15 +3,15 @@
 import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/canvas.hook";
 import { useRef } from "react";
-import { useCanvasStore, useSettingsStore } from "./canvas.store";
+import { useOptionsStore } from "./canvas.store";
 import { colord } from "colord";
 
 export const Canvas = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const selectedTool = useCanvasStore((state) => state.selectedTool);
-  const activeTool = useCanvasStore((state) => state.activeTool);
-  const toolOption = useCanvasStore((state) => state.toolOption);
-  const canvasColor = useSettingsStore((state) => state.canvasColor);
+  const selectedTool = useOptionsStore((state) => state.selectedTool);
+  const activeTool = useOptionsStore((state) => state.activeTool);
+  const toolOption = useOptionsStore((state) => state.toolOption);
+  const canvasColor = useOptionsStore((state) => state.canvasColor);
   const bgColor = colord(canvasColor).toHex();
 
   useInitTwoCanvas(containerRef);

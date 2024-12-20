@@ -15,18 +15,10 @@ export type Tool =
   | "bezier";
 
 export interface CanvasState {
-  selectedTool?: Tool;
-  activeTool?: Tool;
-  toolOption?: string;
-  restoreTool?: Tool;
   doodler?: Doodler;
   cursor?: Point;
   container?: HTMLDivElement;
   shapes: Shape[];
-  setSelectedTool: (tool?: Tool) => void;
-  setActiveTool: (tool?: Tool) => void;
-  setRestoreTool: (tool?: Tool) => void;
-  setToolOption: (option: string) => void;
   setDoodler: (doodler: Doodler) => void;
   setContainer: (container?: HTMLDivElement | undefined) => void;
   setCursor: (cursor?: Point) => void;
@@ -35,17 +27,10 @@ export interface CanvasState {
 }
 
 export const useCanvasStore = create<CanvasState>()((set) => ({
-  selectedTool: "bezier",
-  activeTool: undefined,
-  restoreTool: undefined,
   doodler: undefined,
   cursor: undefined,
   shapes: [],
-  toolOption: "",
-  setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
-  setActiveTool: (activeTool) => set(() => ({ activeTool })),
-  setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
-  setToolOption: (toolOption) => set(() => ({ toolOption })),
+
   setDoodler: (doodler) => set(() => ({ doodler })),
   setContainer: (container) => set(() => ({ container })),
   setCursor: (cursor) => set(() => ({ cursor })),
@@ -65,21 +50,37 @@ export const useCanvasStore = create<CanvasState>()((set) => ({
     }),
 }));
 
-export interface SettingsState {
+export interface OptionsState {
   canvasColor: RgbaColor;
   throttleRate: number;
+  selectedTool?: Tool;
+  activeTool?: Tool;
+  toolOption?: string;
+  restoreTool?: Tool;
+  setSelectedTool: (tool?: Tool) => void;
+  setActiveTool: (tool?: Tool) => void;
+  setRestoreTool: (tool?: Tool) => void;
+  setToolOption: (option: string) => void;
   setCanvasColor: (canvasColor: RgbaColor) => void;
   setThrottleRate: (throttleRate: number) => void;
 }
 
-export const useSettingsStore = create<SettingsState>()(
+export const useOptionsStore = create<OptionsState>()(
   persist(
     (set) => ({
       canvasColor: { r: 249, g: 250, b: 251, a: 1 },
       throttleRate: 1,
+      selectedTool: "brush",
+      activeTool: undefined,
+      restoreTool: undefined,
+      toolOption: "",
+      setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
+      setActiveTool: (activeTool) => set(() => ({ activeTool })),
+      setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
+      setToolOption: (toolOption) => set(() => ({ toolOption })),
       setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
       setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
     }),
-    { name: "settings", version: 1 }
+    { name: "options", version: 1 }
   )
 );
