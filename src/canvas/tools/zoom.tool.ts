@@ -77,9 +77,10 @@ function onZoomMove(event): void {
 
     // If current distance is greater than initial, it's a zoom in; if less, zoom out
     if (currentDistance > initialDistance) {
-      console.log("Pinch to zoom in");
+     // pinch zoom in
     } else {
-      console.log("Pinch to zoom out");
+
+      // pinch zoom out
     }
 
     // Update the initial distance to the new distance

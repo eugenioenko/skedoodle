@@ -6,7 +6,12 @@ import { useRef } from "react";
 import { useOptionsStore } from "./canvas.store";
 import { colord } from "colord";
 
-export const Canvas = () => {
+interface CanvasProps {
+  sketchId: string;
+  onReady?: () => void;
+}
+
+export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
   const activeTool = useOptionsStore((state) => state.activeTool);
@@ -14,11 +19,11 @@ export const Canvas = () => {
   const canvasColor = useOptionsStore((state) => state.canvasColor);
   const bgColor = colord(canvasColor).toHex();
 
-  useInitTwoCanvas(containerRef);
+  useInitTwoCanvas(containerRef, sketchId, onReady);
 
   return (
     <div
-      style={{ backgroundColor: bgColor }}
+      style={{ backgroundColor: bgColor || "black" }}
       className="canvas-container flex-grow overflow-hidden"
       tabIndex={0}
       ref={containerRef}

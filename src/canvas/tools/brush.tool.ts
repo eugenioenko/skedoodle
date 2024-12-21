@@ -150,8 +150,8 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
       path.vertices = simplified;
     }
   }
-
   doodler.throttledTwoUpdate();
+  doodler.saveDoodles();
 }
 
 /**

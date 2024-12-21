@@ -75,6 +75,10 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 }
 
 const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
+  if (!useCanvasStore.getState().doodler?.two) {
+    // prevents random getDoodler() instance error while in dev mode
+    return;
+  }
   if (!e.currentTarget) {
     return;
   }

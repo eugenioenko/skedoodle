@@ -1,14 +1,16 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { MutableRefObject, useEffect, useState } from "react";
+import { MutableRefObject, useEffect } from "react";
 import Two from "two.js";
 import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
-import { Doodler, getDoodler, setDoodlerInstance } from "./doodle.client";
+import { Doodler, setDoodlerInstance } from "./doodle.client";
 
 export const useInitTwoCanvas = (
-  containerRef: MutableRefObject<HTMLDivElement | null>
+  containerRef: MutableRefObject<HTMLDivElement | null>,
+  sketchId: string,
+  onReady?: () => void
 ) => {
   useEffect(() => {
     const { doodler, setContainer, setDoodler } = useCanvasStore.getState();
@@ -26,13 +28,16 @@ export const useInitTwoCanvas = (
       two: instance,
       canvas: canvasInstance as never,
       zui: zuiInstance,
-      sketchId: "1",
+      sketchId,
     });
 
     setDoodler(doodlerInstance);
     setContainer(containerRef.current);
     setDoodlerInstance(doodlerInstance);
-    loadCanvas();
+
+    doodlerInstance.loadDoodles().then(() => onReady?.());
+
+    (window as any).doodler = doodlerInstance;
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
@@ -54,7 +59,7 @@ export const useInitTwoCanvas = (
         currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
       }
     };
-  }, [containerRef]);
+  }, [containerRef, onReady, sketchId]);
 };
 
 const createTwo = (container: HTMLDivElement): Two => {
@@ -72,13 +77,6 @@ const createCanvas = (two: Two): Group => {
 
   two.add(canvas);
   return canvas as never;
-};
-
-const loadCanvas = () => {
-  const doodler = getDoodler();
-  const circle = new Two.Circle(0, 0, 11);
-  circle.fill = "#333";
-  doodler.addDoodle({ shape: circle, type: "circle" });
 };
 
 const createZUI = (canvas: Two): ZUI => {

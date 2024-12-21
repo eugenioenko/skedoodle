@@ -98,5 +98,7 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doShapeUp() {
   const { setShape } = useShapeStore.getState();
+  const doodler = getDoodler();
+  doodler.saveDoodles();
   setShape(undefined);
 }

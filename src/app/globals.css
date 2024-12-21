@@ -43,7 +43,8 @@ body {
   cursor: grabbing;
 }
 
-.canvas-container[data-selected="brush"] {
+.canvas-container[data-selected="brush"],
+.canvas-container[data-selected="square"] {
   cursor: crosshair;
 }
 
@@ -53,6 +54,10 @@ body {
 
 .canvas-container[data-selected="zoom"] {
   cursor: zoom-in;
+}
+
+canvas {
+  background-color: "red";
 }
 
 input[type="text"] {
@@ -123,4 +128,17 @@ input[type="number"] {
 
 .flex-center {
   @apply justify-center items-center;
+}
+
+.animate-tail {
+  animation: tail-animation 2s ease-out forwards;
+}
+
+@keyframes tail-animation {
+  from {
+    stroke-dashoffset: 490;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
