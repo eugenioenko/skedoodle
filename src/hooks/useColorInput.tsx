@@ -15,10 +15,12 @@ export const useColorInput = ({ value, onChange }: UseColorInputProps) => {
   const rgbValue = rgbaToRgbStr(rgbaValue);
 
   useEffect(() => {
-    const color = rgbaToRgbStr(rgbaValue);
-    setRgbStrValue(color);
-    setAlphaValue(`${Math.round((rgbaValue.a || 0) * 100)}`);
-  }, [value, rgbaValue]);
+    if (value) {
+      setAlphaValue(`${Math.round((value.a || 0) * 100)}`);
+      setRgbStrValue(rgbaToRgbStr(value));
+      setRgbaValue(value);
+    }
+  }, [value]);
 
   const doChange = (rgba: RgbaColor): void => {
     setRgbaValue(rgba);
