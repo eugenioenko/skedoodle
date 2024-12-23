@@ -69,6 +69,14 @@ const BrushToolOptions = () => {
         icon={IconWaveSine}
       />
       <ToggleGroup>
+        <WithTooltip tooltip="Douglas-Peucker: High-performance general-purpose simplification. Preserves the path's overall shape efficiently. The number represents the acceptable tolerance x 10 times">
+          <ToggleButton
+            isSelected={simplifyAlgo === "douglas"}
+            onClick={() => setSimplifyAlgo("douglas")}
+          >
+            <IconVectorSpline size={20} stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
         <WithTooltip tooltip="Area of Triangle smoothing: General-purpose line simplification, especially for preserving visual shapes and smooth curves. The number represents the percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
           <ToggleButton
             isSelected={simplifyAlgo === "triangle"}
@@ -91,14 +99,6 @@ const BrushToolOptions = () => {
             onClick={() => setSimplifyAlgo("distance")}
           >
             <IconVectorBezier size={20} stroke={1} />
-          </ToggleButton>
-        </WithTooltip>
-        <WithTooltip tooltip="Douglas-Peucker: High-performance general-purpose simplification. Preserves the path's overall shape efficiently. The number represents the acceptable tolerance x 10 times">
-          <ToggleButton
-            isSelected={simplifyAlgo === "douglas"}
-            onClick={() => setSimplifyAlgo("douglas")}
-          >
-            <IconVectorSpline size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
       </ToggleGroup>

@@ -60,15 +60,21 @@ export class Doodler {
   }
 
   saveDoodles(): void {
+    return;
+    /*
     const { doodles } = useCanvasStore.getState();
     const data = doodles.map((doodle) => ({
       type: doodle.type,
       shape: doodle.shape.toObject(),
     }));
     set(this.sketchId, data);
+    */
   }
 
   async loadDoodles(): Promise<void> {
+    return;
+    /*
+
     if (!this.sketchId) {
       return;
     }
@@ -109,6 +115,7 @@ export class Doodler {
       }
     }
     this.throttledTwoUpdate();
+    */
   }
 }
 

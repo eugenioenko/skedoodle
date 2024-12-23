@@ -12,7 +12,6 @@ import { Path } from "two.js/src/path";
 import { Circle } from "two.js/src/shapes/circle";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
-import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodle.client";
 import { persist } from "zustand/middleware";
@@ -32,7 +31,7 @@ export const useBrushStore = create<BrushState>()(
   persist(
     (set) => ({
       strokeWidth: 5,
-      tolerance: 10,
+      tolerance: 30,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "triangle",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
@@ -98,10 +97,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
       );
 
       // TODO set stabilizer to a percentage and make it an option
-      let stabilizer = strokeWidth / 4;
-      const maxStabilizer = 10;
-      stabilizer = stabilizer > maxStabilizer ? maxStabilizer : stabilizer;
-      if (distance < stabilizer) {
+      if (distance < 1) {
         skipVertices = true;
       }
     }
@@ -128,20 +124,20 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   path.vertices.push(makeAnchor(position));
 
   normalizePathOrigin(path);
+  // path.vertices = simplifyPathPointsByMinDist(path.vertices, 1);
 
   if (tolerance !== 0) {
     // Area of Triangle:	Smooth and general-purpose; preserves curves and shape.
     // Perpendicular Distance:	Prioritizes straight-line segments, sharper results on straight paths.
     // Angle:	Retains sharp corners, may oversimplify smooth curves.
     if (simplifyAlgo === "douglas") {
-      const limit = tolerance / 10;
+      const limit = tolerance / 100;
       const simplified = simplifyPath(path.vertices, limit, true);
       path.vertices = simplified;
     } else {
       const limit = Math.floor(
         ((100 - tolerance) * path.vertices.length) / 100
       );
-      //const limit = tolerance / 10;
       const simplified = simplifyEdge(
         pathSimplifyTypeToFunc(simplifyAlgo),
         path.vertices,

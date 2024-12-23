@@ -6,6 +6,7 @@ import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodle.client";
+import { envIsDevelopment } from "@/environment";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>,
@@ -50,6 +51,9 @@ export const useInitTwoCanvas = (
     instance.addEventListener("update", handlers.doUpdate);
 
     return () => {
+      if (envIsDevelopment) {
+        return;
+      }
       if (instance) {
         instance.removeEventListener("update", handlers.doUpdate);
         instance.remove();
@@ -81,6 +85,6 @@ const createCanvas = (two: Two): Group => {
 
 const createZUI = (canvas: Two): ZUI => {
   const zui = new ZUI(canvas as never);
-  zui.addLimits(0.05, 4);
+  zui.addLimits(0.05, 100);
   return zui;
 };

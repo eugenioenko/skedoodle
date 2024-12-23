@@ -11,13 +11,6 @@ interface Point {
   y: number;
 }
 
-function getSqDist(p1: Point, p2: Point): number {
-  var dx = p1.x - p2.x,
-    dy = p1.y - p2.y;
-
-  return dx * dx + dy * dy;
-}
-
 function getSqSegDist(p: Point, p1: Point, p2: Point): number {
   var x = p1.x,
     y = p1.y,
@@ -40,27 +33,6 @@ function getSqSegDist(p: Point, p1: Point, p2: Point): number {
   dy = p.y - y;
 
   return dx * dx + dy * dy;
-}
-
-function simplifyRadialDist(points: Point[], sqTolerance: number): Point[] {
-  let prevPoint = points[0];
-  let newPoints = [prevPoint];
-  let point: Point | undefined;
-
-  for (var i = 1, len = points.length; i < len; i++) {
-    point = points[i];
-
-    if (getSqDist(point, prevPoint) > sqTolerance) {
-      newPoints.push(point);
-      prevPoint = point;
-    }
-  }
-
-  if (prevPoint !== point) {
-    newPoints.push(point as Point);
-  }
-
-  return newPoints;
 }
 
 function simplifyDPStep(
@@ -113,7 +85,7 @@ export function simplifyPath(
   }
 
   var sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
-  points = highestQuality ? points : simplifyRadialDist(points, sqTolerance);
+  //points = highestQuality ? points : simplifyRadialDist(points, sqTolerance);
   points = simplifyDouglasPeucker(points, sqTolerance);
 
   return points;

@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { Shape } from "two.js/src/shape";
 import { Doodle, Doodler } from "./doodle.client";
 import { Point } from "@/models/point.model";
 import { RgbaColor } from "colord";
@@ -42,12 +41,14 @@ export interface OptionsState {
   activeTool?: Tool;
   toolOption?: string;
   restoreTool?: Tool;
+  isPanelOpen: boolean;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
   setToolOption: (option: string) => void;
   setCanvasColor: (canvasColor: RgbaColor) => void;
   setThrottleRate: (throttleRate: number) => void;
+  setIsPanelOpen: (isPanelOpen: boolean) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -59,12 +60,14 @@ export const useOptionsStore = create<OptionsState>()(
       activeTool: undefined,
       restoreTool: undefined,
       toolOption: "",
+      isPanelOpen: true,
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
       setToolOption: (toolOption) => set(() => ({ toolOption })),
       setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
       setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
+      setIsPanelOpen: (isPanelOpen) => set(() => ({ isPanelOpen })),
     }),
     { name: "options", version: 1 }
   )
