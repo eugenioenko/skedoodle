@@ -1,10 +1,9 @@
 # Skedoodle
 
-**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate. 
+**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate.
 Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
 
 ### > [Live Preview Here](http://skedoodle.yy-dev.top)
-
 
 ## Table of Contents
 
@@ -43,8 +42,8 @@ Make sure you have the following installed:
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/eugenioenko/collaborative-whiteboard.git
-   cd collaborative-whiteboard
+   git clone https://github.com/eugenioenko/skedoodle.git
+   cd skedoodle
    ```
 
 2. **Install Dependencies**:
@@ -53,12 +52,12 @@ Make sure you have the following installed:
    npm install
    ```
 
-2. **Install Dependencies**:
+3. **Install Dependencies**:
 
    ```bash
    npm run dev
    ```
-   
+
 ## Usage
 
 - Open a Board: Navigate to http://localhost:4200 and create a new board or join an existing one.
