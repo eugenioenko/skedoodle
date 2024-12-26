@@ -13,7 +13,7 @@ import { Circle } from "two.js/src/shapes/circle";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
-import { getDoodler } from "../doodle.client";
+import { getDoodler } from "../doodler.client";
 import { persist } from "zustand/middleware";
 
 export interface BrushState {
@@ -147,7 +147,6 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     }
   }
   doodler.throttledTwoUpdate();
-  doodler.saveDoodles();
 }
 
 /**

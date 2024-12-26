@@ -8,7 +8,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
-import { getDoodler } from "../doodle.client";
+import { getDoodler } from "../doodler.client";
 import { Events } from "two.js/src/events";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
@@ -98,7 +98,5 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doShapeUp() {
   const { setShape } = useShapeStore.getState();
-  const doodler = getDoodler();
-  doodler.saveDoodles();
   setShape(undefined);
 }

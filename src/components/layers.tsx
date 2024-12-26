@@ -1,5 +1,5 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { Doodle, DoodleType } from "@/canvas/doodle.client";
+import { Doodle, DoodleType } from "@/canvas/doodle.utils";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
   IconCircle,
@@ -51,7 +51,7 @@ const DoodleItem = ({ doodle, isSelected }: ShapeProps) => {
       <div className="w-8 h-8 flex flex-center text-default-6">
         <DoodleIcon type={doodle.type} />
       </div>
-      <div className="flex-grow">{doodle.shape.id}</div>
+      <div className="flex-grow">{doodle.type}</div>
     </button>
   );
 };

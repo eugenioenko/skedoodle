@@ -5,7 +5,7 @@ import { Path } from "two.js/src/path";
 import { Anchor } from "two.js/src/anchor";
 import { create } from "zustand";
 import { ColorHighlight, eventToClientPosition } from "../canvas.utils";
-import { getDoodler } from "../doodle.client";
+import { getDoodler } from "../doodler.client";
 
 export interface BezierState {
   path?: Path;

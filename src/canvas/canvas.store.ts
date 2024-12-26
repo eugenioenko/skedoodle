@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import { Doodle, Doodler } from "./doodle.client";
+import { Doodler } from "./doodler.client";
 import { Point } from "@/models/point.model";
 import { RgbaColor } from "colord";
 import { persist } from "zustand/middleware";
+import { Doodle } from "./doodle.utils";
 
 export type Tool =
   | "hand"

@@ -1,6 +1,6 @@
 import { MouseEvent } from "react";
 import { create } from "zustand";
-import { getDoodler } from "../doodle.client";
+import { getDoodler } from "../doodler.client";
 import { usePointerStore } from "./pointer.tool";
 
 export interface ZoomState {

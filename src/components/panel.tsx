@@ -1,10 +1,12 @@
 "use client";
 
 import { doZoomReset, useZoomStore } from "@/canvas/tools/zoom.tool";
-import { IconFocus2, IconMenu2 } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconFocus2, IconMenu2 } from "@tabler/icons-react";
 import { Properties } from "./properties";
 import { Button } from "./ui/button";
 import { useOptionsStore } from "@/canvas/canvas.store";
+import { WithTooltip } from "./ui/tooltip";
+import { getDoodler } from "@/canvas/doodler.client";
 
 export const Panel = () => {
   const isPanelOpen = useOptionsStore((state) => state.isPanelOpen);
@@ -36,14 +38,24 @@ export const Panel = () => {
 const CanvasBar = () => {
   const zoom = useZoomStore((state) => state.zoom);
 
+  const doSaveToStorage = () => {
+    const doodler = getDoodler();
+    doodler.saveDoodles();
+  };
+
   return (
-    <div className="text-sm flex justify-between items-center w-full gap-4">
-      <div>
+    <div className="text-sm flex justify-end items-center w-full">
+      <WithTooltip tooltip="Save to local storage">
+        <Button onClick={() => doSaveToStorage()}>
+          <IconDeviceFloppy stroke={1} />
+        </Button>
+      </WithTooltip>
+      <WithTooltip tooltip="Reset zoom">
         <Button onClick={() => doZoomReset()}>
           <IconFocus2 stroke={1} />
         </Button>
-      </div>
-      <div>{zoom}%</div>
+      </WithTooltip>
+      <div className="w-12 text-right">{zoom}%</div>
     </div>
   );
 };

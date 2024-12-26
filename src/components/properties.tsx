@@ -1,5 +1,5 @@
 import { degreesToRadians, radiansToDegrees } from "@/canvas/canvas.utils";
-import { getDoodler } from "@/canvas/doodle.client";
+import { getDoodler } from "@/canvas/doodler.client";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
   IconAngle,

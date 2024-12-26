@@ -5,7 +5,7 @@ import Group from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
-import { Doodler, setDoodlerInstance } from "./doodle.client";
+import { Doodler, setDoodlerInstance } from "./doodler.client";
 import { envIsDevelopment } from "@/environment";
 
 export const useInitTwoCanvas = (
