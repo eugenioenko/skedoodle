@@ -12,6 +12,7 @@ import {
   serializeDoodle,
   unserializeDoodle,
 } from "./doodle.utils";
+import { useToastStore } from "@/components/ui/toasts";
 
 interface DoodlerProps {
   two: Two;
@@ -65,10 +66,13 @@ export class Doodler {
     this.canvas.remove(doodle.shape);
   }
 
-  saveDoodles(): void {
+  async saveDoodles(): Promise<void> {
     const { doodles } = useCanvasStore.getState();
     const data = doodles.map((doodle) => serializeDoodle(doodle));
-    set(this.sketchId, data);
+    await set(this.sketchId, data);
+
+    const addToast = useToastStore.getState().addToast;
+    addToast("Sketch saved successfully");
   }
 
   async loadDoodles(): Promise<void> {
