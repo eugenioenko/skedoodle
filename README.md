@@ -16,10 +16,10 @@ Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsiv
 
 ## Features
 
-- **Real-time Collaboration**: Multiple users can draw on the same board in real-time.
+- **Real-time Collaboration**: (Pending) Multiple users can draw on the same board in real-time.
 - **Sketch & Draw**: Offers tools for freehand sketching, shapes, and lines with Two.js for smooth vector graphics.
 - **Persistent Data**: TBD.
-- **Scalable**: Designed for scalability with WebSocket handling real-time data, powered by Next.js for optimal performance.
+- **Scalable**: Designed for scalability with WebSocket handling real-time data.
 
 ## Tech Stack
 
