@@ -20,10 +20,12 @@ export interface BrushState {
   strokeColor: RgbaColor;
   strokeWidth: number;
   tolerance: number;
+  stabilizer: number;
   simplifyAlgo: PathSimplifyType;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
+  setStabilizer: (stabilizer: number) => void;
   setSimplifyAlgo: (algo: PathSimplifyType) => void;
 }
 
@@ -32,11 +34,13 @@ export const useBrushStore = create<BrushState>()(
     (set) => ({
       strokeWidth: 5,
       tolerance: 30,
+      stabilizer: 1,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "triangle",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
       setTolerance: (tolerance) => set(() => ({ tolerance })),
+      setStabilizer: (stabilizer) => set(() => ({ stabilizer })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
     }),
     { name: "brush-tool", version: 1 }
@@ -67,7 +71,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { strokeColor, strokeWidth } = useBrushStore.getState();
+  const { strokeColor, strokeWidth, stabilizer } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToSurfacePosition(e, doodler.zui);
@@ -96,8 +100,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
         position as never
       );
 
-      // TODO set stabilizer to a percentage and make it an option
-      if (distance < 1) {
+      if (distance < stabilizer) {
         skipVertices = true;
       }
     }

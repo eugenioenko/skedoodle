@@ -3,6 +3,7 @@ import {
   IconAngle,
   IconBorderCornerRounded,
   IconBrush,
+  IconChartScatter3d,
   IconSquare,
   IconVectorBezier,
   IconVectorSpline,
@@ -37,11 +38,17 @@ export const ToolOptions = () => {
 const BrushToolOptions = () => {
   const strokeWidth = useBrushStore((state) => state.strokeWidth);
   const tolerance = useBrushStore((state) => state.tolerance);
+  const stabilizer = useBrushStore((state) => state.stabilizer);
   const strokeColor = useBrushStore((state) => state.strokeColor);
   const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
 
-  const { setStrokeColor, setStrokeWidth, setTolerance, setSimplifyAlgo } =
-    useBrushStore.getState();
+  const {
+    setStrokeColor,
+    setStrokeWidth,
+    setStabilizer,
+    setTolerance,
+    setSimplifyAlgo,
+  } = useBrushStore.getState();
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
@@ -52,16 +59,25 @@ const BrushToolOptions = () => {
       />
       <label className="pl-2">Stroke</label>
       <SlideInput
-        className="max-w-24"
+        className="max-w-20"
         value={strokeWidth}
         min={1}
         max={256}
         onChange={(value) => setStrokeWidth(value)}
         icon={IconBrush}
       />
+      <label className="pl-2">Stabilizer</label>
+      <SlideInput
+        className="max-w-20"
+        value={stabilizer}
+        min={0}
+        max={10}
+        onChange={(value) => setStabilizer(value)}
+        icon={IconChartScatter3d}
+      />
       <label className="pl-2">Smoothing</label>
       <SlideInput
-        className="max-w-24"
+        className="max-w-20"
         value={tolerance}
         min={0}
         max={100}

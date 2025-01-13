@@ -29,11 +29,6 @@ interface Rect {
   height: number;
 }
 
-interface PointerSelection {
-  shapes: Path[];
-  border?: Rectangle;
-}
-
 export interface PointerState {
   origin: Vector;
   highlighted?: Path;
@@ -49,28 +44,23 @@ export interface PointerState {
   setIsMoving: (isMoving: boolean) => void;
 }
 
-export const usePointerStore = create<PointerState>()(
-  devtools(
-    (set) => ({
-      selected: [],
-      origin: new Vector(),
-      origins: [],
-      highlighted: undefined,
-      isMoving: false,
-      outlines: { origin: new Vector() },
-      originTranslations: { shape: new Vector(), border: new Vector() },
-      setIsMoving: (isMoving) => set((state) => ({ ...state, isMoving })),
-      setOrigins: (origins) => set((state) => ({ ...state, origins })),
-      setHighlight: (shape, border) =>
-        set((state) => highlightShape(state, shape, border)),
-      clearHighlight: () => set((state) => clearHighlight(state)),
-      clearSelected: () => set((state) => clearSelected(state)),
-      addHighlightToSelection: (join: boolean) =>
-        set((state) => addToSelection(state, join)),
-    }),
-    { name: "pointerStore", enabled: true || envIsDevelopment }
-  )
-);
+export const usePointerStore = create<PointerState>()((set) => ({
+  selected: [],
+  origin: new Vector(),
+  origins: [],
+  highlighted: undefined,
+  isMoving: false,
+  outlines: { origin: new Vector() },
+  originTranslations: { shape: new Vector(), border: new Vector() },
+  setIsMoving: (isMoving) => set((state) => ({ ...state, isMoving })),
+  setOrigins: (origins) => set((state) => ({ ...state, origins })),
+  setHighlight: (shape, border) =>
+    set((state) => highlightShape(state, shape, border)),
+  clearHighlight: () => set((state) => clearHighlight(state)),
+  clearSelected: () => set((state) => clearSelected(state)),
+  addHighlightToSelection: (join: boolean) =>
+    set((state) => addToSelection(state, join)),
+}));
 
 function highlightShape(
   state: PointerState,
@@ -95,7 +85,8 @@ function clearHighlight(state: PointerState): PointerState {
   const outlines = state.outlines;
   state.highlighted = undefined;
   if (outlines.highlight) {
-    outlines.highlight.visible = false;
+    outlines.highlight.remove();
+    outlines.highlight = undefined;
   }
   return state;
 }
@@ -112,7 +103,8 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
     if (join) {
       return { ...state };
     } else {
-      outlines.selected.visible = false;
+      outlines.selected.remove();
+      outlines.selected = undefined;
       return { ...state, selected: [] };
     }
   }
@@ -159,7 +151,8 @@ function setSelectionOutline(selected: Path[], outline: Rectangle): void {
 
 function clearSelected(state: PointerState): PointerState {
   if (state.outlines.selected) {
-    state.outlines.selected.visible = false;
+    state.outlines.selected.remove();
+    state.outlines.selected = undefined;
   }
 
   return { ...state, selected: [] };
@@ -179,7 +172,8 @@ function startMoveSelection(): void {
     );
   }
   if (outlines.highlight) {
-    outlines.highlight.visible = false;
+    outlines.highlight.remove();
+    outlines.highlight = undefined;
   }
   setOrigins(origins);
 }

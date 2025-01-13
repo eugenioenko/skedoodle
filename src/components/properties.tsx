@@ -21,6 +21,7 @@ import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
+import { Sketches } from "./sketches";
 
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selected);
@@ -57,6 +58,9 @@ export const Properties = () => {
                 value={canvasColor}
                 onChange={(value) => setCanvasColor(value)}
               />
+            </div>
+            <div>
+              <Sketches />
             </div>
           </>
         )}

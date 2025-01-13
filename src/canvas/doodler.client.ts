@@ -5,7 +5,6 @@ import { Group } from "two.js/src/group";
 
 import { useCanvasStore } from "./canvas.store";
 import { get, set } from "idb-keyval";
-import { Point } from "@/models/point.model";
 import {
   Doodle,
   SerializedDoodle,
@@ -19,6 +18,7 @@ interface DoodlerProps {
   zui: ZUI;
   canvas: Group;
   sketchId: string;
+  container: HTMLDivElement;
 }
 
 export class Doodler {
@@ -26,12 +26,14 @@ export class Doodler {
   zui: ZUI;
   canvas: Group;
   sketchId: string;
+  container: HTMLDivElement;
 
   constructor(props: DoodlerProps) {
     this.two = props.two;
     this.canvas = props.canvas;
     this.zui = props.zui;
     this.sketchId = props.sketchId || "default";
+    this.container = props.container;
 
     if (typeof window !== "undefined") {
       (window as any).doodler = this;
