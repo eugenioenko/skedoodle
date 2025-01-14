@@ -2,9 +2,8 @@ import { throttle } from "@/utils/throttle";
 import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
-
+import { get, set } from "@/services/storage.client";
 import { useCanvasStore } from "./canvas.store";
-import { get, set } from "idb-keyval";
 import {
   Doodle,
   SerializedDoodle,
@@ -71,7 +70,7 @@ export class Doodler {
   async saveDoodles(): Promise<void> {
     const { doodles } = useCanvasStore.getState();
     const data = doodles.map((doodle) => serializeDoodle(doodle));
-    await set(this.sketchId, data);
+    set(this.sketchId, data);
 
     const addToast = useToastStore.getState().addToast;
     addToast("Sketch saved successfully");
@@ -82,7 +81,7 @@ export class Doodler {
       return;
     }
 
-    const doodles = await get<SerializedDoodle[]>(this.sketchId);
+    const doodles = get<SerializedDoodle[]>(this.sketchId);
 
     if (!doodles || !doodles?.length) {
       return;

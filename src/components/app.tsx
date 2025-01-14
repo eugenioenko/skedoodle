@@ -6,14 +6,14 @@ import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
 import { ToolOptions } from "./tool-options";
 import { Loader } from "./loader";
 import { useCallback, useState } from "react";
-import { envIsProduction } from "@/environment";
 import { useParams } from "react-router-dom";
+import { Toasts } from "./ui/toasts";
 
 export const App = () => {
   useWindowWheelPrevent();
   const { id } = useParams();
   const sketchId = id || "local";
-  const loadDelay = envIsProduction ? 1000 : 0;
+  const loadDelay = 450;
   const [isLoading, setIsLoading] = useState(true);
 
   const onReady = useCallback(() => {
@@ -34,6 +34,7 @@ export const App = () => {
         <StatusBar />
       </div>
       {isLoading && <Loader />}
+      <Toasts />
     </main>
   );
 };

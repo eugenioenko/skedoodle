@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { keys } from "idb-keyval";
+import { keys } from "@/services/storage.client";
 import { Link } from "react-router-dom";
 
 export const Sketches = () => {

@@ -1,5 +1,3 @@
-"use client";
-
 import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/canvas.hook";
 import { useRef } from "react";

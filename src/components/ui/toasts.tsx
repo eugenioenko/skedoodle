@@ -1,5 +1,3 @@
-"use client";
-
 import { create } from "zustand";
 
 interface Toast {
@@ -36,7 +34,7 @@ export const Toasts = () => {
   const toasts = useToastStore().toasts;
   return (
     <div className="fixed top-0 left-0 right-0 h-0 flex justify-center">
-      <div className="flex flex-col md:items-center gap-2 p-2 relative top-12">
+      <div className="flex flex-col md:items-center gap-2 relative top-14">
         {toasts.map((toast) => (
           <Toast key={toast.id} message={toast.message} />
         ))}
@@ -48,6 +46,7 @@ export const Toasts = () => {
 interface ToastProps {
   message: string;
 }
+
 const Toast = ({ message }: ToastProps) => {
   return (
     <div className="text-inverse bg-secondary py-2 px-4 flex items-center rounded gap-2 animate-fade-in-down min-w-72">

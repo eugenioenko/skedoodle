@@ -1,10 +1,8 @@
 import { MouseEvent } from "react";
 
-import { envIsDevelopment } from "@/environment";
 import { colord, RgbaColor } from "colord";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
@@ -23,24 +21,19 @@ export interface ShapeState {
   setRadius: (radius?: number) => void;
 }
 
-export const useShapeStore = create<ShapeState>()(
-  devtools(
-    (set) => ({
-      shape: undefined,
-      origin: new Vector(),
-      strokeWidth: 2,
-      radius: 0,
-      strokeColor: { r: 0, g: 0, b: 0, a: 1 },
-      fillColor: { r: 255, g: 255, b: 255, a: 1 },
-      setShape: (shape) => set(() => ({ shape })),
-      setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
-      setFillColor: (fillColor) => set(() => ({ fillColor })),
-      setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
-      setRadius: (radius) => set(() => ({ radius })),
-    }),
-    { name: "brushStore", enabled: false || envIsDevelopment }
-  )
-);
+export const useShapeStore = create<ShapeState>()((set) => ({
+  shape: undefined,
+  origin: new Vector(),
+  strokeWidth: 2,
+  radius: 0,
+  strokeColor: { r: 0, g: 0, b: 0, a: 1 },
+  fillColor: { r: 255, g: 255, b: 255, a: 1 },
+  setShape: (shape) => set(() => ({ shape })),
+  setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
+  setFillColor: (fillColor) => set(() => ({ fillColor })),
+  setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
+  setRadius: (radius) => set(() => ({ radius })),
+}));
 
 export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();

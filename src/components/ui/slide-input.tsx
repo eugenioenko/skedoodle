@@ -1,5 +1,3 @@
-"use client";
-
 import { useSliderInput } from "@/hooks/useSliderInput";
 import { Icon, IconSelector } from "@tabler/icons-react";
 import Slider from "rc-slider";
