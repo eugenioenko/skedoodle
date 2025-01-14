@@ -75,7 +75,7 @@ export function doBezierNext(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doBezierMove(e: MouseEvent<HTMLDivElement>): void {
-  const { anchors, preview, path } = useBezierStore.getState();
+  const { preview, path } = useBezierStore.getState();
   const doodler = getDoodler();
   if (path?.vertices.length) {
     const lastPoint = path.vertices[path.vertices.length - 1];

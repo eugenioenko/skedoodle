@@ -1,7 +1,7 @@
 # Skedoodle
 
-**Skedoodle** is a real-time, interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate.
-Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
+**Skedoodle** is a work in progress of a real-time interactive sketching and drawing tool that allows multiple users to connect, view, and edit the same board simultaneously. Designed for teams to brainstorm and visually collaborate.
+Built with Vite, React, WebSocket, and Two.js, the platform delivers fast, responsive, and synchronized interactions across devices.
 
 ### > [Live Preview Here](http://skedoodle.yy-dev.top)
 
@@ -16,51 +16,29 @@ Built with Next.js, WebSocket, and Two.js, the platform delivers fast, responsiv
 
 ## Features
 
-- **Real-time Collaboration**: (TODO) Multiple users can draw on the same board in real-time.
+- **Real-time Collaboration**: (In Progress) Multiple users can draw on the same board in real-time.
 - **Sketch & Draw**: Offers tools for freehand sketching, shapes, and lines with Two.js for smooth vector graphics.
 - **Persistent Data**: TBD.
 - **Scalable**: Designed for scalability with WebSocket handling real-time data.
 
 ## Tech Stack
 
-- **Frontend**: [Next.js](https://nextjs.org/) for server-side rendering and optimized React components.
-- **Backend**: [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket) for real-time data synchronization.
+- **Frontend**: [Vite](https://https://vite.dev/) for client side rendering.
 - **Graphics**: [Two.js](https://two.js.org/) for rendering smooth and interactive vector graphics.
+- **Server**: [Socket.io](https://socket.io/) for real-time collaboration
 
 ## Getting Started
 
-### Prerequisites
+### Installation and Execution
 
-Make sure you have the following installed:
-
-- [Node.js](https://nodejs.org/) v14+
-- [Next.js](https://nextjs.org/)
-- Database (SQLite/PostgreSQL/MySQL, etc.)
-
-### Installation
-
-1. **Clone the Repository**:
-
-   ```bash
-   git clone https://github.com/eugenioenko/skedoodle.git
-   cd skedoodle
-   ```
-
-2. **Install Dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-3. **Install Dependencies**:
-
-   ```bash
-   npm run dev
-   ```
+```bash
+pnpm install
+pnpm dev
+```
 
 ## Usage
 
-- Open a Board: Navigate to http://localhost:4200 and create a new board or join an existing one.
+- Open a Board: Navigate to http://localhost:5317 and create a new board or join an existing one.
 - Collaborate: Invite others to join the board via a unique URL. All participants can draw, erase, and edit in real-time.
 - Persist Data: Board data will be saved and synced to the database, making it accessible for future sessions.
 

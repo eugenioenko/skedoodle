@@ -135,7 +135,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     // Angle:	Retains sharp corners, may oversimplify smooth curves.
     if (simplifyAlgo === "douglas") {
       const limit = tolerance / 100;
-      const simplified = simplifyPath(path.vertices, limit, true);
+      const simplified = simplifyPath(path.vertices, limit);
       path.vertices = simplified;
     } else {
       const limit = Math.floor(
@@ -169,6 +169,7 @@ function normalizePathOrigin(path: Path): void {
  * Centers the vertices of a path while keeping its visual position unchanged on the canvas.
  * This helps with transformations
  */
+/*
 function normalizePathToCenterPoint(path: Path): void {
   // TODO: fix zui
   const oldPosition = path.getBoundingClientRect();
@@ -181,6 +182,7 @@ function normalizePathToCenterPoint(path: Path): void {
   path.translation.x += offsetX;
   path.translation.y += offsetY;
 }
+*/
 
 function makeAnchor({ x, y }: Point) {
   var anchor = new Two.Anchor(x, y);

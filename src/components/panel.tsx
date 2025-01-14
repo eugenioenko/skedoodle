@@ -1,5 +1,3 @@
-"use client";
-
 import { doZoomReset, useZoomStore } from "@/canvas/tools/zoom.tool";
 import { IconDeviceFloppy, IconFocus2, IconMenu2 } from "@tabler/icons-react";
 import { Properties } from "./properties";

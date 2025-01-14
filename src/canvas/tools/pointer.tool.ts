@@ -1,11 +1,9 @@
 import { MouseEvent } from "react";
 
-import { envIsDevelopment } from "@/environment";
 import { Path } from "two.js/src/path";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 import { useCanvasStore, useOptionsStore } from "../canvas.store";
 import {
   eventToClientPosition,
@@ -233,7 +231,7 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   }
 }
 
-export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
+export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
   const { setIsMoving } = usePointerStore.getState();
   const { setToolOption } = useOptionsStore.getState();
   const doodler = getDoodler();

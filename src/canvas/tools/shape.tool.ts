@@ -2,14 +2,11 @@ import { MouseEvent } from "react";
 
 import { envIsDevelopment } from "@/environment";
 import { colord, RgbaColor } from "colord";
-import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
-import { Events } from "two.js/src/events";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
 export interface ShapeState {

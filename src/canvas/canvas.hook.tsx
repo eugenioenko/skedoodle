@@ -36,9 +36,8 @@ export const useInitTwoCanvas = (
     setContainer(containerRef.current);
     setDoodlerInstance(doodlerInstance);
 
-    doodlerInstance.loadDoodles().then(() => onReady?.());
-
-    (window as any).doodler = doodlerInstance;
+    // TODO: update here to handle errors on loading local storage
+    doodlerInstance.loadDoodles().finally(() => onReady?.());
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;

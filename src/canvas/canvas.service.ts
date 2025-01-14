@@ -175,7 +175,7 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
   }
 }
 
-function doMouseOut(e: MouseEvent<HTMLDivElement>) {
+function doMouseOut(_: MouseEvent<HTMLDivElement>) {
   const { setCursor } = useCanvasStore.getState();
   const { activeTool } = useOptionsStore.getState();
 
@@ -190,7 +190,7 @@ function doMouseOut(e: MouseEvent<HTMLDivElement>) {
   setCursor(undefined);
 }
 
-function doMouseOver(e: MouseEvent<HTMLDivElement>) {}
+function doMouseOver(_: MouseEvent<HTMLDivElement>) {}
 
 function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
@@ -236,9 +236,9 @@ function doWindowResize() {
   doodler?.throttledTwoUpdate();
 }
 
-function doKeyDown(e: KeyboardEvent): void {}
+function doKeyDown(_: KeyboardEvent): void {}
 
-function doUpdate(frameCount: number, deltaTime: number) {}
+function doUpdate() {}
 
 export const handlers = {
   doMouseWheel,

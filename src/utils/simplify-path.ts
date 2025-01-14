@@ -75,11 +75,7 @@ function simplifyDouglasPeucker(points: Point[], sqTolerance: number): Point[] {
 }
 
 // both algorithms combined for awesome performance
-export function simplifyPath(
-  points: Point[],
-  tolerance: number,
-  highestQuality: boolean
-): Point[] {
+export function simplifyPath(points: Point[], tolerance: number): Point[] {
   if (points.length <= 2) {
     return points;
   }

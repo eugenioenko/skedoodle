@@ -46,7 +46,7 @@ interface MenuProps {
 export const MenuComponent = React.forwardRef<
   HTMLButtonElement,
   MenuProps & React.HTMLProps<HTMLButtonElement>
->(({ children, trigger, label, ...props }, forwardedRef) => {
+>(({ children, trigger, label }, forwardedRef) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 

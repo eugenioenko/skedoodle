@@ -1,5 +1,3 @@
-"use client";
-
 import { Toolbar } from "./toolbar";
 import { Canvas } from "../canvas/canvas.comp";
 import { StatusBar } from "./status-bar";
@@ -9,13 +7,12 @@ import { ToolOptions } from "./tool-options";
 import { Loader } from "./loader";
 import { useCallback, useState } from "react";
 import { envIsProduction } from "@/environment";
+import { useParams } from "react-router-dom";
 
-interface AppProps {
-  sketchId: string;
-}
-
-export const App = ({ sketchId }: AppProps) => {
+export const App = () => {
   useWindowWheelPrevent();
+  const { id } = useParams();
+  const sketchId = id || "local";
   const loadDelay = envIsProduction ? 1000 : 0;
   const [isLoading, setIsLoading] = useState(true);
 

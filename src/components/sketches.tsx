@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { keys } from "idb-keyval";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export const Sketches = () => {
   const [names, setNames] = useState<string[]>([]);
@@ -24,7 +24,7 @@ export const Sketches = () => {
             <Link
               className="px-2 py-0.5 hover:bg-default-4"
               key={name}
-              href={`/sketch/${name}`}
+              to={`/sketch/${name}`}
             >
               {name}
             </Link>
