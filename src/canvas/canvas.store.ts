@@ -12,6 +12,7 @@ export type Tool =
   | "square"
   | "line"
   | "arrow"
+  | "text"
   | "eraser"
   | "zoom"
   | "bezier";

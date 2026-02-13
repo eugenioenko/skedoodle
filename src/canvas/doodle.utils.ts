@@ -1,12 +1,14 @@
 import { Point } from "@/models/point.model";
 import Two from "two.js";
 import { Path } from "two.js/src/path";
+import { Shape } from "two.js/src/shape";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
+import { Text } from "two.js/src/text";
 
-export type DoodleType = "brush" | "rect" | "line" | "arrow" | "ellipse" | "circle";
+export type DoodleType = "brush" | "rect" | "line" | "arrow" | "text" | "ellipse" | "circle";
 
 export interface Doodle {
-  shape: Path;
+  shape: Shape;
   type: DoodleType;
 }
 
@@ -23,6 +25,12 @@ export interface SerializedDoodle {
   fc: string; // fill color
   lw: number; // linewidth
   v: SerializedPoint[]; // vertices
+  // text-specific fields
+  txt?: string; // text value
+  ff?: string; // font family
+  fs?: number; // font size
+  fa?: string; // font alignment
+  fw?: number | string; // font weight
 }
 
 /**
@@ -30,12 +38,16 @@ export interface SerializedDoodle {
  */
 export function serializeDoodle(doodle: Doodle): SerializedDoodle {
   const { shape, type } = doodle;
-  const { translation, stroke, fill, linewidth, vertices, id } = shape;
+  const { translation, id } = shape;
+  const stroke = (shape as any).stroke;
+  const fill = (shape as any).fill;
+  const linewidth = (shape as any).linewidth;
+  const vertices = (shape as Path).vertices;
   const width = (shape as any).width || 0;
   const height = (shape as any).height || 0;
   const radius = (shape as any).radius || 0;
 
-  return {
+  const serialized: SerializedDoodle = {
     id,
     t: type,
     x: translation.x,
@@ -48,6 +60,17 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
     lw: linewidth || 1,
     v: (vertices || []).map((v: Point) => [v.x, v.y]),
   };
+
+  if (type === "text") {
+    const text = shape as Text;
+    serialized.txt = text.value;
+    serialized.ff = text.family;
+    serialized.fs = text.size;
+    serialized.fa = text.alignment;
+    serialized.fw = text.weight;
+  }
+
+  return serialized;
 }
 
 /**
@@ -92,6 +115,17 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
     shape.fill = fc;
     shape.linewidth = lw;
     return { shape: shape, type: "rect" };
+  } else if (type === "text") {
+    const shape = new Text(serialized.txt || "", x, y);
+    shape.id = id;
+    shape.fill = fc;
+    shape.stroke = sc;
+    shape.linewidth = lw;
+    shape.family = serialized.ff || "sans-serif";
+    shape.size = serialized.fs || 24;
+    shape.alignment = (serialized.fa || "left") as "left" | "center" | "right";
+    shape.weight = serialized.fw || 400;
+    return { shape, type: "text" };
   } else {
     throw new Error(`Unknown doodle unserialization of type "${type}"`);
   }

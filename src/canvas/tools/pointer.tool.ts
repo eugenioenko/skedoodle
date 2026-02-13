@@ -1,7 +1,7 @@
 import { MouseEvent } from "react";
 
-import { Path } from "two.js/src/path";
 import { Rectangle } from "two.js/src/shapes/rectangle";
+import { Shape } from "two.js/src/shape";
 import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { useCanvasStore, useOptionsStore } from "../canvas.store";
@@ -30,14 +30,14 @@ interface Rect {
 
 export interface PointerState {
   origin: Vector;
-  highlighted?: Path;
-  selected: Path[];
+  highlighted?: Shape;
+  selected: Shape[];
   isMoving: boolean;
   outlines: Outlines;
   origins: Vector[];
   clearSelected: () => void;
   addHighlightToSelection: (join: boolean) => void;
-  setHighlight: (shape: Path, border: Rect) => void;
+  setHighlight: (shape: Shape, border: Rect) => void;
   setOrigins: (origins: Vector[]) => void;
   clearHighlight: () => void;
   setIsMoving: (isMoving: boolean) => void;
@@ -63,7 +63,7 @@ export const usePointerStore = create<PointerState>()((set) => ({
 
 function highlightShape(
   state: PointerState,
-  shape: Path,
+  shape: Shape,
   border: Rect
 ): PointerState {
   const outlines = state.outlines;
@@ -125,10 +125,10 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
   return { ...state, selected };
 }
 
-function setSelectionOutline(selected: Path[], outline: Rectangle): void {
+function setSelectionOutline(selected: Shape[], outline: Rectangle): void {
   const doodler = getDoodler();
   // calculate selection rectangle
-  const boxes = selected.map((shape) => shape.getBoundingClientRect());
+  const boxes = selected.map((shape) => (shape as any).getBoundingClientRect());
   const left = Math.min(...boxes.map((box) => box.left));
   const top = Math.min(...boxes.map((box) => box.top));
   const right = Math.max(...boxes.map((box) => box.right));
@@ -317,10 +317,10 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
 
   for (const doodle of doodles) {
     const shape = doodle.shape;
-    if (!shape.getBoundingClientRect) {
+    if (!(shape as any).getBoundingClientRect) {
       continue;
     }
-    const item = shape.getBoundingClientRect(false);
+    const item = (shape as any).getBoundingClientRect(false);
     const isShapeWithin = isPointInRect(
       pointer.x,
       pointer.y,

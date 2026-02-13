@@ -4,6 +4,7 @@ import {
   IconBrush,
   IconEraser,
   IconHandStop,
+  IconLetterT,
   IconLine,
   IconPointer,
   IconSquare,
@@ -48,6 +49,11 @@ export const Toolbar = () => {
         <WithTooltip tooltip="Arrow tool [A]">
           <ToggleButton value="arrow">
             <IconArrowNarrowRight stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Text tool [T]">
+          <ToggleButton value="text">
+            <IconLetterT stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Zoom tool [Z]">

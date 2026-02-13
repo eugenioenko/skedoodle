@@ -5,6 +5,7 @@ import {
   IconBorderCornerRounded,
   IconBrush,
   IconChartScatter3d,
+  IconLetterT,
   IconLine,
   IconSquare,
   IconVectorBezier,
@@ -14,6 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { useBrushStore } from "@/canvas/tools/brush.tool";
 import { useLineStore } from "@/canvas/tools/line.tool";
+import { useTextStore } from "@/canvas/tools/text.tool";
 import { ColorInput } from "./ui/color-input";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { useShapeStore } from "@/canvas/tools/shape.tool";
@@ -37,6 +39,10 @@ export const ToolOptions = () => {
 
   if (selectedTool === "line" || selectedTool === "arrow") {
     return <LineToolOptions />;
+  }
+
+  if (selectedTool === "text") {
+    return <TextToolOptions />;
   }
 
   return null;
@@ -164,6 +170,41 @@ const SquareToolOptions = () => {
         onChange={(value) => setRadius(value)}
         icon={IconBorderCornerRounded}
       />
+    </div>
+  );
+};
+
+const TextToolOptions = () => {
+  const fontSize = useTextStore((state) => state.fontSize);
+  const fillColor = useTextStore((state) => state.fillColor);
+  const fontFamily = useTextStore((state) => state.fontFamily);
+  const { setFillColor, setFontSize, setFontFamily } =
+    useTextStore.getState();
+
+  return (
+    <div className="flex flex-row gap-2 text-xs items-center">
+      <label>Color</label>
+      <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
+      <label className="pl-2">Size</label>
+      <SlideInput
+        className="max-w-24"
+        value={fontSize}
+        min={8}
+        max={256}
+        onChange={(value) => setFontSize(value)}
+        icon={IconLetterT}
+      />
+      <label className="pl-2">Font</label>
+      <select
+        className="bg-default-3 border border-default-1 rounded px-2 py-1 text-xs"
+        value={fontFamily}
+        onChange={(e) => setFontFamily(e.target.value)}
+      >
+        <option value="sans-serif">Sans Serif</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Monospace</option>
+        <option value="cursive">Cursive</option>
+      </select>
     </div>
   );
 };
