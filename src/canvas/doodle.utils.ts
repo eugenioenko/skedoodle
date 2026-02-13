@@ -5,7 +5,7 @@ import { Shape } from "two.js/src/shape";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { Text } from "two.js/src/text";
 
-export type DoodleType = "brush" | "rect" | "line" | "arrow" | "text" | "ellipse" | "circle";
+export type DoodleType = "brush" | "rect" | "line" | "arrow" | "text" | "ellipse" | "circle" | "bezier";
 
 export interface Doodle {
   shape: Shape;
@@ -31,6 +31,9 @@ export interface SerializedDoodle {
   fs?: number; // font size
   fa?: string; // font alignment
   fw?: number | string; // font weight
+  // bezier-specific fields
+  bv?: [number, number, number, number, number, number, string][]; // [x, y, lx, ly, rx, ry, command]
+  cl?: boolean; // closed path
 }
 
 /**
@@ -68,6 +71,20 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
     serialized.fs = text.size;
     serialized.fa = text.alignment;
     serialized.fw = text.weight;
+  }
+
+  if (type === "bezier") {
+    // Controls are relative offsets from anchor position
+    serialized.bv = (vertices || []).map((v: any) => [
+      v.x,
+      v.y,
+      v.controls?.left?.x ?? 0,
+      v.controls?.left?.y ?? 0,
+      v.controls?.right?.x ?? 0,
+      v.controls?.right?.y ?? 0,
+      v.command || "C",
+    ]);
+    serialized.cl = (shape as Path).closed;
   }
 
   return serialized;
@@ -126,6 +143,27 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
     shape.alignment = (serialized.fa || "left") as "left" | "center" | "right";
     shape.weight = serialized.fw || 400;
     return { shape, type: "text" };
+  } else if (type === "bezier") {
+    const vertices = (serialized.bv || []).map(
+      (bv) =>
+        new Two.Anchor(
+          bv[0], bv[1], // position
+          bv[2], bv[3], // left control
+          bv[4], bv[5], // right control
+          bv[6]         // command
+        )
+    );
+    const shape = new Path(vertices, false, false, true);
+    shape.id = id;
+    shape.cap = "round";
+    shape.join = "round";
+    shape.closed = !!serialized.cl;
+    shape.noFill().stroke = sc;
+    shape.linewidth = lw;
+    shape.translation.x = x;
+    shape.translation.y = y;
+
+    return { type, shape };
   } else {
     throw new Error(`Unknown doodle unserialization of type "${type}"`);
   }
