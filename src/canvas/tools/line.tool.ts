@@ -14,15 +14,19 @@ import { DoodleType } from "../doodle.utils";
 export interface LineState {
   line?: Path;
   arrowHead?: Path;
+  arrowTail?: Path;
   origin: Vector;
   strokeWidth: number;
   strokeColor: RgbaColor;
   hasArrow: boolean;
+  doubleArrow: boolean;
   setLine: (line?: Path) => void;
   setArrowHead: (arrowHead?: Path) => void;
+  setArrowTail: (arrowTail?: Path) => void;
   setStrokeWidth: (strokeWidth: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setHasArrow: (hasArrow: boolean) => void;
+  setDoubleArrow: (doubleArrow: boolean) => void;
 }
 
 export const useLineStore = create<LineState>()(
@@ -30,15 +34,19 @@ export const useLineStore = create<LineState>()(
     (set) => ({
       line: undefined,
       arrowHead: undefined,
+      arrowTail: undefined,
       origin: new Vector(),
       strokeWidth: 3,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       hasArrow: false,
+      doubleArrow: false,
       setLine: (line) => set(() => ({ line })),
       setArrowHead: (arrowHead) => set(() => ({ arrowHead })),
+      setArrowTail: (arrowTail) => set(() => ({ arrowTail })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setHasArrow: (hasArrow) => set(() => ({ hasArrow })),
+      setDoubleArrow: (doubleArrow) => set(() => ({ doubleArrow })),
     }),
     {
       name: "line-tool",
@@ -53,18 +61,21 @@ export const useLineStore = create<LineState>()(
 
 export function doLineStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { setLine, setArrowHead, origin, strokeColor, strokeWidth, hasArrow } =
-    useLineStore.getState();
+  const {
+    setLine, setArrowHead, setArrowTail, origin,
+    strokeColor, strokeWidth, hasArrow, doubleArrow,
+  } = useLineStore.getState();
 
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   origin.set(position.x, position.y);
+  const color = colord(strokeColor).toRgbString();
 
   const startAnchor = new Two.Anchor(position.x, position.y);
   const endAnchor = new Two.Anchor(position.x, position.y);
 
   const line = new Path([startAnchor, endAnchor], false, false);
   line.cap = "round";
-  line.noFill().stroke = colord(strokeColor).toRgbString();
+  line.noFill().stroke = color;
   line.linewidth = strokeWidth;
 
   const doodleType: DoodleType = hasArrow ? "arrow" : "line";
@@ -72,14 +83,15 @@ export function doLineStart(e: MouseEvent<HTMLDivElement>): void {
   setLine(line);
 
   if (hasArrow) {
-    const arrowHead = makeArrowHead(
-      position,
-      position,
-      strokeWidth,
-      colord(strokeColor).toRgbString()
-    );
+    const arrowHead = makeArrowHead(position, position, strokeWidth, color);
     doodler.addDoodle({ shape: arrowHead, type: "arrow" });
     setArrowHead(arrowHead);
+
+    if (doubleArrow) {
+      const arrowTail = makeArrowHead(position, position, strokeWidth, color);
+      doodler.addDoodle({ shape: arrowTail, type: "arrow" });
+      setArrowTail(arrowTail);
+    }
   }
 
   doodler.throttledTwoUpdate();
@@ -87,24 +99,29 @@ export function doLineStart(e: MouseEvent<HTMLDivElement>): void {
 
 export function doLineMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { line, arrowHead, hasArrow, strokeWidth } = useLineStore.getState();
+  const { line, arrowHead, arrowTail, hasArrow, strokeWidth } =
+    useLineStore.getState();
   if (!line) return;
 
   const position = eventToSurfacePosition(e, doodler.zui);
+  const start = line.vertices[0];
   const endVertex = line.vertices[1];
   endVertex.x = position.x;
   endVertex.y = position.y;
 
   if (hasArrow && arrowHead) {
-    const start = line.vertices[0];
     updateArrowHead(arrowHead, start, position, strokeWidth);
+  }
+  if (hasArrow && arrowTail) {
+    // Tail points in the reverse direction (from end toward start)
+    updateArrowHead(arrowTail, position, start, strokeWidth);
   }
 
   doodler.throttledTwoUpdate();
 }
 
 export function doLineUp(): void {
-  const { line, arrowHead, hasArrow, setLine, setArrowHead } =
+  const { line, arrowHead, arrowTail, hasArrow, setLine, setArrowHead, setArrowTail } =
     useLineStore.getState();
 
   if (line) {
@@ -117,9 +134,13 @@ export function doLineUp(): void {
   if (hasArrow && arrowHead) {
     pushCreateCommand("Draw arrowhead", { shape: arrowHead, type: "arrow" });
   }
+  if (hasArrow && arrowTail) {
+    pushCreateCommand("Draw arrowhead", { shape: arrowTail, type: "arrow" });
+  }
 
   setLine(undefined);
   setArrowHead(undefined);
+  setArrowTail(undefined);
 }
 
 function makeArrowHead(

@@ -1,6 +1,7 @@
 import { SlideInput } from "./ui/slide-input";
 import {
   IconAngle,
+  IconArrowsHorizontal,
   IconBorderCornerRounded,
   IconBrush,
   IconChartScatter3d,
@@ -170,7 +171,10 @@ const SquareToolOptions = () => {
 const LineToolOptions = () => {
   const strokeWidth = useLineStore((state) => state.strokeWidth);
   const strokeColor = useLineStore((state) => state.strokeColor);
-  const { setStrokeColor, setStrokeWidth } = useLineStore.getState();
+  const doubleArrow = useLineStore((state) => state.doubleArrow);
+  const selectedTool = useOptionsStore((state) => state.selectedTool);
+  const { setStrokeColor, setStrokeWidth, setDoubleArrow } =
+    useLineStore.getState();
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
@@ -188,6 +192,21 @@ const LineToolOptions = () => {
         onChange={(value) => setStrokeWidth(value)}
         icon={IconLine}
       />
+      {selectedTool === "arrow" && (
+        <>
+          <label className="pl-2">Double</label>
+          <ToggleGroup>
+            <WithTooltip tooltip="Double-ended arrow">
+              <ToggleButton
+                isSelected={doubleArrow}
+                onClick={() => setDoubleArrow(!doubleArrow)}
+              >
+                <IconArrowsHorizontal size={20} stroke={1} />
+              </ToggleButton>
+            </WithTooltip>
+          </ToggleGroup>
+        </>
+      )}
     </div>
   );
 };
