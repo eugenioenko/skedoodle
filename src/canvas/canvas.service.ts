@@ -19,6 +19,7 @@ import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
+import { undo, redo } from "./history.service";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
@@ -236,7 +237,24 @@ function doWindowResize() {
   doodler?.throttledTwoUpdate();
 }
 
-function doKeyDown(_: KeyboardEvent): void {}
+function doKeyDown(e: KeyboardEvent): void {
+  const target = e.target as HTMLElement;
+  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Z" || e.key === "z")) {
+    e.preventDefault();
+    redo();
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+    e.preventDefault();
+    undo();
+    return;
+  }
+}
 
 function doUpdate() {}
 

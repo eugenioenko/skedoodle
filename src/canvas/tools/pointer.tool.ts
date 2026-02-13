@@ -12,6 +12,7 @@ import {
   isPointInRect,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
+import { pushCommand } from "../history.service";
 
 interface Outlines {
   highlight?: Rectangle;
@@ -232,9 +233,34 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
-  const { setIsMoving } = usePointerStore.getState();
+  const { isMoving, setIsMoving, selected, origins } =
+    usePointerStore.getState();
   const { setToolOption } = useOptionsStore.getState();
   const doodler = getDoodler();
+
+  if (isMoving && selected.length && origins.length === selected.length) {
+    for (let i = 0; i < selected.length; i++) {
+      const shape = selected[i];
+      const origin = origins[i];
+      pushCommand({
+        type: "update",
+        label: "Move shape",
+        shapeId: shape.id,
+        changes: [
+          {
+            field: "translation.x",
+            oldValue: origin.x,
+            newValue: shape.translation.x,
+          },
+          {
+            field: "translation.y",
+            oldValue: origin.y,
+            newValue: shape.translation.y,
+          },
+        ],
+      });
+    }
+  }
 
   setIsMoving(false);
   setToolOption("");

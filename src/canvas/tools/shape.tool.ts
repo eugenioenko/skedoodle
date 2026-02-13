@@ -6,6 +6,7 @@ import { create } from "zustand";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
+import { pushCreateCommand } from "../history.service";
 
 export interface ShapeState {
   shape?: RoundedRectangle;
@@ -87,6 +88,9 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doShapeUp() {
-  const { setShape } = useShapeStore.getState();
+  const { shape, setShape } = useShapeStore.getState();
+  if (shape) {
+    pushCreateCommand("Draw rectangle", { shape, type: "rect" });
+  }
   setShape(undefined);
 }
