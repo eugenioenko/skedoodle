@@ -6,6 +6,7 @@ import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
+import { useHistoryStore } from "./history.store";
 // import { io } from "socket.io-client";
 
 export const useInitTwoCanvas = (
@@ -47,9 +48,11 @@ export const useInitTwoCanvas = (
 
     const debouncesWindowResize = debounce(handlers.doWindowResize, 250);
     window.addEventListener("resize", debouncesWindowResize);
+    window.addEventListener("keydown", handlers.doKeyDown);
 
     return () => {
       window.removeEventListener("resize", debouncesWindowResize);
+      window.removeEventListener("keydown", handlers.doKeyDown);
       currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
       if (currentContainer.firstChild) {
         currentContainer.removeChild(currentContainer.firstChild);
@@ -60,6 +63,7 @@ export const useInitTwoCanvas = (
       instance.remove();
       const { setDoodles } = useCanvasStore.getState();
       setDoodles([]);
+      useHistoryStore.getState().clear();
     };
   }, [containerRef, onReady, sketchId]);
 };

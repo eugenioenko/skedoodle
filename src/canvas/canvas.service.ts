@@ -16,9 +16,11 @@ import {
   doTryHighlight,
 } from "./tools/pointer.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
+import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
+import { undo, redo } from "./history.service";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
@@ -61,6 +63,12 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "square") {
     doShapeStart(e);
+    return;
+  }
+
+  if (selectedTool === "line" || selectedTool === "arrow") {
+    useLineStore.getState().setHasArrow(selectedTool === "arrow");
+    doLineStart(e);
     return;
   }
 
@@ -127,6 +135,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     doShapeMove(e);
     return;
   }
+
+  if (activeTool === "line" || activeTool === "arrow") {
+    doLineMove(e);
+    return;
+  }
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
@@ -170,6 +183,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "square") {
     doShapeUp();
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "line" || activeTool === "arrow") {
+    doLineUp();
     setActiveTool(undefined);
     return;
   }
@@ -236,7 +255,24 @@ function doWindowResize() {
   doodler?.throttledTwoUpdate();
 }
 
-function doKeyDown(_: KeyboardEvent): void {}
+function doKeyDown(e: KeyboardEvent): void {
+  const target = e.target as HTMLElement;
+  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Z" || e.key === "z")) {
+    e.preventDefault();
+    redo();
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+    e.preventDefault();
+    undo();
+    return;
+  }
+}
 
 function doUpdate() {}
 

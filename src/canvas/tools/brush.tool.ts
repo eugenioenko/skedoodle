@@ -15,6 +15,7 @@ import { create } from "zustand";
 import { eventToClientPosition, eventToSurfacePosition } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { persist } from "zustand/middleware";
+import { pushCreateCommand } from "../history.service";
 
 export interface BrushState {
   strokeColor: RgbaColor;
@@ -150,6 +151,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     }
   }
   doodler.throttledTwoUpdate();
+  pushCreateCommand("Draw brush stroke", { shape: path, type: "brush" });
 }
 
 /**

@@ -1,10 +1,18 @@
 import { doZoomReset, useZoomStore } from "@/canvas/tools/zoom.tool";
-import { IconDeviceFloppy, IconFocus2, IconMenu2 } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconDeviceFloppy,
+  IconFocus2,
+  IconMenu2,
+} from "@tabler/icons-react";
 import { Properties } from "./properties";
 import { Button } from "./ui/button";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { WithTooltip } from "./ui/tooltip";
 import { getDoodler } from "@/canvas/doodler.client";
+import { undo, redo } from "@/canvas/history.service";
+import { useHistoryStore } from "@/canvas/history.store";
 
 export const Panel = () => {
   const isPanelOpen = useOptionsStore((state) => state.isPanelOpen);
@@ -35,6 +43,8 @@ export const Panel = () => {
 
 const CanvasBar = () => {
   const zoom = useZoomStore((state) => state.zoom);
+  const undoCount = useHistoryStore((state) => state.undoStack.length);
+  const redoCount = useHistoryStore((state) => state.redoStack.length);
 
   const doSaveToStorage = () => {
     const doodler = getDoodler();
@@ -43,6 +53,16 @@ const CanvasBar = () => {
 
   return (
     <div className="text-sm flex justify-end items-center w-full">
+      <WithTooltip tooltip="Undo (Ctrl+Z)">
+        <Button onClick={undo} disabled={undoCount === 0}>
+          <IconArrowBackUp stroke={1} />
+        </Button>
+      </WithTooltip>
+      <WithTooltip tooltip="Redo (Ctrl+Shift+Z)">
+        <Button onClick={redo} disabled={redoCount === 0}>
+          <IconArrowForwardUp stroke={1} />
+        </Button>
+      </WithTooltip>
       <WithTooltip tooltip="Save to local storage">
         <Button onClick={() => doSaveToStorage()}>
           <IconDeviceFloppy stroke={1} />

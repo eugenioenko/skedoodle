@@ -17,11 +17,57 @@ import { colord } from "colord";
 import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Layers } from "./layers";
+import { History } from "./history";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { Sketches } from "./sketches";
+import { pushCommand } from "@/canvas/history.service";
+import { PropertyChange } from "@/canvas/history.store";
+
+// Debounced property edit tracking for undo/redo
+let pendingChanges: Map<string, { shapeId: string; changes: Map<string, PropertyChange> }> = new Map();
+let pendingTimer: ReturnType<typeof setTimeout> | undefined;
+
+function flushPendingChanges(): void {
+  for (const [, entry] of pendingChanges) {
+    pushCommand({
+      type: "update",
+      label: "Edit properties",
+      shapeId: entry.shapeId,
+      changes: Array.from(entry.changes.values()),
+    });
+  }
+  pendingChanges = new Map();
+  pendingTimer = undefined;
+}
+
+function trackPropertyChange(shapeId: string, field: string, oldValue: any, newValue: any): void {
+  let entry = pendingChanges.get(shapeId);
+  if (!entry) {
+    entry = { shapeId, changes: new Map() };
+    pendingChanges.set(shapeId, entry);
+  }
+  // Keep the original oldValue from the first change in a batch
+  const existing = entry.changes.get(field);
+  entry.changes.set(field, {
+    field,
+    oldValue: existing ? existing.oldValue : oldValue,
+    newValue,
+  });
+
+  clearTimeout(pendingTimer);
+  pendingTimer = setTimeout(flushPendingChanges, 500);
+}
+
+function getShapeField(shape: Shape, field: string): any {
+  const props = field.split(".");
+  if (props.length === 2) {
+    return (shape as any)[props[0]][props[1]];
+  }
+  return (shape as any)[field];
+}
 
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selected);
@@ -34,6 +80,7 @@ export const Properties = () => {
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
     for (const item of usePointerStore.getState().selected) {
+      const oldValue = getShapeField(item, field);
       const props = field.split(".");
       if (["stroke", "fill"].includes(field)) {
         value = colord(value).toHex();
@@ -43,6 +90,7 @@ export const Properties = () => {
       } else {
         (item as any)[field] = value;
       }
+      trackPropertyChange(item.id, field, oldValue, value);
     }
     doodler.throttledTwoUpdate();
   }
@@ -174,6 +222,9 @@ export const Properties = () => {
             </div>
           </>
         )}
+      </div>
+      <div>
+        <History />
       </div>
       <div>
         <Layers />

@@ -10,6 +10,8 @@ export type Tool =
   | "pointer"
   | "brush"
   | "square"
+  | "line"
+  | "arrow"
   | "eraser"
   | "zoom"
   | "bezier";

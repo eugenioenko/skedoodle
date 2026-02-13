@@ -3,7 +3,7 @@ import Two from "two.js";
 import { Path } from "two.js/src/path";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 
-export type DoodleType = "brush" | "rect" | "ellipse" | "circle";
+export type DoodleType = "brush" | "rect" | "line" | "arrow" | "ellipse" | "circle";
 
 export interface Doodle {
   shape: Path;
@@ -61,6 +61,20 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
       (vv: SerializedPoint) => new Two.Anchor(vv[0], vv[1])
     );
     const shape = new Path(vertices, false, true);
+    shape.id = id;
+    shape.cap = "round";
+    shape.closed = false;
+    shape.noFill().stroke = sc;
+    shape.linewidth = lw;
+    shape.translation.x = x;
+    shape.translation.y = y;
+
+    return { type, shape };
+  } else if (type === "line" || type === "arrow") {
+    const vertices = v.map(
+      (vv: SerializedPoint) => new Two.Anchor(vv[0], vv[1])
+    );
+    const shape = new Path(vertices, false, false);
     shape.id = id;
     shape.cap = "round";
     shape.closed = false;

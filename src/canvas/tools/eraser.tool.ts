@@ -3,6 +3,7 @@ import { MouseEvent } from "react";
 import { useCanvasStore } from "../canvas.store";
 import { eventToClientPosition, isPointInRect } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
+import { pushRemoveCommand } from "../history.service";
 import { usePointerStore } from "./pointer.tool";
 
 export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
@@ -22,6 +23,7 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
       item.bottom
     );
     if (isShapeWithin) {
+      pushRemoveCommand("Delete shape", doodle);
       doodler.removeDoodle(doodle);
       clearHighlight();
       // TODO recalculate selection when deleted shape is from the selection
