@@ -4,6 +4,7 @@ import {
   IconBorderCornerRounded,
   IconBrush,
   IconChartScatter3d,
+  IconLine,
   IconSquare,
   IconVectorBezier,
   IconVectorSpline,
@@ -11,6 +12,7 @@ import {
   IconWaveSine,
 } from "@tabler/icons-react";
 import { useBrushStore } from "@/canvas/tools/brush.tool";
+import { useLineStore } from "@/canvas/tools/line.tool";
 import { ColorInput } from "./ui/color-input";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { useShapeStore } from "@/canvas/tools/shape.tool";
@@ -30,6 +32,10 @@ export const ToolOptions = () => {
 
   if (selectedTool === "square") {
     return <SquareToolOptions />;
+  }
+
+  if (selectedTool === "line" || selectedTool === "arrow") {
+    return <LineToolOptions />;
   }
 
   return null;
@@ -156,6 +162,31 @@ const SquareToolOptions = () => {
         max={100}
         onChange={(value) => setRadius(value)}
         icon={IconBorderCornerRounded}
+      />
+    </div>
+  );
+};
+
+const LineToolOptions = () => {
+  const strokeWidth = useLineStore((state) => state.strokeWidth);
+  const strokeColor = useLineStore((state) => state.strokeColor);
+  const { setStrokeColor, setStrokeWidth } = useLineStore.getState();
+
+  return (
+    <div className="flex flex-row gap-2 text-xs items-center">
+      <label>Color</label>
+      <ColorInput
+        value={strokeColor}
+        onChange={(value) => setStrokeColor(value)}
+      />
+      <label className="pl-2">Width</label>
+      <SlideInput
+        className="max-w-24"
+        value={strokeWidth}
+        min={1}
+        max={100}
+        onChange={(value) => setStrokeWidth(value)}
+        icon={IconLine}
       />
     </div>
   );

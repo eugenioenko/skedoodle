@@ -16,6 +16,7 @@ import {
   doTryHighlight,
 } from "./tools/pointer.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
+import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
@@ -62,6 +63,12 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "square") {
     doShapeStart(e);
+    return;
+  }
+
+  if (selectedTool === "line" || selectedTool === "arrow") {
+    useLineStore.getState().setHasArrow(selectedTool === "arrow");
+    doLineStart(e);
     return;
   }
 
@@ -128,6 +135,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     doShapeMove(e);
     return;
   }
+
+  if (activeTool === "line" || activeTool === "arrow") {
+    doLineMove(e);
+    return;
+  }
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
@@ -171,6 +183,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "square") {
     doShapeUp();
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "line" || activeTool === "arrow") {
+    doLineUp();
     setActiveTool(undefined);
     return;
   }

@@ -2,8 +2,10 @@ import { useCanvasStore } from "@/canvas/canvas.store";
 import { Doodle, DoodleType } from "@/canvas/doodle.utils";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
+  IconArrowNarrowRight,
   IconCircle,
   IconFileUnknown,
+  IconLine,
   IconRectangle,
   IconWaveSine,
 } from "@tabler/icons-react";
@@ -69,6 +71,10 @@ const DoodleIcon = ({ type }: DoodleIconProps) => {
       return <IconCircle stroke={1} size={16} />;
     case "rect":
       return <IconRectangle stroke={1} size={16} />;
+    case "line":
+      return <IconLine stroke={1} size={16} />;
+    case "arrow":
+      return <IconArrowNarrowRight stroke={1} size={16} />;
     default:
       return <IconFileUnknown stroke={1} size={16} />;
   }
