@@ -13,7 +13,7 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
   const pointer = eventToClientPosition(e);
 
   for (const doodle of doodles) {
-    const item = doodle.shape.getBoundingClientRect(false);
+    const item = (doodle.shape as any).getBoundingClientRect(false);
     const isShapeWithin = isPointInRect(
       pointer.x,
       pointer.y,

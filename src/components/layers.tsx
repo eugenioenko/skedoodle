@@ -5,6 +5,7 @@ import {
   IconArrowNarrowRight,
   IconCircle,
   IconFileUnknown,
+  IconLetterT,
   IconLine,
   IconRectangle,
   IconWaveSine,
@@ -75,6 +76,8 @@ const DoodleIcon = ({ type }: DoodleIconProps) => {
       return <IconLine stroke={1} size={16} />;
     case "arrow":
       return <IconArrowNarrowRight stroke={1} size={16} />;
+    case "text":
+      return <IconLetterT stroke={1} size={16} />;
     default:
       return <IconFileUnknown stroke={1} size={16} />;
   }

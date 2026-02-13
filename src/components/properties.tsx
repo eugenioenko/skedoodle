@@ -72,8 +72,8 @@ function getShapeField(shape: Shape, field: string): any {
 export const Properties = () => {
   const selection = usePointerStore((state) => state.selected);
   const shape = selection?.[0];
-  const strokeColor = colord(shape?.stroke as string).toRgb();
-  const fillColor = colord(shape?.fill as string).toRgb();
+  const strokeColor = colord((shape as any)?.stroke as string).toRgb();
+  const fillColor = colord((shape as any)?.fill as string).toRgb();
   const canvasColor = useOptionsStore((state) => state.canvasColor);
   const setCanvasColor = useOptionsStore.getState().setCanvasColor;
 

@@ -17,6 +17,7 @@ import {
 } from "./tools/pointer.tool";
 import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
 import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
+import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
@@ -69,6 +70,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   if (selectedTool === "line" || selectedTool === "arrow") {
     useLineStore.getState().setHasArrow(selectedTool === "arrow");
     doLineStart(e);
+    return;
+  }
+
+  if (selectedTool === "text") {
+    doTextStart(e);
     return;
   }
 
