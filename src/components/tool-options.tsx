@@ -13,6 +13,7 @@ import {
   IconVectorTriangle,
   IconWaveSine,
 } from "@tabler/icons-react";
+import { useBezierStore } from "@/canvas/tools/bezier.tool";
 import { useBrushStore } from "@/canvas/tools/brush.tool";
 import { useLineStore } from "@/canvas/tools/line.tool";
 import { useTextStore } from "@/canvas/tools/text.tool";
@@ -35,6 +36,10 @@ export const ToolOptions = () => {
 
   if (selectedTool === "square") {
     return <SquareToolOptions />;
+  }
+
+  if (selectedTool === "bezier") {
+    return <BezierToolOptions />;
   }
 
   if (selectedTool === "line" || selectedTool === "arrow") {
@@ -205,6 +210,35 @@ const TextToolOptions = () => {
         <option value="monospace">Monospace</option>
         <option value="cursive">Cursive</option>
       </select>
+    </div>
+  );
+};
+
+const BezierToolOptions = () => {
+  const strokeWidth = useBezierStore((state) => state.strokeWidth);
+  const strokeColor = useBezierStore((state) => state.strokeColor);
+  const fillColor = useBezierStore((state) => state.fillColor);
+  const { setStrokeColor, setStrokeWidth, setFillColor } =
+    useBezierStore.getState();
+
+  return (
+    <div className="flex flex-row gap-2 text-xs items-center">
+      <label>Fill</label>
+      <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
+      <label className="pl-2">Stroke</label>
+      <ColorInput
+        value={strokeColor}
+        onChange={(value) => setStrokeColor(value)}
+      />
+      <label className="pl-2">Width</label>
+      <SlideInput
+        className="max-w-24"
+        value={strokeWidth}
+        min={0}
+        max={100}
+        onChange={(value) => setStrokeWidth(value)}
+        icon={IconLine}
+      />
     </div>
   );
 };

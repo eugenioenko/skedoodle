@@ -8,6 +8,7 @@ import {
   IconLine,
   IconPointer,
   IconSquare,
+  IconVectorBezier,
   IconZoom,
 } from "@tabler/icons-react";
 import { WithTooltip } from "./ui/tooltip";
@@ -49,6 +50,11 @@ export const Toolbar = () => {
         <WithTooltip tooltip="Arrow tool [A]">
           <ToggleButton value="arrow">
             <IconArrowNarrowRight stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Pen tool [C]">
+          <ToggleButton value="bezier">
+            <IconVectorBezier stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Text tool [T]">

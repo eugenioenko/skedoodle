@@ -20,7 +20,7 @@ import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.to
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
-import { doBezierMove, doBezierNext, doBezierUp } from "./tools/bezier.tool";
+import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
 import { undo, redo } from "./history.service";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
@@ -265,6 +265,22 @@ function doKeyDown(e: KeyboardEvent): void {
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
     return;
+  }
+
+  const { selectedTool } = useOptionsStore.getState();
+
+  // Bezier tool: Enter to finish, Escape to cancel
+  if (selectedTool === "bezier") {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      finalizeBezier();
+      return;
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      cancelBezier();
+      return;
+    }
   }
 
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "Z" || e.key === "z")) {
