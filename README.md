@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Preview](https://img.shields.io/badge/Live_Preview-gh--pages-green)](https://app.skedoodle.top/)
 
-## Visit [Live Preview](https://eugenioenko.github.io/skedoodle/dist/) to try it out now!
+## Visit [Live Preview to try it out now!](https://app.skedoodle.top/) 
 
 **Skedoodle** is a real-time, interactive sketching and drawing tool designed for seamless collaboration. It empowers teams and individuals to brainstorm, visualize ideas, and co-create on a shared digital canvas, fostering creativity and remote teamwork.
 
