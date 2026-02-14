@@ -1,7 +1,7 @@
 # Skedoodle: Real-Time Collaborative Sketching 🎨
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Live Preview](https://img.shields.io/badge/Live_Preview-gh--pages-green)](https://eugenioenko.github.io/skedoodle/dist/)
+[![Live Preview](https://img.shields.io/badge/Live_Preview-gh--pages-green)](https://app.skedoodle.top/)
 
 ## Visit [Live Preview](https://eugenioenko.github.io/skedoodle/dist/) to try it out now!
 
