@@ -27,13 +27,13 @@ Skedoodle provides a dynamic and responsive platform for collaborative drawing. 
 
 ## ✨ Features
 
-- **🎨 Real-time Collaboration**: (In Progress) Multiple users can draw, erase, and edit on the same board simultaneously, with changes reflected instantly.
-- **✏️ Rich Drawing Tools**: Offers a variety of tools for freehand sketching, creating shapes (rectangles, circles, lines), and an eraser.
-- **🖌️ Customizable Brush**: Adjust brush size and color for precise drawing.
-- **🖼️ Vector Graphics**: Utilizes Two.js for rendering smooth, scalable, and interactive vector graphics, ensuring high-quality output regardless of zoom level.
-- **⚡️ Performant**: Built in a way to preserve CPU load compared to other market propositions. (0% cpu load on idle, 10% load on 60 fps while drawing)
-- **💾 Persistent Data**: (TBD) Future plans include saving and loading board states.
-- **🌐 Scalable Architecture**: Designed with scalability in mind, using WebSockets to efficiently handle real-time data streams for numerous concurrent users.
+- **Real-time Collaboration**: (In Progress) Multiple users can draw, erase, and edit on the same board simultaneously, with changes reflected instantly.
+- **Rich Drawing Tools**: Offers a variety of tools for freehand sketching, creating shapes (rectangles, circles, lines), and an eraser.
+- **Customizable Brush**: Adjust brush size and color for precise drawing.
+- **Vector Graphics**: Utilizes Two.js for rendering smooth, scalable, and interactive vector graphics, ensuring high-quality output regardless of zoom level.
+- **Performant**: Built in a way to preserve CPU load compared to other market propositions. (0% cpu load on idle, 10% load on 60 fps while drawing)
+- **Persistent Data**: (TBD) Future plans include saving and loading board states.
+- **Scalable Architecture**: Designed with scalability in mind, using WebSockets to efficiently handle real-time data streams for numerous concurrent users.
 
 ## 🛠️ Tech Stack
 
