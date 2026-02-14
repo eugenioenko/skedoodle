@@ -51,7 +51,8 @@ export function doZoom(
     }
   }
 
-  updateGrid(doodler.zui.surfaceMatrix);
+  const sm = doodler.zui.surfaceMatrix.elements;
+  updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
 }
 
@@ -62,7 +63,7 @@ export function doZoomReset(): void {
   doodler.zui.reset();
   doodler.zui.translateSurface(0, 0);
   setZoom(100);
-  updateGrid(doodler.zui.surfaceMatrix);
+  updateGrid(1, 0, 0);
   doodler.two.update();
   doodler.throttledTwoUpdate();
 }

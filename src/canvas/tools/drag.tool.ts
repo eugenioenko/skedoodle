@@ -19,6 +19,7 @@ export function doDragMove(e: MouseEvent<HTMLDivElement>): void {
 export function doDragTranslate(dx: number, dy: number) {
   const doodler = getDoodler();
   doodler.zui.translateSurface(dx, dy);
-  updateGrid(doodler.zui.surfaceMatrix);
+  const sm = doodler.zui.surfaceMatrix.elements;
+  updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
 }

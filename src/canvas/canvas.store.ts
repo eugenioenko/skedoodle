@@ -46,8 +46,10 @@ export interface OptionsState {
   toolOption?: string;
   restoreTool?: Tool;
   isPanelOpen: boolean;
-  showGrid: boolean;
   gridSize: number;
+  gridType: "none" | "dots" | "lines";
+  gridColor: RgbaColor;
+  gridMinZoom: number;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -55,8 +57,10 @@ export interface OptionsState {
   setCanvasColor: (canvasColor: RgbaColor) => void;
   setThrottleRate: (throttleRate: number) => void;
   setIsPanelOpen: (isPanelOpen: boolean) => void;
-  setShowGrid: (showGrid: boolean) => void;
   setGridSize: (gridSize: number) => void;
+  setGridType: (gridType: "none" | "dots" | "lines") => void;
+  setGridColor: (gridColor: RgbaColor) => void;
+  setGridMinZoom: (gridMinZoom: number) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -69,8 +73,10 @@ export const useOptionsStore = create<OptionsState>()(
       restoreTool: undefined,
       toolOption: "",
       isPanelOpen: true,
-      showGrid: true,
       gridSize: 20,
+      gridType: "dots",
+      gridColor: { r: 0, g: 0, b: 0, a: 0.15 },
+      gridMinZoom: 50,
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
@@ -78,8 +84,10 @@ export const useOptionsStore = create<OptionsState>()(
       setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
       setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
       setIsPanelOpen: (isPanelOpen) => set(() => ({ isPanelOpen })),
-      setShowGrid: (showGrid) => set(() => ({ showGrid })),
       setGridSize: (gridSize) => set(() => ({ gridSize })),
+      setGridType: (gridType) => set(() => ({ gridType })),
+      setGridColor: (gridColor) => set(() => ({ gridColor })),
+      setGridMinZoom: (gridMinZoom) => set(() => ({ gridMinZoom })),
     }),
     { name: "options", version: 1 }
   )

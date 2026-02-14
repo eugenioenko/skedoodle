@@ -6,7 +6,7 @@ import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
-import { destroyGrid, initGrid, showGrid } from "./grid";
+import { destroyGrid, initGrid } from "./grid";
 import { useHistoryStore } from "./history.store";
 // import { io } from "socket.io-client";
 
@@ -39,10 +39,9 @@ export const useInitTwoCanvas = (
     setDoodlerInstance(doodlerInstance);
 
     // Initialize dot grid inside the Two.js SVG
-    const { showGrid: isGridVisible, gridSize } = useOptionsStore.getState();
+    const { gridSize, gridType, gridColor, gridMinZoom } = useOptionsStore.getState();
     const svgEl = instance.renderer.domElement as SVGSVGElement;
-    initGrid(svgEl, gridSize);
-    showGrid(isGridVisible);
+    initGrid(svgEl, gridSize, gridType, gridColor, gridMinZoom);
 
     // TODO: update here to handle errors on loading local storage
     doodlerInstance.loadDoodles().finally(() => onReady?.());
