@@ -57,9 +57,8 @@ export const SlideInput = ({
       )}
       <div className={`relative ${className}`}>
         <button
-          className={`absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-white/65 border ${
-            isHoverSliding ? "border-highlight" : "border-transparent"
-          }`}
+          className={`absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-white/65 border ${isHoverSliding ? "border-highlight" : "border-transparent"
+            }`}
           onMouseDown={(e) => onMouseDown(e.screenX)}
         >
           {Icon && <Icon size={18} stroke={1} />}
@@ -103,9 +102,8 @@ const SliderPopover = ({ min, max, value, setValue }: SliderPopoverProps) => {
     >
       <PopoverTrigger
         onClick={() => setIsOpen((v) => !v)}
-        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-white/65" ${
-          isOpen ? "border-highlight" : "border-transparent"
-        }`}
+        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-white/65" ${isOpen ? "border-highlight" : "border-transparent"
+          }`}
       >
         <IconSelector size={18} stroke={1} />
       </PopoverTrigger>
