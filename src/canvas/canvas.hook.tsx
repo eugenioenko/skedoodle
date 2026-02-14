@@ -1,4 +1,4 @@
-import { useCanvasStore } from "@/canvas/canvas.store";
+import { useCanvasStore, useOptionsStore } from "@/canvas/canvas.store";
 import { MutableRefObject, useEffect } from "react";
 import Two from "two.js";
 import Group from "two.js";
@@ -6,6 +6,7 @@ import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
+import { destroyGrid, initGrid, showGrid } from "./grid";
 import { useHistoryStore } from "./history.store";
 // import { io } from "socket.io-client";
 
@@ -37,6 +38,12 @@ export const useInitTwoCanvas = (
     setContainer(containerRef.current);
     setDoodlerInstance(doodlerInstance);
 
+    // Initialize dot grid inside the Two.js SVG
+    const { showGrid: isGridVisible, gridSize } = useOptionsStore.getState();
+    const svgEl = instance.renderer.domElement as SVGSVGElement;
+    initGrid(svgEl, gridSize);
+    showGrid(isGridVisible);
+
     // TODO: update here to handle errors on loading local storage
     doodlerInstance.loadDoodles().finally(() => onReady?.());
 
@@ -54,6 +61,7 @@ export const useInitTwoCanvas = (
       window.removeEventListener("resize", debouncesWindowResize);
       window.removeEventListener("keydown", handlers.doKeyDown);
       currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
+      destroyGrid();
       if (currentContainer.firstChild) {
         currentContainer.removeChild(currentContainer.firstChild);
       }

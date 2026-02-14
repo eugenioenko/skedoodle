@@ -1,6 +1,7 @@
 import { MouseEvent } from "react";
 import Two from "two.js";
 import { getDoodler } from "../doodler.client";
+import { updateGrid } from "../grid";
 
 let mouse = new Two.Vector();
 
@@ -18,5 +19,6 @@ export function doDragMove(e: MouseEvent<HTMLDivElement>): void {
 export function doDragTranslate(dx: number, dy: number) {
   const doodler = getDoodler();
   doodler.zui.translateSurface(dx, dy);
+  updateGrid(doodler.zui.surfaceMatrix);
   doodler.throttledTwoUpdate();
 }

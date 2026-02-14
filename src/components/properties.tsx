@@ -6,6 +6,7 @@ import {
   IconBorderCornerRounded,
   IconBrush,
   IconDimensions,
+  IconGridDots,
   IconRulerMeasure,
   IconRulerMeasure2,
   IconSkewX,
@@ -22,6 +23,7 @@ import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
+import { showGrid as showGridDom, setGridSize as setGridSizeDom } from "@/canvas/grid";
 import { Sketches } from "./sketches";
 import { pushCommand } from "@/canvas/history.service";
 import { PropertyChange } from "@/canvas/history.store";
@@ -76,6 +78,8 @@ export const Properties = () => {
   const fillColor = colord((shape as any)?.fill as string).toRgb();
   const canvasColor = useOptionsStore((state) => state.canvasColor);
   const setCanvasColor = useOptionsStore.getState().setCanvasColor;
+  const isGridVisible = useOptionsStore((state) => state.showGrid);
+  const gridSize = useOptionsStore((state) => state.gridSize);
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
@@ -105,6 +109,31 @@ export const Properties = () => {
               <ColorInput
                 value={canvasColor}
                 onChange={(value) => setCanvasColor(value)}
+              />
+            </div>
+            <div className="pt-4 pb-1 text-sm">Grid</div>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isGridVisible}
+                  onChange={(e) => {
+                    const val = e.target.checked;
+                    useOptionsStore.getState().setShowGrid(val);
+                    showGridDom(val);
+                  }}
+                />
+                Show grid
+              </label>
+              <SlideInput
+                icon={IconGridDots}
+                min={5}
+                max={100}
+                value={gridSize}
+                onChange={(value) => {
+                  useOptionsStore.getState().setGridSize(value);
+                  setGridSizeDom(value);
+                }}
               />
             </div>
             <div>

@@ -46,6 +46,8 @@ export interface OptionsState {
   toolOption?: string;
   restoreTool?: Tool;
   isPanelOpen: boolean;
+  showGrid: boolean;
+  gridSize: number;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -53,6 +55,8 @@ export interface OptionsState {
   setCanvasColor: (canvasColor: RgbaColor) => void;
   setThrottleRate: (throttleRate: number) => void;
   setIsPanelOpen: (isPanelOpen: boolean) => void;
+  setShowGrid: (showGrid: boolean) => void;
+  setGridSize: (gridSize: number) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -65,6 +69,8 @@ export const useOptionsStore = create<OptionsState>()(
       restoreTool: undefined,
       toolOption: "",
       isPanelOpen: true,
+      showGrid: true,
+      gridSize: 20,
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
@@ -72,6 +78,8 @@ export const useOptionsStore = create<OptionsState>()(
       setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
       setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
       setIsPanelOpen: (isPanelOpen) => set(() => ({ isPanelOpen })),
+      setShowGrid: (showGrid) => set(() => ({ showGrid })),
+      setGridSize: (gridSize) => set(() => ({ gridSize })),
     }),
     { name: "options", version: 1 }
   )

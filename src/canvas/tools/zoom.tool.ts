@@ -1,6 +1,7 @@
 import { MouseEvent } from "react";
 import { create } from "zustand";
 import { getDoodler } from "../doodler.client";
+import { updateGrid } from "../grid";
 import { usePointerStore } from "./pointer.tool";
 
 export interface ZoomState {
@@ -50,6 +51,7 @@ export function doZoom(
     }
   }
 
+  updateGrid(doodler.zui.surfaceMatrix);
   doodler.throttledTwoUpdate();
 }
 
@@ -60,6 +62,7 @@ export function doZoomReset(): void {
   doodler.zui.reset();
   doodler.zui.translateSurface(0, 0);
   setZoom(100);
+  updateGrid(doodler.zui.surfaceMatrix);
   doodler.two.update();
   doodler.throttledTwoUpdate();
 }
