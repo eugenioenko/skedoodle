@@ -4,7 +4,6 @@ import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "https://eugenioenko.github.io/skedoodle/dist/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
