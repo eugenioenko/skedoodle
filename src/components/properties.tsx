@@ -96,7 +96,7 @@ export const Properties = () => {
         value = colord(value).toHex();
       }
       if (props.length == 2) {
-        item[props[0] as keyof Shape][props[1]] = value;
+        (item[props[0] as keyof Shape] as any)[props[1]] = value;
       } else {
         (item as any)[field] = value;
       }
@@ -217,7 +217,7 @@ export const Properties = () => {
                 icon={IconBorderCornerRounded}
                 min={-100}
                 max={100}
-                value={(shape as RoundedRectangle)?.radius}
+                value={(shape as RoundedRectangle)?.radius as number}
                 onChange={(value) => updateShape("radius", value)}
               />
             </div>

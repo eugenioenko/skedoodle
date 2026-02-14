@@ -150,7 +150,7 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
           bv[0], bv[1], // position
           bv[2], bv[3], // left control
           bv[4], bv[5], // right control
-          bv[6]         // command
+          bv[6] as never      // command
         )
     );
     const shape = new Path(vertices, false, false, true);

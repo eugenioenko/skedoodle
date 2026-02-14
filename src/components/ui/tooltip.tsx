@@ -118,12 +118,14 @@ export const TooltipTrigger = React.forwardRef<
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(
       children,
-      context.getReferenceProps({
-        ref,
-        ...props,
-        ...children.props,
+      {
+        ...context.getReferenceProps({
+          ref,
+          ...props,
+          ...(children.props as Record<string, unknown>),
+        }),
         "data-state": context.open ? "open" : "closed",
-      })
+      } as any
     );
   }
 

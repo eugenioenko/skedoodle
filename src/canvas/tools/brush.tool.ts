@@ -137,7 +137,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     if (simplifyAlgo === "douglas") {
       const limit = tolerance / 100;
       const simplified = simplifyPath(path.vertices, limit);
-      path.vertices = simplified;
+      path.vertices = simplified as never;
     } else {
       const limit = Math.floor(
         ((100 - tolerance) * path.vertices.length) / 100

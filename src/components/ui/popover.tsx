@@ -86,11 +86,11 @@ export function usePopover({
 
 type ContextType =
   | (ReturnType<typeof usePopover> & {
-      setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
-      setDescriptionId: React.Dispatch<
-        React.SetStateAction<string | undefined>
-      >;
-    })
+    setLabelId: React.Dispatch<React.SetStateAction<string | undefined>>;
+    setDescriptionId: React.Dispatch<
+      React.SetStateAction<string | undefined>
+    >;
+  })
   | null;
 
 const PopoverContext = React.createContext<ContextType>(null);
@@ -139,12 +139,14 @@ export const PopoverTrigger = React.forwardRef<
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(
       children,
-      context.getReferenceProps({
-        ref,
-        ...props,
-        ...children.props,
+      {
+        ...context.getReferenceProps({
+          ref,
+          ...props,
+          ...(children.props as Record<string, unknown>),
+        }),
         "data-state": context.open ? "open" : "closed",
-      })
+      } as any
     );
   }
 
