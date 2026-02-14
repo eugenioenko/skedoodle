@@ -41,6 +41,8 @@ export const useCanvasStore = create<CanvasState>()((set) => ({
 export interface OptionsState {
   canvasColor: RgbaColor;
   throttleRate: number;
+  rendererType: "svg" | "canvas" | "webgl";
+  updateFrequency: 0 | 16 | 33;
   selectedTool?: Tool;
   activeTool?: Tool;
   toolOption?: string;
@@ -56,6 +58,8 @@ export interface OptionsState {
   setToolOption: (option: string) => void;
   setCanvasColor: (canvasColor: RgbaColor) => void;
   setThrottleRate: (throttleRate: number) => void;
+  setRendererType: (rendererType: "svg" | "canvas" | "webgl") => void;
+  setUpdateFrequency: (updateFrequency: 0 | 16 | 33) => void;
   setIsPanelOpen: (isPanelOpen: boolean) => void;
   setGridSize: (gridSize: number) => void;
   setGridType: (gridType: "none" | "dots" | "lines") => void;
@@ -68,6 +72,8 @@ export const useOptionsStore = create<OptionsState>()(
     (set) => ({
       canvasColor: { r: 249, g: 250, b: 251, a: 1 },
       throttleRate: 1,
+      rendererType: "canvas",
+      updateFrequency: 0,
       selectedTool: "brush",
       activeTool: undefined,
       restoreTool: undefined,
@@ -83,6 +89,8 @@ export const useOptionsStore = create<OptionsState>()(
       setToolOption: (toolOption) => set(() => ({ toolOption })),
       setCanvasColor: (canvasColor) => set(() => ({ canvasColor })),
       setThrottleRate: (throttleRate) => set(() => ({ throttleRate })),
+      setRendererType: (rendererType) => set(() => ({ rendererType })),
+      setUpdateFrequency: (updateFrequency) => set(() => ({ updateFrequency })),
       setIsPanelOpen: (isPanelOpen) => set(() => ({ isPanelOpen })),
       setGridSize: (gridSize) => set(() => ({ gridSize })),
       setGridType: (gridType) => set(() => ({ gridType })),

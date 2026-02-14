@@ -28,6 +28,7 @@ import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/grid";
 import { ToggleButton, ToggleGroup } from "./ui/button";
+import { useToastStore } from "./ui/toasts";
 import { Sketches } from "./sketches";
 import { pushCommand } from "@/canvas/history.service";
 import { PropertyChange } from "@/canvas/history.store";
@@ -86,6 +87,8 @@ export const Properties = () => {
   const gridType = useOptionsStore((state) => state.gridType);
   const gridColor = useOptionsStore((state) => state.gridColor);
   const gridMinZoom = useOptionsStore((state) => state.gridMinZoom);
+  const rendererType = useOptionsStore((state) => state.rendererType);
+  const updateFrequency = useOptionsStore((state) => state.updateFrequency);
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
@@ -116,6 +119,39 @@ export const Properties = () => {
                 value={canvasColor}
                 onChange={(value) => setCanvasColor(value)}
               />
+            </div>
+            <div className="pt-4 pb-1 text-sm">Renderer</div>
+            <div className="flex flex-col gap-2">
+              <select
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
+                value={rendererType}
+                onChange={(e) => {
+                  const newType = e.target.value as "svg" | "canvas" | "webgl";
+                  useOptionsStore.getState().setRendererType(newType);
+                  useToastStore.getState().addToast("Reload page to apply renderer change");
+                }}
+              >
+                <option value="svg">SVG</option>
+                <option value="canvas">Canvas</option>
+                <option value="webgl">WebGL</option>
+              </select>
+            </div>
+            <div className="pt-4 pb-1 text-sm">Update Frequency</div>
+            <div className="flex flex-col gap-2">
+              <select
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
+                value={updateFrequency}
+                onChange={(e) => {
+                  const newFreq = Number(e.target.value) as 0 | 16 | 33;
+                  useOptionsStore.getState().setUpdateFrequency(newFreq);
+                }}
+              >
+                <option value={0}>High Performance</option>
+                <option value={8}>Performance (120 FPS)</option>
+                <option value={16}>Balanced (60 FPS)</option>
+                <option value={33}>Battery Saver (30 FPS)</option>
+                <option value={100}>Save my Battery (10 FPS)</option>
+              </select>
             </div>
             <div className="pt-4 pb-1 text-sm">Grid</div>
             <div className="flex flex-col gap-2">
