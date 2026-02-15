@@ -3,7 +3,7 @@ import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
 import { get, set } from "@/services/storage.client";
-import { useCanvasStore } from "./canvas.store";
+import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   Doodle,
   SerializedDoodle,
@@ -39,11 +39,30 @@ export class Doodler {
     }
   }
 
-  throttledTwoUpdate = throttle(() => {
-    if (typeof this.two?.update === "function") {
-      this.two?.update?.();
+  throttledTwoUpdate = () => {
+    const updateFrequency = useOptionsStore.getState().updateFrequency;
+
+    if (updateFrequency === 0) {
+      // No throttle - call immediately
+      if (typeof this.two?.update === "function") {
+        this.two?.update?.();
+      }
+    } else {
+      // Use throttle with configured frequency
+      if (!this._throttledUpdate || this._lastFrequency !== updateFrequency) {
+        this._lastFrequency = updateFrequency;
+        this._throttledUpdate = throttle(() => {
+          if (typeof this.two?.update === "function") {
+            this.two?.update?.();
+          }
+        }, updateFrequency);
+      }
+      this._throttledUpdate();
     }
-  }, 1);
+  };
+
+  private _throttledUpdate?: () => void;
+  private _lastFrequency?: number;
 
   doCenterCanvas(): void {
     this.canvas.position.x = 0;

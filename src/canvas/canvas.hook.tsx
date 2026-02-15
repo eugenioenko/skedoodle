@@ -38,10 +38,14 @@ export const useInitTwoCanvas = (
     setContainer(containerRef.current);
     setDoodlerInstance(doodlerInstance);
 
-    // Initialize dot grid inside the Two.js SVG
-    const { gridSize, gridType, gridColor, gridMinZoom } = useOptionsStore.getState();
-    const svgEl = instance.renderer.domElement as SVGSVGElement;
-    initGrid(svgEl, gridSize, gridType, gridColor, gridMinZoom);
+    // Initialize grid based on renderer type
+    const { gridSize, gridType, gridColor, gridMinZoom, rendererType } = useOptionsStore.getState();
+    if (rendererType === "svg") {
+      const svgEl = instance.renderer.domElement as SVGSVGElement;
+      initGrid(svgEl, gridSize, gridType, gridColor, gridMinZoom);
+    } else {
+      initGrid(containerRef.current, instance, gridSize, gridType, gridColor, gridMinZoom);
+    }
 
     // TODO: update here to handle errors on loading local storage
     doodlerInstance.loadDoodles().finally(() => onReady?.());
@@ -76,12 +80,17 @@ export const useInitTwoCanvas = (
 };
 
 const createTwo = (container: HTMLDivElement): Two => {
+  const { rendererType } = useOptionsStore.getState();
+  const twoType = rendererType === "svg" ? Two.Types.svg :
+    rendererType === "webgl" ? Two.Types.webgl :
+      Two.Types.canvas;
+
   return new Two({
     autostart: false,
     fitted: true,
     width: container.clientWidth,
     height: container.clientHeight,
-    type: Two.Types.svg,
+    type: twoType,
   }).appendTo(container);
 };
 
