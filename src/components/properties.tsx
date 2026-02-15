@@ -6,9 +6,8 @@ import {
   IconBorderCornerRounded,
   IconBrush,
   IconDimensions,
-  IconEyeOff,
+  IconEyeClosed,
   IconGridDots,
-  IconLayoutGrid,
   IconZoomOut,
   IconRulerMeasure,
   IconRulerMeasure2,
@@ -16,6 +15,7 @@ import {
   IconSkewY,
   IconSquareLetterX,
   IconSquareLetterY,
+  IconGrid3x3
 } from "@tabler/icons-react";
 import { colord } from "colord";
 import { Shape } from "two.js/src/shape";
@@ -164,7 +164,7 @@ export const Properties = () => {
                       setGridTypeDom("none");
                     }}
                   >
-                    <IconEyeOff size={20} stroke={1} />
+                    <IconEyeClosed size={20} stroke={1} />
                   </ToggleButton>
                   <ToggleButton
                     isSelected={gridType === "dots"}
@@ -182,7 +182,7 @@ export const Properties = () => {
                       setGridTypeDom("lines");
                     }}
                   >
-                    <IconLayoutGrid size={20} stroke={1} />
+                    <IconGrid3x3 size={20} stroke={1} />
                   </ToggleButton>
                 </ToggleGroup>
                 <ColorInput
