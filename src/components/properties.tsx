@@ -21,7 +21,8 @@ import { colord } from "colord";
 import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Layers } from "./layers";
-import { UndoRedoHistory, CommandLog } from "./history";
+import { History } from "./history";
+import { Timeline } from "./timeline";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
@@ -331,15 +332,15 @@ export const Properties = () => {
         )}
       </div>
       <div>
-        <UndoRedoHistory />
+        <History />
       </div>
       <div>
-        <CommandLog />
+        <Timeline />
       </div>
       <div>
         <Layers />
       </div>
-      <div className="pt-16"></div>
+      <div className="pt-64"></div>
     </div>
   );
 };

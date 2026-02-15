@@ -27,6 +27,7 @@ export const Panel = () => {
   const zoom = useZoomStore((state) => state.zoom);
   const undoCount = useCommandLogStore((state) => state.sessionUndoStack.length);
   const redoCount = useCommandLogStore((state) => state.sessionRedoStack.length);
+  const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
 
   return (
     <div
@@ -40,12 +41,12 @@ export const Panel = () => {
         <div className="flex items-center w-full py-2 gap-1">
           <div className="flex items-center border border-default-4 rounded gap-0">
             <WithTooltip tooltip="Undo (Ctrl+Z)">
-              <Button onClick={undo} disabled={undoCount === 0}>
+              <Button onClick={undo} disabled={undoCount === 0 || isTimeTraveling}>
                 <IconArrowBackUp size={20} stroke={1} />
               </Button>
             </WithTooltip>
             <WithTooltip tooltip="Redo (Ctrl+Shift+Z)">
-              <Button onClick={redo} disabled={redoCount === 0}>
+              <Button onClick={redo} disabled={redoCount === 0 || isTimeTraveling}>
                 <IconArrowForwardUp size={20} stroke={1} />
               </Button>
             </WithTooltip>

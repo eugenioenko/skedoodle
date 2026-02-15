@@ -8,6 +8,11 @@ import { getDoodler } from "./doodler.client";
 import { Command, createCommand, useCommandLogStore } from "./history.store";
 import { usePointerStore } from "./tools/pointer.tool";
 import { Shape } from "two.js/src/shape";
+import {
+  getSketchMeta,
+  setSketchCommands,
+  setSketchMeta,
+} from "@/services/storage.client";
 
 // Stores old values for update commands, keyed by command ID
 const preUpdateSnapshots = new Map<string, Record<string, any>>();
@@ -228,4 +233,77 @@ export function pushUpdateCommand(
   const cmd = createCommand("update", shapeId, { changes: newValues });
   preUpdateSnapshots.set(cmd.id, oldValues);
   pushCommand(cmd);
+}
+
+// --- Time Travel ---
+
+function clearCanvas(): void {
+  const doodler = getDoodler();
+  const { doodles, setDoodles } = useCanvasStore.getState();
+  for (const d of doodles) {
+    doodler.canvas.remove(d.shape);
+  }
+  setDoodles([]);
+}
+
+export function enterTimeTravelMode(): void {
+  const { commandLog } = useCommandLogStore.getState();
+  clearSelection();
+  useCommandLogStore.setState({
+    isTimeTraveling: true,
+    timelinePosition: commandLog.length,
+  });
+}
+
+export function exitTimeTravelMode(): void {
+  const { commandLog } = useCommandLogStore.getState();
+  clearCanvas();
+  for (const cmd of commandLog) {
+    try {
+      executeForward(cmd);
+    } catch {
+      // skip failed commands
+    }
+  }
+  useCommandLogStore.setState({
+    isTimeTraveling: false,
+    timelinePosition: 0,
+  });
+  getDoodler().throttledTwoUpdate();
+}
+
+export function scrubTo(position: number): void {
+  const { commandLog } = useCommandLogStore.getState();
+  clearCanvas();
+  const cmds = commandLog.slice(0, position);
+  for (const cmd of cmds) {
+    try {
+      executeForward(cmd);
+    } catch {
+      // skip failed commands
+    }
+  }
+  useCommandLogStore.setState({ timelinePosition: position });
+  getDoodler().throttledTwoUpdate();
+}
+
+export function branchFromTimeline(): string {
+  const { commandLog, timelinePosition } = useCommandLogStore.getState();
+  const doodler = getDoodler();
+
+  const branchCommands = commandLog.slice(0, timelinePosition);
+  const newId = crypto.randomUUID();
+
+  setSketchCommands(newId, branchCommands);
+  const existingMeta = getSketchMeta(doodler.sketchId);
+  const now = Date.now();
+  setSketchMeta(newId, {
+    id: newId,
+    name: `${existingMeta?.name ?? doodler.sketchId} (branch)`,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  exitTimeTravelMode();
+  return newId;
 }

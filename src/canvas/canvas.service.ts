@@ -21,9 +21,12 @@ import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
-import { undo, redo } from "./history.service";
+import { undo, redo, exitTimeTravelMode } from "./history.service";
+import { useCommandLogStore } from "./history.store";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
+  if (useCommandLogStore.getState().isTimeTraveling) return;
+
   const { selectedTool, setActiveTool, setRestoreTool, setSelectedTool } =
     useOptionsStore.getState();
 
@@ -103,6 +106,8 @@ const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
 }, 16);
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
+  if (useCommandLogStore.getState().isTimeTraveling) return;
+
   const { activeTool, selectedTool } = useOptionsStore.getState();
 
   throttledCursorUpdate(e);
@@ -149,6 +154,8 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
 }
 
 function doMouseUp(e: MouseEvent<HTMLDivElement>) {
+  if (useCommandLogStore.getState().isTimeTraveling) return;
+
   const {
     activeTool,
     setActiveTool,
@@ -264,6 +271,14 @@ function doWindowResize() {
 function doKeyDown(e: KeyboardEvent): void {
   const target = e.target as HTMLElement;
   if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+    return;
+  }
+
+  if (useCommandLogStore.getState().isTimeTraveling) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      exitTimeTravelMode();
+    }
     return;
   }
 

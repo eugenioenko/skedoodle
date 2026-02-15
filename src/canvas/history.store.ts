@@ -32,15 +32,21 @@ export interface CommandLogState {
   commandLog: Command[];
   sessionUndoStack: string[];
   sessionRedoStack: Command[];
+  isTimeTraveling: boolean;
+  timelinePosition: number;
   appendCommand: (command: Command) => void;
   setCommandLog: (commands: Command[]) => void;
   clearSession: () => void;
+  setTimeTraveling: (value: boolean) => void;
+  setTimelinePosition: (position: number) => void;
 }
 
 export const useCommandLogStore = create<CommandLogState>()((set) => ({
   commandLog: [],
   sessionUndoStack: [],
   sessionRedoStack: [],
+  isTimeTraveling: false,
+  timelinePosition: 0,
 
   appendCommand: (command: Command) =>
     set((state) => ({
@@ -52,4 +58,10 @@ export const useCommandLogStore = create<CommandLogState>()((set) => ({
 
   clearSession: () =>
     set({ sessionUndoStack: [], sessionRedoStack: [] }),
+
+  setTimeTraveling: (value: boolean) =>
+    set({ isTimeTraveling: value }),
+
+  setTimelinePosition: (position: number) =>
+    set({ timelinePosition: position }),
 }));

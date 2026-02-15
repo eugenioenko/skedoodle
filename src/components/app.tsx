@@ -8,10 +8,13 @@ import { Loader } from "./loader";
 import { useCallback, useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { Toasts } from "./ui/toasts";
+import { useCommandLogStore } from "@/canvas/history.store";
+import { exitTimeTravelMode } from "@/canvas/history.service";
 
 export const App = () => {
   useWindowWheelPrevent();
   const { id } = useParams();
+  const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
   const loadDelay = 450;
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,6 +31,17 @@ export const App = () => {
       <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4">
         <ToolOptions />
       </div>
+      {isTimeTraveling && (
+        <div className="bg-amber-600/90 text-white text-xs text-center py-1 px-4">
+          Timeline Mode (read-only) — Press Escape to exit
+          <button
+            onClick={exitTimeTravelMode}
+            className="ml-2 underline hover:no-underline"
+          >
+            Exit
+          </button>
+        </div>
+      )}
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <Canvas sketchId={id} onReady={onReady} />
