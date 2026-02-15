@@ -1,7 +1,4 @@
-import { undo, redo } from "@/canvas/history.service";
 import { Command, useCommandLogStore } from "@/canvas/history.store";
-import { IconArrowBackUp, IconArrowForwardUp } from "@tabler/icons-react";
-import { Button } from "./ui/button";
 
 function commandLabel(cmd: Command): string {
   switch (cmd.type) {
@@ -24,9 +21,6 @@ export const UndoRedoHistory = () => {
     (state) => state.sessionRedoStack
   );
 
-  const canUndo = sessionUndoStack.length > 0;
-  const canRedo = sessionRedoStack.length > 0;
-
   // Resolve undo stack IDs to Command objects
   const commandMap = new Map(commandLog.map((c) => [c.id, c]));
   const undoCommands = sessionUndoStack
@@ -35,16 +29,8 @@ export const UndoRedoHistory = () => {
 
   return (
     <>
-      <div className="pb-1 pt-4 flex items-center justify-between">
+      <div className="pb-1 pt-4">
         <span>Undo / Redo</span>
-        <div className="flex gap-1">
-          <Button onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
-            <IconArrowBackUp size={16} stroke={1} />
-          </Button>
-          <Button onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Shift+Z)">
-            <IconArrowForwardUp size={16} stroke={1} />
-          </Button>
-        </div>
       </div>
       <div className="h-40 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
         <div className="flex flex-col text-sm">

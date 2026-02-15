@@ -56,15 +56,73 @@ export function doZoom(
   doodler.throttledTwoUpdate();
 }
 
+export function doZoomTo(level: number): void {
+  const doodler = getDoodler();
+  const { setZoom } = useZoomStore.getState();
+  const currentScale = doodler.zui.scale;
+  const targetScale = level / 100;
+  const ratio = targetScale / currentScale;
+
+  const cx = doodler.two.width / 2;
+  const cy = doodler.two.height / 2;
+  doodler.zui.zoomBy(ratio - 1, cx, cy);
+  setZoom(Math.floor(doodler.zui.scale * 100));
+
+  const { outlines } = usePointerStore.getState();
+  for (const outline of Object.values(outlines)) {
+    if (outline) {
+      outline.linewidth = 1.5 / doodler.zui.scale;
+    }
+  }
+
+  const sm = doodler.zui.surfaceMatrix.elements;
+  updateGrid(doodler.zui.scale, sm[2], sm[5]);
+  doodler.throttledTwoUpdate();
+}
+
+export function doZoomStep(direction: 1 | -1): void {
+  const doodler = getDoodler();
+  const { setZoom } = useZoomStore.getState();
+  const currentScale = doodler.zui.scale;
+  const currentPercent = Math.round(currentScale * 100);
+
+  const STEPS = [10, 25, 50, 75, 100, 150, 200, 300, 400];
+  let target: number;
+  if (direction === 1) {
+    target = STEPS.find((s) => s > currentPercent) ?? STEPS[STEPS.length - 1];
+  } else {
+    target = [...STEPS].reverse().find((s) => s < currentPercent) ?? STEPS[0];
+  }
+
+  const targetScale = target / 100;
+  const ratio = targetScale / currentScale;
+  const cx = doodler.two.width / 2;
+  const cy = doodler.two.height / 2;
+  doodler.zui.zoomBy(ratio - 1, cx, cy);
+  setZoom(Math.floor(doodler.zui.scale * 100));
+
+  const { outlines } = usePointerStore.getState();
+  for (const outline of Object.values(outlines)) {
+    if (outline) {
+      outline.linewidth = 1.5 / doodler.zui.scale;
+    }
+  }
+
+  const sm = doodler.zui.surfaceMatrix.elements;
+  updateGrid(doodler.zui.scale, sm[2], sm[5]);
+  doodler.throttledTwoUpdate();
+}
+
 export function doZoomReset(): void {
   const doodler = getDoodler();
   const { setZoom } = useZoomStore.getState();
 
   doodler.zui.reset();
   doodler.zui.translateSurface(0, 0);
+  doodler.canvas.position.x = 0;
+  doodler.canvas.position.y = 0;
   setZoom(100);
   updateGrid(1, 0, 0);
-  doodler.two.update();
   doodler.throttledTwoUpdate();
 }
 
