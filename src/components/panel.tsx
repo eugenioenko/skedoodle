@@ -12,7 +12,7 @@ import { useOptionsStore } from "@/canvas/canvas.store";
 import { WithTooltip } from "./ui/tooltip";
 import { getDoodler } from "@/canvas/doodler.client";
 import { undo, redo } from "@/canvas/history.service";
-import { useHistoryStore } from "@/canvas/history.store";
+import { useCommandLogStore } from "@/canvas/history.store";
 
 export const Panel = () => {
   const isPanelOpen = useOptionsStore((state) => state.isPanelOpen);
@@ -41,8 +41,8 @@ export const Panel = () => {
 
 const CanvasBar = () => {
   const zoom = useZoomStore((state) => state.zoom);
-  const undoCount = useHistoryStore((state) => state.undoStack.length);
-  const redoCount = useHistoryStore((state) => state.redoStack.length);
+  const undoCount = useCommandLogStore((state) => state.sessionUndoStack.length);
+  const redoCount = useCommandLogStore((state) => state.sessionRedoStack.length);
 
   const doSaveToStorage = () => {
     const doodler = getDoodler();

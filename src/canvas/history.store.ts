@@ -1,38 +1,55 @@
 import { create } from "zustand";
 import { SerializedDoodle } from "./doodle.utils";
 
-export interface PropertyChange {
-  field: string;
-  oldValue: any;
-  newValue: any;
+export interface Command {
+  id: string;
+  ts: number;
+  uid: string;
+  type: "create" | "update" | "remove";
+  shapeId: string;
+  data?: SerializedDoodle;
+  changes?: Record<string, any>;
 }
 
-export type HistoryCommand =
-  | { type: "create"; label: string; doodle: SerializedDoodle }
-  | {
-      type: "update";
-      label: string;
-      shapeId: string;
-      changes: PropertyChange[];
-    }
-  | { type: "remove"; label: string; doodle: SerializedDoodle };
+const LOCAL_USER_ID = "local-user";
 
-export interface HistoryState {
-  undoStack: HistoryCommand[];
-  redoStack: HistoryCommand[];
-  push: (command: HistoryCommand) => void;
-  clear: () => void;
+export function createCommand(
+  type: Command["type"],
+  shapeId: string,
+  opts?: { data?: SerializedDoodle; changes?: Record<string, any> }
+): Command {
+  return {
+    id: crypto.randomUUID(),
+    ts: Date.now(),
+    uid: LOCAL_USER_ID,
+    type,
+    shapeId,
+    ...opts,
+  };
 }
 
-export const useHistoryStore = create<HistoryState>()((set) => ({
-  undoStack: [],
-  redoStack: [],
+export interface CommandLogState {
+  commandLog: Command[];
+  sessionUndoStack: string[];
+  sessionRedoStack: Command[];
+  appendCommand: (command: Command) => void;
+  setCommandLog: (commands: Command[]) => void;
+  clearSession: () => void;
+}
 
-  push: (command: HistoryCommand) =>
+export const useCommandLogStore = create<CommandLogState>()((set) => ({
+  commandLog: [],
+  sessionUndoStack: [],
+  sessionRedoStack: [],
+
+  appendCommand: (command: Command) =>
     set((state) => ({
-      undoStack: [...state.undoStack, command],
-      redoStack: [],
+      commandLog: [...state.commandLog, command],
     })),
 
-  clear: () => set({ undoStack: [], redoStack: [] }),
+  setCommandLog: (commands: Command[]) =>
+    set({ commandLog: commands }),
+
+  clearSession: () =>
+    set({ sessionUndoStack: [], sessionRedoStack: [] }),
 }));

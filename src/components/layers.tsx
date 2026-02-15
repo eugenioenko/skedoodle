@@ -22,9 +22,11 @@ export const Layers = () => {
 
   return (
     <>
-      <div className="pb-1 pt-4">Layers</div>
-      <div className="h-64 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
-        <div className="flex flex-col  text-sm">
+      <div className="pb-1 pt-4 flex items-center justify-between">
+        <span>Layers</span>
+      </div>
+      <div className="h-40 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
+        <div className="flex flex-col text-sm">
           {doodles.map((doodle) => (
             <DoodleItem
               doodle={doodle}

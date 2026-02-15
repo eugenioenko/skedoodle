@@ -254,7 +254,7 @@ export function finalizeBezier(): void {
     // Remove from canvas (it was added directly), then re-add via addDoodle
     doodler.canvas.remove(state.path);
     doodler.addDoodle({ shape: state.path, type: "bezier" });
-    pushCreateCommand("Draw bezier curve", {
+    pushCreateCommand({
       shape: state.path,
       type: "bezier",
     });

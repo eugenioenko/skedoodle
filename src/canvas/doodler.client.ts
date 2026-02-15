@@ -8,9 +8,10 @@ import {
   Doodle,
   SerializedDoodle,
   serializeDoodle,
-  unserializeDoodle,
 } from "./doodle.utils";
 import { useToastStore } from "@/components/ui/toasts";
+import { Command, createCommand, useCommandLogStore } from "./history.store";
+import { executeForward } from "./history.service";
 
 interface DoodlerProps {
   two: Two;
@@ -86,13 +87,9 @@ export class Doodler {
     this.canvas.remove(doodle.shape);
   }
 
-  async saveDoodles(): Promise<void> {
-    const { doodles } = useCanvasStore.getState();
-    const data = doodles.map((doodle) => serializeDoodle(doodle));
-    set(this.sketchId, data);
-
-    const addToast = useToastStore.getState().addToast;
-    addToast("Sketch saved successfully");
+  saveDoodles(): void {
+    const { commandLog } = useCommandLogStore.getState();
+    set(this.sketchId, commandLog);
   }
 
   async loadDoodles(): Promise<void> {
@@ -100,20 +97,46 @@ export class Doodler {
       return;
     }
 
-    const doodles = get<SerializedDoodle[]>(this.sketchId);
+    // Try loading as Command[] first
+    const stored = get<Command[] | SerializedDoodle[]>(this.sketchId);
 
-    if (!doodles || !doodles?.length) {
+    if (!stored || !stored.length) {
       return;
     }
 
-    for (const serialized of doodles) {
-      try {
-        const doodle = unserializeDoodle(serialized);
-        this.addDoodle(doodle);
-      } catch (e) {
-        console.warn(e);
-        continue;
+    // Detect format: Command[] has `uid` field, SerializedDoodle[] has `t` field
+    const first = stored[0] as any;
+    const isCommandLog = "uid" in first && "type" in first;
+
+    if (isCommandLog) {
+      // New format: Command[]
+      const commands = stored as Command[];
+      useCommandLogStore.getState().setCommandLog(commands);
+      for (const cmd of commands) {
+        try {
+          executeForward(cmd);
+        } catch (e) {
+          console.warn("Failed to replay command:", e);
+        }
       }
+    } else {
+      // Legacy format: SerializedDoodle[] — migrate to Command[]
+      const doodles = stored as SerializedDoodle[];
+      const commands: Command[] = [];
+      for (const serialized of doodles) {
+        try {
+          const cmd = createCommand("create", serialized.id, {
+            data: serialized,
+          });
+          commands.push(cmd);
+          executeForward(cmd);
+        } catch (e) {
+          console.warn("Failed to migrate doodle:", e);
+        }
+      }
+      // Save in new format
+      useCommandLogStore.getState().setCommandLog(commands);
+      set(this.sketchId, commands);
     }
 
     this.throttledTwoUpdate();

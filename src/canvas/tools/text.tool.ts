@@ -93,7 +93,7 @@ export function doTextStart(e: MouseEvent<HTMLDivElement>): void {
       text.alignment = alignment;
 
       doodler.addDoodle({ shape: text, type: "text" });
-      pushCreateCommand("Add text", { shape: text, type: "text" });
+      pushCreateCommand({ shape: text, type: "text" });
       doodler.throttledTwoUpdate();
     }
     cleanup();
