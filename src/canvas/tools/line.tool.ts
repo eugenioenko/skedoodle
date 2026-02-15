@@ -126,16 +126,13 @@ export function doLineUp(): void {
 
   if (line) {
     const doodleType: DoodleType = hasArrow ? "arrow" : "line";
-    pushCreateCommand(
-      hasArrow ? "Draw arrow" : "Draw line",
-      { shape: line, type: doodleType }
-    );
+    pushCreateCommand({ shape: line, type: doodleType });
   }
   if (hasArrow && arrowHead) {
-    pushCreateCommand("Draw arrowhead", { shape: arrowHead, type: "arrow" });
+    pushCreateCommand({ shape: arrowHead, type: "arrow" });
   }
   if (hasArrow && arrowTail) {
-    pushCreateCommand("Draw arrowhead", { shape: arrowTail, type: "arrow" });
+    pushCreateCommand({ shape: arrowTail, type: "arrow" });
   }
 
   setLine(undefined);

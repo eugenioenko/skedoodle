@@ -22,6 +22,7 @@ import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { Layers } from "./layers";
 import { History } from "./history";
+import { Timeline } from "./timeline";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
@@ -30,21 +31,19 @@ import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridCo
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
 import { Sketches } from "./sketches";
-import { pushCommand } from "@/canvas/history.service";
-import { PropertyChange } from "@/canvas/history.store";
+import { pushUpdateCommand } from "@/canvas/history.service";
 
 // Debounced property edit tracking for undo/redo
-let pendingChanges: Map<string, { shapeId: string; changes: Map<string, PropertyChange> }> = new Map();
+let pendingChanges: Map<string, { shapeId: string; newValues: Map<string, any>; oldValues: Map<string, any> }> = new Map();
 let pendingTimer: ReturnType<typeof setTimeout> | undefined;
 
 function flushPendingChanges(): void {
   for (const [, entry] of pendingChanges) {
-    pushCommand({
-      type: "update",
-      label: "Edit properties",
-      shapeId: entry.shapeId,
-      changes: Array.from(entry.changes.values()),
-    });
+    pushUpdateCommand(
+      entry.shapeId,
+      Object.fromEntries(entry.newValues),
+      Object.fromEntries(entry.oldValues)
+    );
   }
   pendingChanges = new Map();
   pendingTimer = undefined;
@@ -53,16 +52,14 @@ function flushPendingChanges(): void {
 function trackPropertyChange(shapeId: string, field: string, oldValue: any, newValue: any): void {
   let entry = pendingChanges.get(shapeId);
   if (!entry) {
-    entry = { shapeId, changes: new Map() };
+    entry = { shapeId, newValues: new Map(), oldValues: new Map() };
     pendingChanges.set(shapeId, entry);
   }
   // Keep the original oldValue from the first change in a batch
-  const existing = entry.changes.get(field);
-  entry.changes.set(field, {
-    field,
-    oldValue: existing ? existing.oldValue : oldValue,
-    newValue,
-  });
+  if (!entry.oldValues.has(field)) {
+    entry.oldValues.set(field, oldValue);
+  }
+  entry.newValues.set(field, newValue);
 
   clearTimeout(pendingTimer);
   pendingTimer = setTimeout(flushPendingChanges, 500);
@@ -338,9 +335,12 @@ export const Properties = () => {
         <History />
       </div>
       <div>
+        <Timeline />
+      </div>
+      <div>
         <Layers />
       </div>
-      <div className="pt-16"></div>
+      <div className="pt-64"></div>
     </div>
   );
 };

@@ -1,32 +1,37 @@
 import { useEffect, useState } from "react";
-
-import { keys } from "@/services/storage.client";
 import { Link } from "react-router-dom";
+import {
+  getAllSketchIds,
+  getSketchMeta,
+  SketchMeta,
+} from "@/services/storage.client";
 
 export const Sketches = () => {
-  const [names, setNames] = useState<string[]>([]);
-
-  async function loadSketchList() {
-    const ids = await keys();
-    setNames(ids as string[]);
-  }
+  const [sketches, setSketches] = useState<SketchMeta[]>([]);
 
   useEffect(() => {
-    loadSketchList();
+    const ids = getAllSketchIds();
+    const metas = ids
+      .map((id) => getSketchMeta(id))
+      .filter((m): m is SketchMeta => !!m)
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+    setSketches(metas);
   }, []);
 
   return (
     <>
-      <div className="pb-1 pt-4">Sketches</div>
-      <div className="h-64 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
-        <div className="flex flex-col text-sm gap-1">
-          {names.map((name) => (
+      <div className="pb-1 pt-4 flex items-center justify-between">
+        <span>Sketches</span>
+      </div>
+      <div className="h-40 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
+        <div className="flex flex-col text-sm">
+          {sketches.map((meta) => (
             <Link
-              className="px-2 py-0.5 hover:bg-default-4"
-              key={name}
-              to={`/sketch/${name}`}
+              className="px-2 py-0.5 text-xs opacity-70 hover:bg-default-4"
+              key={meta.id}
+              to={`/sketch/${meta.id}`}
             >
-              {name}
+              {meta.name}
             </Link>
           ))}
         </div>

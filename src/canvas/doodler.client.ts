@@ -2,15 +2,21 @@ import { throttle } from "@/utils/throttle";
 import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
-import { get, set } from "@/services/storage.client";
+import {
+  get,
+  getSketchCommands,
+  getSketchMeta,
+  setSketchCommands,
+  setSketchMeta,
+  SketchMeta,
+} from "@/services/storage.client";
 import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   Doodle,
   SerializedDoodle,
-  serializeDoodle,
-  unserializeDoodle,
 } from "./doodle.utils";
-import { useToastStore } from "@/components/ui/toasts";
+import { Command, createCommand, useCommandLogStore } from "./history.store";
+import { executeForward } from "./history.service";
 
 interface DoodlerProps {
   two: Two;
@@ -43,12 +49,10 @@ export class Doodler {
     const updateFrequency = useOptionsStore.getState().updateFrequency;
 
     if (updateFrequency === 0) {
-      // No throttle - call immediately
       if (typeof this.two?.update === "function") {
         this.two?.update?.();
       }
     } else {
-      // Use throttle with configured frequency
       if (!this._throttledUpdate || this._lastFrequency !== updateFrequency) {
         this._lastFrequency = updateFrequency;
         this._throttledUpdate = throttle(() => {
@@ -71,7 +75,6 @@ export class Doodler {
   }
 
   addDoodle(doodle: Doodle): void {
-    // TODO update ID generation
     doodle.shape.id = crypto.randomUUID();
     const { doodles, setDoodles } = useCanvasStore.getState();
     const newDoodles = [...doodles, doodle];
@@ -86,13 +89,22 @@ export class Doodler {
     this.canvas.remove(doodle.shape);
   }
 
-  async saveDoodles(): Promise<void> {
-    const { doodles } = useCanvasStore.getState();
-    const data = doodles.map((doodle) => serializeDoodle(doodle));
-    set(this.sketchId, data);
+  saveDoodles(): void {
+    const { commandLog } = useCommandLogStore.getState();
+    setSketchCommands(this.sketchId, commandLog);
 
-    const addToast = useToastStore.getState().addToast;
-    addToast("Sketch saved successfully");
+    // Update metadata
+    const existing = getSketchMeta(this.sketchId);
+    const now = Date.now();
+    const meta: SketchMeta = existing
+      ? { ...existing, updatedAt: now }
+      : {
+          id: this.sketchId,
+          name: this.sketchId,
+          createdAt: now,
+          updatedAt: now,
+        };
+    setSketchMeta(this.sketchId, meta);
   }
 
   async loadDoodles(): Promise<void> {
@@ -100,21 +112,66 @@ export class Doodler {
       return;
     }
 
-    const doodles = get<SerializedDoodle[]>(this.sketchId);
-
-    if (!doodles || !doodles?.length) {
+    // Try new storage format first
+    const commands = getSketchCommands(this.sketchId);
+    if (commands && commands.length) {
+      useCommandLogStore.getState().setCommandLog(commands);
+      for (const cmd of commands) {
+        try {
+          executeForward(cmd);
+        } catch (e) {
+          console.warn("Failed to replay command:", e);
+        }
+      }
+      this.throttledTwoUpdate();
       return;
     }
 
-    for (const serialized of doodles) {
-      try {
-        const doodle = unserializeDoodle(serialized);
-        this.addDoodle(doodle);
-      } catch (e) {
-        console.warn(e);
-        continue;
+    // Legacy migration: try old format (generic key with SerializedDoodle[] or Command[])
+    const stored = get<Command[] | SerializedDoodle[]>(this.sketchId);
+    if (!stored || !stored.length) {
+      return;
+    }
+
+    const first = stored[0] as any;
+    const isCommandLog = "uid" in first && "type" in first;
+    const migrated: Command[] = [];
+
+    if (isCommandLog) {
+      const cmds = stored as Command[];
+      for (const cmd of cmds) {
+        try {
+          migrated.push(cmd);
+          executeForward(cmd);
+        } catch (e) {
+          console.warn("Failed to replay command:", e);
+        }
+      }
+    } else {
+      const doodles = stored as SerializedDoodle[];
+      for (const serialized of doodles) {
+        try {
+          const cmd = createCommand("create", serialized.id, {
+            data: serialized,
+          });
+          migrated.push(cmd);
+          executeForward(cmd);
+        } catch (e) {
+          console.warn("Failed to migrate doodle:", e);
+        }
       }
     }
+
+    // Save in new format and create metadata
+    useCommandLogStore.getState().setCommandLog(migrated);
+    setSketchCommands(this.sketchId, migrated);
+    const now = Date.now();
+    setSketchMeta(this.sketchId, {
+      id: this.sketchId,
+      name: this.sketchId,
+      createdAt: now,
+      updatedAt: now,
+    });
 
     this.throttledTwoUpdate();
   }
@@ -126,7 +183,6 @@ export function setDoodlerInstance(doodler: Doodler) {
   doodlerInstance = doodler;
 }
 
-// doodler() is only called after instance is initialized
 export function getDoodler(): Doodler {
   if (!doodlerInstance) {
     throw new Error("Doodler instance is not set yet.");

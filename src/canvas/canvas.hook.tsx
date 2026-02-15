@@ -7,7 +7,7 @@ import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
 import { destroyGrid, initGrid } from "./grid";
-import { useHistoryStore } from "./history.store";
+import { useCommandLogStore } from "./history.store";
 // import { io } from "socket.io-client";
 
 export const useInitTwoCanvas = (
@@ -74,7 +74,7 @@ export const useInitTwoCanvas = (
       instance.remove();
       const { setDoodles } = useCanvasStore.getState();
       setDoodles([]);
-      useHistoryStore.getState().clear();
+      useCommandLogStore.getState().clearSession();
     };
   }, [containerRef, onReady, sketchId]);
 };

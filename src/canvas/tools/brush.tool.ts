@@ -151,7 +151,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     }
   }
   doodler.throttledTwoUpdate();
-  pushCreateCommand("Draw brush stroke", { shape: path, type: "brush" });
+  pushCreateCommand({ shape: path, type: "brush" });
 }
 
 /**

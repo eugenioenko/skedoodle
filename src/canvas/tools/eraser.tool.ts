@@ -23,7 +23,7 @@ export function doDeleteShape(e: MouseEvent<HTMLDivElement>) {
       item.bottom
     );
     if (isShapeWithin) {
-      pushRemoveCommand("Delete shape", doodle);
+      pushRemoveCommand(doodle);
       doodler.removeDoodle(doodle);
       clearHighlight();
       // TODO recalculate selection when deleted shape is from the selection

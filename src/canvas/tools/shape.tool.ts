@@ -90,7 +90,7 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
 export function doShapeUp() {
   const { shape, setShape } = useShapeStore.getState();
   if (shape) {
-    pushCreateCommand("Draw rectangle", { shape, type: "rect" });
+    pushCreateCommand({ shape, type: "rect" });
   }
   setShape(undefined);
 }

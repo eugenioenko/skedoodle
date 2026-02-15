@@ -12,7 +12,7 @@ import {
   isPointInRect,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
-import { pushCommand } from "../history.service";
+import { pushUpdateCommand } from "../history.service";
 
 interface Outlines {
   highlight?: Rectangle;
@@ -242,23 +242,17 @@ export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
     for (let i = 0; i < selected.length; i++) {
       const shape = selected[i];
       const origin = origins[i];
-      pushCommand({
-        type: "update",
-        label: "Move shape",
-        shapeId: shape.id,
-        changes: [
-          {
-            field: "translation.x",
-            oldValue: origin.x,
-            newValue: shape.translation.x,
-          },
-          {
-            field: "translation.y",
-            oldValue: origin.y,
-            newValue: shape.translation.y,
-          },
-        ],
-      });
+      pushUpdateCommand(
+        shape.id,
+        {
+          "translation.x": shape.translation.x,
+          "translation.y": shape.translation.y,
+        },
+        {
+          "translation.x": origin.x,
+          "translation.y": origin.y,
+        }
+      );
     }
   }
 
