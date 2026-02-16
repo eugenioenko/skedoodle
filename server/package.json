@@ -1,0 +1,35 @@
+{
+  "name": "skedoodle-server",
+  "version": "1.0.0",
+  "description": "Real-time collaboration server for Skedoodle",
+  "main": "dist/http-server.js",
+  "scripts": {
+    "start": "node dist/http-server.js",
+    "build": "tsc",
+    "dev:http": "tsx watch src/http-server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "@simplewebauthn/server": "^13.2.2",
+    "@simplewebauthn/types": "^12.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "sqlite3": "^5.1.7",
+    "tsx": "^4.21.0",
+    "ulid": "^3.0.2",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.5",
+    "prisma": "^6.19.2",
+    "typescript": "^5.0.4"
+  }
+}

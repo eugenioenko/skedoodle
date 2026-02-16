@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  username    String       @unique
+  credentials Credential[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  commands    Command[]
+  sketches    Sketch[]
+}
+
+model Credential {
+  id           String  @id @default(cuid())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String
+  credentialId String  @unique
+  publicKey    Bytes
+  counter      BigInt
+  transports   String?
+}
+
+model Challenge {
+  id        String   @id @default(cuid())
+  challenge String   @unique
+  username  String
+  createdAt DateTime @default(now())
+}
+
+model Sketch {
+  id        String   @id @default(cuid())
+  name      String
+  color     String?
+  positionX Float?
+  positionY Float?
+  zoom      Float?
+  public    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String
+}
+
+model Command {
+  id   String   @id @default(cuid())
+  ts   DateTime @default(now())
+  uid  String
+  type String
+  sid  String
+  data String
+  user User     @relation(fields: [uid], references: [id])
+}
