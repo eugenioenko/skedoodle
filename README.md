@@ -8,14 +8,30 @@ A real-time collaborative sketching app built with event sourcing and WebSockets
 
 Multiple people draw on the same canvas at once. Every stroke, shape, and edit is captured as an immutable command in an append-only log. The log is the single source of truth — the canvas is just a projection of it.
 
+### Performance
+- **0% CPU at idle** — fully event-driven rendering, no polling or animation loops when nothing is changing
+- **~40% CPU during heavy brush usage** on a single core (measured against Figma's 150–200% under comparable conditions)
+- **~20% CPU max with throttling enabled**
+- Configurable frame rate: 120fps, 60fps, or 15fps battery-saver mode
+
 ### Drawing tools
-- Freehand brush with stabilizer and path simplification (Douglas-Peucker / area-based)
+- **Freehand brush** with configurable stabilization (1–10 pixel smoothing) and real-time path simplification during drawing:
+  - Douglas-Peucker algorithm (1–100 tolerance)
+  - Visvalingam-Whyatt with three variants: angle-based, distance-based, and triangle-area (1–100 sensitivity each)
+  - Simplification runs on the stroke as it's drawn, not as a post-processing step
 - Lines with optional arrowheads
 - Rectangles with configurable stroke, fill, and corner radius
 - Bezier curves with control points
 - Text with inline editing
 - Pointer for selecting and dragging shapes
 - Eraser, hand/pan, zoom
+
+### Canvas
+- Infinite canvas with pan and zoom up to 10,000% (practical precision limit, expandable)
+- Incremental rendering — only dirty regions are redrawn, not the full canvas
+- Configurable grid system: line or dot rendering with customizable color
+- Grid auto-hides at configured zoom thresholds to reduce visual clutter
+- Viewport culling: off-screen shapes are excluded from the render pass
 
 ### Collaboration
 - Real-time sync via WebSocket rooms — commands broadcast to all participants
@@ -60,6 +76,13 @@ WebSocket rooms handle the real-time layer:
 - Empty rooms clean up after a 30-second grace period
 
 Conflict resolution is last-write-wins by command order. If user A deletes a shape that user B is editing, B's update silently no-ops. All clients converge to the same state by replaying the same ordered command log.
+
+### Rendering pipeline
+- Event-driven rendering: the render loop only runs in response to user input or incoming sync events — zero idle CPU
+- Incremental dirty-region updates: only shapes that changed are re-rendered
+- Viewport culling skips shapes outside the visible area
+- Real-time path simplification (Douglas-Peucker / Visvalingam-Whyatt) reduces vertex count during drawing, not after
+- Configurable frame throttling (120/60/15fps) trades smoothness for CPU headroom
 
 ## Tech stack
 
