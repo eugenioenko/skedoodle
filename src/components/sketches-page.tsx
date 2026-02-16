@@ -7,6 +7,7 @@ import {
   SketchMeta,
 } from "@/services/storage.client";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { ulid } from "ulid";
 
 export const SketchesPage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export const SketchesPage = () => {
   }, []);
 
   function handleNewSketch() {
-    const id = crypto.randomUUID();
+    const id = ulid();
     navigate(`/sketch/${id}`);
   }
 

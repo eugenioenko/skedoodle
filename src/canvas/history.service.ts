@@ -14,6 +14,7 @@ import {
   setSketchMeta,
 } from "@/services/storage.client";
 import { syncService } from "@/services/sync.client";
+import { ulid } from "ulid";
 
 // Stores old values for update commands, keyed by command ID
 const preUpdateSnapshots = new Map<string, Record<string, any>>();
@@ -104,7 +105,7 @@ export function applyRemoteCommand(cmd: Command): void {
 
   // Avoid re-applying commands we already have
   if (commandLog.some(c => c.id === cmd.id)) {
-      return;
+    return;
   }
 
   appendCommand(cmd);
@@ -302,7 +303,7 @@ export function branchFromTimeline(): string {
   const doodler = getDoodler();
 
   const branchCommands = commandLog.slice(0, timelinePosition);
-  const newId = crypto.randomUUID();
+  const newId = ulid();
 
   setSketchCommands(newId, branchCommands);
   const existingMeta = getSketchMeta(doodler.sketchId);

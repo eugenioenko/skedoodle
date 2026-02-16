@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { ulid } from 'ulid';
 import { UserInfo } from './protocol';
 
 
@@ -15,7 +15,7 @@ function getRandomColor() {
 
 export function getIdentity(): UserInfo {
     const newIdentity: UserInfo = {
-        uid: nanoid(10),
+        uid: ulid(),
         name: getRandomName(),
         color: getRandomColor(),
     };

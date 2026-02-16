@@ -17,6 +17,7 @@ import {
 } from "./doodle.utils";
 import { Command, createCommand, useCommandLogStore } from "./history.store";
 import { executeForward } from "./history.service";
+import { ulid } from "ulid";
 
 interface DoodlerProps {
   two: Two;
@@ -75,7 +76,9 @@ export class Doodler {
   }
 
   addDoodle(doodle: Doodle): void {
-    doodle.shape.id = crypto.randomUUID();
+    if (!doodle.shape.id) {
+      doodle.shape.id = ulid();
+    }
     const { doodles, setDoodles } = useCanvasStore.getState();
     const newDoodles = [...doodles, doodle];
     setDoodles(newDoodles);
@@ -99,11 +102,11 @@ export class Doodler {
     const meta: SketchMeta = existing
       ? { ...existing, updatedAt: now }
       : {
-          id: this.sketchId,
-          name: this.sketchId,
-          createdAt: now,
-          updatedAt: now,
-        };
+        id: this.sketchId,
+        name: this.sketchId,
+        createdAt: now,
+        updatedAt: now,
+      };
     setSketchMeta(this.sketchId, meta);
   }
 

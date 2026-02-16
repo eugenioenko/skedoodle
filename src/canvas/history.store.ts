@@ -1,29 +1,30 @@
 import { create } from 'zustand';
 import { useSyncStore } from '@/services/sync.store';
+import { ulid } from 'ulid';
 
 export interface Command<T = any> {
-    id: string; // Unique ID for the command
-    ts: number; // Timestamp
-    uid: string; // User ID
-    type: 'create' | 'update' | 'remove' | 'undo' | 'redo';
-    sid: string; // Shape ID
-    data: T;
+  id: string; // Unique ID for the command
+  ts: number; // Timestamp
+  uid: string; // User ID
+  type: 'create' | 'update' | 'remove' | 'undo' | 'redo';
+  sid: string; // Shape ID
+  data: T;
 }
 
 export function createCommand(
-    type: Command['type'],
-    sid: string,
-    opts?: { data?: any; }
+  type: Command['type'],
+  sid: string,
+  opts?: { data?: any; }
 ): Command {
-    const user = useSyncStore.getState().localUser;
-    return {
-        id: crypto.randomUUID(),
-        ts: Date.now(),
-        uid: user?.uid ?? 'local-user',
-        type,
-        sid,
-        data: opts?.data,
-    };
+  const user = useSyncStore.getState().localUser;
+  return {
+    id: ulid(),
+    ts: Date.now(),
+    uid: user?.uid ?? 'local-user',
+    type,
+    sid,
+    data: opts?.data,
+  };
 }
 
 

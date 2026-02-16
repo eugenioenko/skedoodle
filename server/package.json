@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ulid": "^3.0.2",
     "ws": "^8.13.0"
   },
   "devDependencies": {
