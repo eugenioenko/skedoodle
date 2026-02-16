@@ -252,7 +252,7 @@ export function pushUpdateCommand(
 
 // --- Time Travel ---
 
-function clearCanvas(): void {
+export function clearCanvas(): void {
   const doodler = getDoodler();
   const { doodles, setDoodles } = useCanvasStore.getState();
   for (const d of doodles) {

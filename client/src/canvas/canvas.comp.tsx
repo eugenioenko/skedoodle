@@ -23,7 +23,7 @@ export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
   const bgColor = colord(canvasColor).toHex();
 
   const onTwoReady = useCallback(async () => {
-    console.log("Canvas ready, loading doodles...");
+    console.log("[Canvas] Canvas ready, loading doodles...");
     await getDoodler().loadDoodles();
     onReady?.();
     setIsReady(true);

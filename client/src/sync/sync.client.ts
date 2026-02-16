@@ -1,5 +1,5 @@
 import { useSyncStore } from './sync.store';
-import { applyRemoteCommand } from '@/canvas/history.service';
+import { applyRemoteCommand, clearCanvas } from '@/canvas/history.service';
 import { useCommandLogStore } from '@/canvas/history.store';
 import { ClientMessage, ServerMessage, UserInfo, Command } from './sync.model';
 
@@ -132,22 +132,31 @@ class SyncClient {
     }
   }
 
+  /**
+   * Replaces local state entirely with the server's command log.
+   *
+   * On join/reconnect the server is treated as the source of truth:
+   *   1. The canvas is wiped (all Two.js shapes removed, doodles array cleared).
+   *   2. The local command log and undo/redo stacks are reset.
+   *   3. Every command from the server log is replayed in order.
+   *
+   * This avoids complex merge/diff logic and guarantees the client
+   * converges to the exact state the server holds.
+   */
   private handleReconciliation(serverLog: Command[]) {
-    const localLog = useCommandLogStore.getState().commandLog;
-    console.log(`[Sync] Reconciling state. Server: ${serverLog.length}, Local: ${localLog.length}`);
+    console.log(`[Sync] Applying ${serverLog.length} server commands.`);
 
-    if (serverLog.length > localLog.length) {
-      const delta = serverLog.slice(localLog.length);
-      console.log(`[Sync] Applying ${delta.length} commands from server.`);
-      for (const cmd of delta) {
-        applyRemoteCommand(cmd);
-      }
-    } else if (localLog.length > serverLog.length) {
-      const localOnlyCommands = localLog.filter(localCmd => !serverLog.some((serverCmd: Command) => serverCmd.id === localCmd.id));
-      console.log(`[Sync] Sending ${localOnlyCommands.length} offline commands to server.`);
-      for (const cmd of localOnlyCommands) {
-        this.sendCommand(cmd);
-      }
+    // 1. Clear the Two.js canvas and doodles array
+    clearCanvas();
+
+    // 2. Reset the command log and session undo/redo stacks
+    const { setCommandLog, clearSession } = useCommandLogStore.getState();
+    setCommandLog([]);
+    clearSession();
+
+    // 3. Replay the full server log to rebuild canvas state
+    for (const cmd of serverLog) {
+      applyRemoteCommand(cmd);
     }
   }
 
