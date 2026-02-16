@@ -1,0 +1,22 @@
+services:
+  app:
+    container_name: skedoodle-app
+    image: ghcr.io/eugenioenko/skedoodle:latest
+    restart: unless-stopped
+    networks:
+      - web
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=file:/app/data/skedoodle.db
+      - JWT_SECRET=${JWT_SECRET}
+      - HTTP_PORT=3013
+      - WS_PORT=3014
+      - CORS_ORIGIN=https://${SKEDOODLE_DOMAIN}
+      - RP_ID=${SKEDOODLE_DOMAIN}
+      - RP_NAME=Skedoodle
+      - RP_ORIGIN=https://${SKEDOODLE_DOMAIN}
+
+networks:
+  web:
+    external: true

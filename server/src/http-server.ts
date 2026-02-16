@@ -3,6 +3,8 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { existsSync } from 'fs';
 import authRoutes from './routes/auth';
 import sketchRoutes from './routes/sketches';
 import { verifyToken } from './utils/auth';
@@ -47,9 +49,20 @@ app.get('/api/sketches/community', async (_req, res) => {
 
 app.use('/api/sketches', sketchRoutes);
 
-app.get('/', (req, res) => {
-  res.send('Skedoodle HTTP API is running!');
-});
+// Serve client static build in production
+const publicDir = path.join(__dirname, '../public');
+const indexPath = path.join(publicDir, 'index.html');
+
+if (existsSync(indexPath)) {
+  app.use(express.static(publicDir));
+  app.get('/{*path}', (_req, res) => {
+    res.sendFile(indexPath);
+  });
+} else {
+  app.get('/', (_req, res) => {
+    res.send('Skedoodle HTTP API is running!');
+  });
+}
 
 // WebSocket Server (integrated)
 const wss = new WebSocketServer({ port: Number(WS_PORT) });
