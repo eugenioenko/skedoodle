@@ -13,6 +13,7 @@ import {
   setSketchCommands,
   setSketchMeta,
 } from "@/services/storage.client";
+import { syncService } from "@/services/sync.client";
 
 // Stores old values for update commands, keyed by command ID
 const preUpdateSnapshots = new Map<string, Record<string, any>>();
@@ -70,13 +71,13 @@ export function executeForward(cmd: Command): void {
       break;
     }
     case "remove": {
-      removeDoodleFromCanvas(cmd.shapeId);
+      removeDoodleFromCanvas(cmd.sid);
       break;
     }
     case "update": {
-      const doodle = findDoodleById(cmd.shapeId);
-      if (!doodle || !cmd.changes) return;
-      for (const [field, value] of Object.entries(cmd.changes)) {
+      const doodle = findDoodleById(cmd.sid);
+      if (!doodle || !cmd.data) return;
+      for (const [field, value] of Object.entries(cmd.data)) {
         setShapeField(doodle.shape, field, value);
       }
       break;
@@ -98,7 +99,19 @@ function scheduleSave(): void {
   }, 1000);
 }
 
-// --- Public API ---
+export function applyRemoteCommand(cmd: Command): void {
+  const { commandLog, appendCommand } = useCommandLogStore.getState();
+
+  // Avoid re-applying commands we already have
+  if (commandLog.some(c => c.id === cmd.id)) {
+      return;
+  }
+
+  appendCommand(cmd);
+  executeForward(cmd);
+  getDoodler().throttledTwoUpdate();
+  scheduleSave();
+}
 
 export function pushCommand(cmd: Command): void {
   useCommandLogStore.setState((state) => ({
@@ -106,6 +119,7 @@ export function pushCommand(cmd: Command): void {
     sessionUndoStack: [...state.sessionUndoStack, cmd.id],
     sessionRedoStack: [],
   }));
+  syncService.sendCommand(cmd);
   scheduleSave();
 }
 
@@ -141,9 +155,8 @@ export function redo(): void {
   const originalCmd = sessionRedoStack[sessionRedoStack.length - 1];
 
   // Re-create command with new id/ts
-  const newCmd = createCommand(originalCmd.type, originalCmd.shapeId, {
+  const newCmd = createCommand(originalCmd.type, originalCmd.sid, {
     data: originalCmd.data,
-    changes: originalCmd.changes,
   });
 
   // If original had preUpdateSnapshots, copy them for the new command
@@ -169,48 +182,45 @@ function createInverseCommand(cmd: Command): Command | null {
   switch (cmd.type) {
     case "create": {
       // create → remove: capture live doodle data before removing
-      const doodle = findDoodleById(cmd.shapeId);
+      const doodle = findDoodleById(cmd.sid);
       const data = doodle ? serializeDoodle(doodle) : cmd.data;
-      return createCommand("remove", cmd.shapeId, { data });
+      return createCommand("remove", cmd.sid, { data });
     }
     case "remove": {
       // remove → create: use stored data to recreate
-      return createCommand("create", cmd.shapeId, { data: cmd.data });
+      return createCommand("create", cmd.sid, { data: cmd.data });
     }
     case "update": {
       // update → update with previous values
-      const doodle = findDoodleById(cmd.shapeId);
-      if (!doodle || !cmd.changes) return null;
+      const doodle = findDoodleById(cmd.sid);
+      if (!doodle || !cmd.data) return null;
 
-      // Capture current values before the forward command changed them
-      // We use preUpdateSnapshots if available (set at push time),
-      // otherwise read current shape values
       const oldValues = preUpdateSnapshots.get(cmd.id);
       if (oldValues) {
-        // Store old values as the inverse changes, and current new values as snapshots
         const currentValues: Record<string, any> = {};
         for (const field of Object.keys(oldValues)) {
           currentValues[field] = getShapeField(doodle.shape, field);
         }
-        const inverseCmd = createCommand("update", cmd.shapeId, {
-          changes: currentValues,
+        const inverseCmd = createCommand("update", cmd.sid, {
+          data: currentValues,
         });
-        preUpdateSnapshots.set(inverseCmd.id, cmd.changes);
+        preUpdateSnapshots.set(inverseCmd.id, cmd.data);
         return inverseCmd;
       }
 
       // Fallback: read current values from shape
       const currentValues: Record<string, any> = {};
-      for (const field of Object.keys(cmd.changes)) {
+      for (const field of Object.keys(cmd.data)) {
         currentValues[field] = getShapeField(doodle.shape, field);
       }
-      const inverseCmd = createCommand("update", cmd.shapeId, {
-        changes: currentValues,
+      const inverseCmd = createCommand("update", cmd.sid, {
+        data: currentValues,
       });
-      preUpdateSnapshots.set(inverseCmd.id, cmd.changes);
+      preUpdateSnapshots.set(inverseCmd.id, cmd.data);
       return inverseCmd;
     }
   }
+  return null;
 }
 
 export function pushCreateCommand(doodle: Doodle): void {
@@ -226,11 +236,11 @@ export function pushRemoveCommand(doodle: Doodle): void {
 }
 
 export function pushUpdateCommand(
-  shapeId: string,
+  sid: string,
   newValues: Record<string, any>,
   oldValues: Record<string, any>
 ): void {
-  const cmd = createCommand("update", shapeId, { changes: newValues });
+  const cmd = createCommand("update", sid, { data: newValues });
   preUpdateSnapshots.set(cmd.id, oldValues);
   pushCommand(cmd);
 }

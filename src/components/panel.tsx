@@ -66,10 +66,10 @@ export const Panel = () => {
               </WithTooltip>
               <Dropdown
                 trigger={
-                  <button className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums">
+                  <div className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums">
                     {zoom}%
                     <IconChevronDown size={12} stroke={2} />
-                  </button>
+                  </div>
                 }
               >
                 {ZOOM_LEVELS.map((level) => (

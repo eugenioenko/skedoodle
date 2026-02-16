@@ -1,0 +1,21 @@
+{
+  "name": "skedoodle-server",
+  "version": "1.0.0",
+  "description": "Real-time collaboration server for Skedoodle",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node .",
+    "build": "tsc",
+    "dev": "tsc -w"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.5",
+    "typescript": "^5.0.4"
+  }
+}

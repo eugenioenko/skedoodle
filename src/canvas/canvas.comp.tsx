@@ -3,6 +3,7 @@ import { useInitTwoCanvas } from "@/canvas/canvas.hook";
 import { useRef } from "react";
 import { useOptionsStore } from "./canvas.store";
 import { colord } from "colord";
+import { useRemoteCursors } from "@/components/cursors";
 
 interface CanvasProps {
   sketchId: string;
@@ -15,6 +16,7 @@ export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
   const activeTool = useOptionsStore((state) => state.activeTool);
   const toolOption = useOptionsStore((state) => state.toolOption);
   const canvasColor = useOptionsStore((state) => state.canvasColor);
+  useRemoteCursors();
   const bgColor = colord(canvasColor).toHex();
 
   useInitTwoCanvas(containerRef, sketchId, onReady);

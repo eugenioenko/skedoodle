@@ -8,7 +8,7 @@ import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
 import { destroyGrid, initGrid } from "./grid";
 import { useCommandLogStore } from "./history.store";
-// import { io } from "socket.io-client";
+import { syncService } from "@/services/sync.client";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>,
@@ -25,7 +25,6 @@ export const useInitTwoCanvas = (
     const instance = createTwo(containerRef.current);
     const canvasInstance = createCanvas(instance);
     const zuiInstance = createZUI(canvasInstance);
-    //createWS(sketchId);
     const doodlerInstance = new Doodler({
       two: instance,
       canvas: canvasInstance as never,
@@ -48,7 +47,10 @@ export const useInitTwoCanvas = (
     }
 
     // TODO: update here to handle errors on loading local storage
-    doodlerInstance.loadDoodles().finally(() => onReady?.());
+    doodlerInstance.loadDoodles().finally(() => {
+        onReady?.();
+        syncService.connect(sketchId);
+    });
 
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
@@ -61,6 +63,7 @@ export const useInitTwoCanvas = (
     window.addEventListener("keydown", handlers.doKeyDown);
 
     return () => {
+      syncService.disconnect();
       window.removeEventListener("resize", debouncesWindowResize);
       window.removeEventListener("keydown", handlers.doKeyDown);
       currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
@@ -107,42 +110,4 @@ const createZUI = (canvas: Two): ZUI => {
   return zui;
 };
 
-/*
-const createWS = (sketchId: string): void => {
-  return;
-  const socket = io("http://localhost:3003");
 
-  socket.on("connect", () => {
-    const engine = socket.io.engine;
-    const roomId = `${sketchId}/${socket.id}`;
-
-    socket.emit("sketch_host_request", { sketchId: sketchId });
-
-    socket.on("sketch_host_response", (data) => {
-      console.log("sketch_host_response");
-      console.log(data);
-    });
-
-    engine.once("upgrade", () => {
-      // called when the transport is upgraded (i.e. from HTTP long-polling to WebSocket)
-      console.log(engine.transport.name); // in most cases, prints "websocket"
-    });
-
-    engine.on("packet", ({ type, data }) => {
-      // called for each packet received
-    });
-
-    engine.on("packetCreate", ({ type, data }) => {
-      // called for each packet sent
-    });
-
-    engine.on("drain", () => {
-      // called when the write buffer is drained
-    });
-
-    engine.on("close", (reason) => {
-      // called when the underlying connection is closed
-    });
-  });
-};
-*/

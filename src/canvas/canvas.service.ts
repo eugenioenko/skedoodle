@@ -23,6 +23,7 @@ import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
 import { undo, redo, exitTimeTravelMode } from "./history.service";
 import { useCommandLogStore } from "./history.store";
+import { syncService } from "@/services/sync.client";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
@@ -105,12 +106,25 @@ const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
   setCursor(cursor);
 }, 16);
 
+const throttledCursorBroadcast = throttle((e: MouseEvent<HTMLDivElement>) => {
+    if (!useCanvasStore.getState().doodler?.two) {
+        return;
+    }
+    if (!e.currentTarget) {
+        return;
+    }
+    const doodler = getDoodler();
+    const cursor = eventToSurfacePosition(e, doodler?.zui);
+    syncService.sendCursor(cursor.x, cursor.y);
+}, 50);
+
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
 
   const { activeTool, selectedTool } = useOptionsStore.getState();
 
   throttledCursorUpdate(e);
+  throttledCursorBroadcast(e);
 
   // highlight the shapes but only when not actively erasing
   if (selectedTool === "eraser" && activeTool !== "eraser") {

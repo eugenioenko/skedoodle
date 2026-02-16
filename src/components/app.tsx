@@ -44,10 +44,12 @@ export const App = () => {
       )}
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
-        <Canvas sketchId={id} onReady={onReady} />
+        <div className="relative flex-grow flex">
+          <Canvas sketchId={id} onReady={onReady} />
+        </div>
         <Panel />
       </div>
-      <div className="bg-default-2 border-t border-default-1 h-6 overflow-hidden">
+      <div className="bg-default-2 border-t border-default-1 flex-shrink-0">
         <StatusBar />
       </div>
       {isLoading && <Loader />}

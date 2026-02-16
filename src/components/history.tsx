@@ -15,6 +15,8 @@ function commandLabel(cmd: Command): string {
       return `Update shape`;
     case "remove":
       return `Remove ${cmd.data?.t ?? "shape"}`;
+    default:
+      return "Unknown command";
   }
 }
 
@@ -111,10 +113,10 @@ export const History = () => {
               isTimeTraveling && index + 1 > timelinePosition;
 
             return (
-              <button
+              <div
                 key={cmd.id}
                 onClick={() => handleClick(index)}
-                className={`px-2 py-1 text-xs text-left flex items-center gap-2 hover:bg-default-4 ${
+                className={`px-2 py-1 text-xs text-left flex items-center gap-2 hover:bg-default-4 cursor-pointer ${
                   isSelected
                     ? "bg-secondary"
                     : isBeyond
@@ -137,7 +139,7 @@ export const History = () => {
                     <IconGitBranch size={12} stroke={1.5} />
                   </button>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>

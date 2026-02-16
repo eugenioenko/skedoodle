@@ -1,32 +1,31 @@
-import { create } from "zustand";
-import { SerializedDoodle } from "./doodle.utils";
+import { create } from 'zustand';
+import { useSyncStore } from '@/services/sync.store';
 
-export interface Command {
-  id: string;
-  ts: number;
-  uid: string;
-  type: "create" | "update" | "remove";
-  shapeId: string;
-  data?: SerializedDoodle;
-  changes?: Record<string, any>;
+export interface Command<T = any> {
+    id: string; // Unique ID for the command
+    ts: number; // Timestamp
+    uid: string; // User ID
+    type: 'create' | 'update' | 'remove' | 'undo' | 'redo';
+    sid: string; // Shape ID
+    data: T;
 }
-
-const LOCAL_USER_ID = "local-user";
 
 export function createCommand(
-  type: Command["type"],
-  shapeId: string,
-  opts?: { data?: SerializedDoodle; changes?: Record<string, any> }
+    type: Command['type'],
+    sid: string,
+    opts?: { data?: any; }
 ): Command {
-  return {
-    id: crypto.randomUUID(),
-    ts: Date.now(),
-    uid: LOCAL_USER_ID,
-    type,
-    shapeId,
-    ...opts,
-  };
+    const user = useSyncStore.getState().localUser;
+    return {
+        id: crypto.randomUUID(),
+        ts: Date.now(),
+        uid: user?.uid ?? 'local-user',
+        type,
+        sid,
+        data: opts?.data,
+    };
 }
+
 
 export interface CommandLogState {
   commandLog: Command[];
