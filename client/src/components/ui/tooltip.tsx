@@ -183,7 +183,7 @@ export const WithTooltip: React.FC<WithTooltipProps> = ({
   return (
     <Tooltip>
       <TooltipTrigger>{React.cloneElement(children, props)}</TooltipTrigger>
-      <TooltipContent className="py-1 px-2 bg-default-2 border border-default-1 text-white rounded text-xs font-normal max-w-sm">
+      <TooltipContent className="py-1 px-2 bg-default-2 border border-default-1 text-text-primary rounded text-xs font-normal max-w-sm">
         {tooltip}
       </TooltipContent>
     </Tooltip>

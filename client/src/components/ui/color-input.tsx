@@ -39,9 +39,8 @@ export const ColorInput = ({ value, onChange }: ColorInputProps) => {
       >
         <PopoverTrigger
           onClick={() => setIsOpen((v) => !v)}
-          className={`w-[18px] h-[18px] rounded absolute left-1 top-1 ${
-            isOpen ? "border-2 border-highlight" : ""
-          }`}
+          className={`w-[18px] h-[18px] rounded absolute left-1 top-1 ${isOpen ? "border-2 border-highlight" : ""
+            }`}
           style={{ background: rgbValue }}
         >
           &nbsp;
@@ -97,9 +96,8 @@ const AlphaSliderPopover = ({ value, setValue }: AlphaSliderPopoverProps) => {
     >
       <PopoverTrigger
         onClick={() => setIsOpen((v) => !v)}
-        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-white/65" ${
-          isOpen ? "border-highlight" : "border-transparent"
-        }`}
+        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-text-primary/65" ${isOpen ? "border-highlight" : "border-transparent"
+          }`}
       >
         <IconPercentage size={18} stroke={1} />
       </PopoverTrigger>

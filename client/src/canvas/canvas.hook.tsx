@@ -6,9 +6,7 @@ import { ZUI } from "two.js/extras/jsm/zui";
 import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
-import { destroyGrid, initGrid } from "./grid";
-import { useCommandLogStore } from "./history.store";
-import { syncService } from "@/services/sync.client";
+import { destroyGrid, initGrid } from "./canvas.grid";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>,
@@ -46,12 +44,6 @@ export const useInitTwoCanvas = (
       initGrid(containerRef.current, instance, gridSize, gridType, gridColor, gridMinZoom);
     }
 
-    // TODO: update here to handle errors on loading local storage
-    doodlerInstance.loadDoodles().finally(() => {
-        onReady?.();
-        syncService.connect(sketchId);
-    });
-
     // adding a passive event listener for wheel to be able to prevent default
     const currentContainer = containerRef.current;
     currentContainer.addEventListener("wheel", handlers.doMouseWheel, {
@@ -62,8 +54,10 @@ export const useInitTwoCanvas = (
     window.addEventListener("resize", debouncesWindowResize);
     window.addEventListener("keydown", handlers.doKeyDown);
 
+    // Call onReady callback after everything is set up
+    onReady?.();
+
     return () => {
-      syncService.disconnect();
       window.removeEventListener("resize", debouncesWindowResize);
       window.removeEventListener("keydown", handlers.doKeyDown);
       currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
@@ -72,12 +66,9 @@ export const useInitTwoCanvas = (
         currentContainer.removeChild(currentContainer.firstChild);
       }
 
-      // clear references
-      // TODO: move this somewhere else
       instance.remove();
       const { setDoodles } = useCanvasStore.getState();
       setDoodles([]);
-      useCommandLogStore.getState().clearSession();
     };
   }, [containerRef, onReady, sketchId]);
 };

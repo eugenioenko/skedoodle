@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { UserInfo } from './protocol';
+import { UserInfo } from './sync.model';
 
 type RemoteCursor = {
     x: number;
@@ -34,7 +34,7 @@ export const useSyncStore = create<SyncState>((set) => ({
     setReconnecting: (status) => set({ isReconnecting: status }),
     setUsers: (users) => set({ roomUsers: users }),
     addUser: (user) => set((state) => ({ roomUsers: [...state.roomUsers, user] })),
-    removeUser: (uid) => set((state) => ({ 
+    removeUser: (uid) => set((state) => ({
         roomUsers: state.roomUsers.filter(u => u.uid !== uid),
         remoteCursors: new Map(state.remoteCursors).set(uid, undefined as any)
     })),

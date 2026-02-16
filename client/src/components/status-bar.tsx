@@ -1,6 +1,6 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
 import { useZoomStore } from "@/canvas/tools/zoom.tool";
-import { useSyncStore } from "@/services/sync.store";
+import { useSyncStore } from "@/sync/sync.store";
 
 export const StatusBar = () => {
     const cursor = useCanvasStore((state) => state.cursor);

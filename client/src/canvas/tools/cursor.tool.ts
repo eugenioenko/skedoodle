@@ -5,7 +5,7 @@ import {
   eventToSurfacePosition,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
-import { syncService } from "@/services/sync.client";
+import { syncService } from "@/sync/sync.client";
 
 
 

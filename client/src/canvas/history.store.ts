@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useSyncStore } from '@/services/sync.store';
+import { useSyncStore } from '@/sync/sync.store';
 import { ulid } from 'ulid';
 
 export interface Command<T = any> {

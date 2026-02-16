@@ -12,7 +12,7 @@ import {
   storageClient,
   SketchMeta,
 } from "@/services/storage.client";
-import { syncService } from "@/services/sync.client";
+import { syncService } from "@/sync/sync.client";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -87,9 +87,12 @@ export function executeForward(cmd: Command): void {
 }
 
 // --- Debounced auto-save ---
-let saveTimer: ReturnType<typeof setTimeout> | undefined;
+// let saveTimer: ReturnType<typeof setTimeout> | undefined;
 
 function scheduleSave(): void {
+  // TODO: re-enable auto-saving once we have a more robust sync mechanism in place 
+  return;
+  /*
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try {
@@ -98,6 +101,7 @@ function scheduleSave(): void {
       // doodler may not be ready yet
     }
   }, 1000);
+  */
 }
 
 export function applyRemoteCommand(cmd: Command): void {

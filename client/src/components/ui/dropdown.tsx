@@ -33,7 +33,7 @@ const MenuContext = React.createContext<{
 }>({
   getItemProps: () => ({}),
   activeIndex: null,
-  setActiveIndex: () => {},
+  setActiveIndex: () => { },
   isOpen: false,
 });
 
@@ -173,7 +173,7 @@ export const DropdownItem = React.forwardRef<
       ref={useMergeRefs([item.ref, forwardedRef])}
       type="button"
       role="menuitem"
-      className="bg-default-2 py-2 px-3 flex items-center gap-2 text-white hover:bg-default-3"
+      className="bg-default-2 py-2 px-3 flex items-center gap-2 text-text-primary hover:bg-default-3"
       tabIndex={isActive ? 0 : -1}
       disabled={disabled}
       {...menu.getItemProps({

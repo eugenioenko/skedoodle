@@ -33,6 +33,11 @@ const config: Config = {
           3: "var(--color-default-3)",
           4: "var(--color-default-4)",
           5: "var(--color-default-5)",
+          6: "var(--color-default-6)",
+        },
+        text: {
+          primary: "var(--color-text-primary)",
+          secondary: "var(--color-text-secondary)",
         },
       },
       animation: {

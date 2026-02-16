@@ -27,10 +27,9 @@ import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
-import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/grid";
+import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/canvas.grid";
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
-import { Sketches } from "./sketches";
 import { pushUpdateCommand } from "@/canvas/history.service";
 
 // Debounced property edit tracking for undo/redo
@@ -214,9 +213,6 @@ export const Properties = () => {
                   }}
                 />
               </div>
-            </div>
-            <div>
-              <Sketches />
             </div>
           </>
         )}

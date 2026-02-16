@@ -74,9 +74,9 @@ export class Doodler {
   }
 
   addDoodle(doodle: Doodle): void {
-    if (!doodle.shape.id) {
-      doodle.shape.id = ulid();
-    }
+
+    // override id to make it globally unique, preventing conflicts when merging command logs from multiple users
+    doodle.shape.id = ulid();
     const { doodles, setDoodles } = useCanvasStore.getState();
     const newDoodles = [...doodles, doodle];
     setDoodles(newDoodles);
@@ -103,12 +103,12 @@ export class Doodler {
     const meta: SketchMeta = existingMeta
       ? { ...existingMeta, updatedAt: now }
       : {
-          id: this.sketchId,
-          name: this.sketchId, // Fallback name
-          createdAt: now,
-          updatedAt: now,
-          ownerId: user.id,
-        };
+        id: this.sketchId,
+        name: this.sketchId, // Fallback name
+        createdAt: now,
+        updatedAt: now,
+        ownerId: user.id,
+      };
     await storageClient.setSketchMeta(this.sketchId, meta);
   }
 
@@ -117,34 +117,26 @@ export class Doodler {
       return;
     }
 
-    // Try new storage format first
+    // load metadata, title, canvas color, etc
+    // const meta = await storageClient.getSketchMeta(this.sketchId);
+
+
     const commands = await storageClient.getSketchCommands(this.sketchId);
-    if (commands && commands.length) {
-      useCommandLogStore.getState().setCommandLog(commands);
-      for (const cmd of commands) {
-        try {
-          executeForward(cmd);
-        } catch (e) {
-          console.warn("Failed to replay command:", e);
-        }
-      }
-      this.throttledTwoUpdate();
+    if (!commands) {
+      console.warn(`No commands found for sketch ${this.sketchId}`);
       return;
     }
-    // No legacy migration needed as local storage is removed.
-    // If no commands found, create a new sketch entry
-    const { user } = useAuthStore.getState();
-    if (user) {
-        const now = Date.now();
-        const newSketchMeta: SketchMeta = {
-            id: this.sketchId,
-            name: this.sketchId,
-            createdAt: now,
-            updatedAt: now,
-            ownerId: user.id,
-        };
-        await storageClient.createSketch(newSketchMeta);
+    if (commands.length) {
+      useCommandLogStore.getState().setCommandLog(commands);
     }
+    for (const cmd of commands) {
+      try {
+        executeForward(cmd);
+      } catch (e) {
+        console.warn("Failed to replay command:", e);
+      }
+    }
+    this.throttledTwoUpdate();
   }
 }
 
@@ -160,3 +152,16 @@ export function getDoodler(): Doodler {
   }
   return doodlerInstance as Doodler;
 }
+
+
+/*
+ // TODO: update here to handle errors on loading local storage
+    doodlerInstance.loadDoodles().finally(() => {
+        onReady?.();
+        syncService.connect(sketchId);
+    });
+
+
+syncService.disconnect();
+useCommandLogStore.getState().clearSession();
+*/

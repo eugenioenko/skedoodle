@@ -26,6 +26,10 @@
   --color-default-3: #3c3c3c;
   --color-default-4: #4d4d4d;
   --color-default-5: #5e5e5e;
+  --color-default-6: #6f6f6f;
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e7e7e7;
 
   --width-breakpoint: 768px;
 }
@@ -61,7 +65,7 @@ canvas {
 }
 
 input[type="text"] {
-  @apply border border-transparent text-white px-2 py-0.5 rounded bg-default-3 shadow-sm hover:border-white/10 focus-visible:border-highlight focus-visible:outline-none w-full;
+  @apply border border-transparent text-text-primary px-2 py-0.5 rounded bg-default-3 shadow-sm hover:border-white/10 focus-visible:border-highlight focus-visible:outline-none w-full;
 }
 
 button {
@@ -81,7 +85,7 @@ input.alpha-input {
 }
 
 input.app-text-input {
-  @apply mt-1 block w-full px-4 py-3 bg-default-2 border border-default-3 rounded-md text-white placeholder-white/70;
+  @apply mt-1 block w-full px-4 py-3 bg-default-2 border border-default-3 rounded-md text-text-primary placeholder-white/70;
 }
 
 input[type="number"]::-webkit-inner-spin-button,

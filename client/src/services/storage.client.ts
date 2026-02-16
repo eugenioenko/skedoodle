@@ -31,7 +31,8 @@ async function getSketchCommands(id: string): Promise<Command[] | null> {
       if (response.status === 404) return null;
       throw new Error(`Failed to fetch sketch commands: ${response.statusText}`);
     }
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error(`Error getting commands for sketch ${id}:`, error);
     return null;

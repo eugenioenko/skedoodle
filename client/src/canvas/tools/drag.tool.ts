@@ -1,7 +1,7 @@
 import { MouseEvent } from "react";
 import Two from "two.js";
 import { getDoodler } from "../doodler.client";
-import { updateGrid } from "../grid";
+import { updateGrid } from "../canvas.grid";
 
 let mouse = new Two.Vector();
 

@@ -15,7 +15,7 @@ export const App = () => {
   useWindowWheelPrevent();
   const { id } = useParams();
   const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
-  const loadDelay = 450;
+  const loadDelay = 650;
   const [isLoading, setIsLoading] = useState(true);
 
   const onReady = useCallback(() => {
@@ -27,12 +27,12 @@ export const App = () => {
   }
 
   return (
-    <main className="w-dvw h-dvh flex flex-col text-white relative">
+    <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
       <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4">
         <ToolOptions />
       </div>
       {isTimeTraveling && (
-        <div className="bg-amber-600/90 text-white text-xs text-center py-1 px-4">
+        <div className="bg-amber-600/90 text-text-primary text-xs text-center py-1 px-4">
           Timeline Mode (read-only) — Press Escape to exit
           <button
             onClick={exitTimeTravelMode}

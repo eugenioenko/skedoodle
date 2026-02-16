@@ -1,9 +1,12 @@
 import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/canvas.hook";
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useOptionsStore } from "./canvas.store";
 import { colord } from "colord";
 import { useRemoteCursors } from "@/components/cursors";
+import { getDoodler } from "./doodler.client";
+import { useSync } from "@/sync/sync.hook";
+
 
 interface CanvasProps {
   sketchId: string;
@@ -11,15 +14,24 @@ interface CanvasProps {
 }
 
 export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
+  const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
   const activeTool = useOptionsStore((state) => state.activeTool);
   const toolOption = useOptionsStore((state) => state.toolOption);
   const canvasColor = useOptionsStore((state) => state.canvasColor);
-  useRemoteCursors();
   const bgColor = colord(canvasColor).toHex();
 
-  useInitTwoCanvas(containerRef, sketchId, onReady);
+  const onTwoReady = useCallback(async () => {
+    console.log("Canvas ready, loading doodles...");
+    await getDoodler().loadDoodles();
+    onReady?.();
+    setIsReady(true);
+  }, [onReady, sketchId]);
+
+  useInitTwoCanvas(containerRef, sketchId, onTwoReady);
+  useRemoteCursors(isReady);
+  useSync(sketchId, isReady);
 
   return (
     <div

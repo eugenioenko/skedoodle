@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useSyncStore } from '@/services/sync.store';
+import { useSyncStore } from '@/sync/sync.store';
 import { getDoodler } from '@/canvas/doodler.client';
 import { useZoomStore } from '@/canvas/tools/zoom.tool';
 import Two from 'two.js';
@@ -13,7 +13,7 @@ type CursorEntry = {
   label: Text;
 };
 
-export function useRemoteCursors() {
+export function useRemoteCursors(isReady: boolean) {
   const remoteCursors = useSyncStore(s => s.remoteCursors);
   const isConnected = useSyncStore(s => s.isConnected);
   const localUser = useSyncStore(s => s.localUser);
@@ -21,7 +21,7 @@ export function useRemoteCursors() {
   const shapesRef = useRef(new Map<string, CursorEntry>());
 
   useEffect(() => {
-    if (!isConnected || !localUser) return;
+    if (!isConnected || !localUser || !isReady) return;
 
     let doodler;
     try {
@@ -79,7 +79,7 @@ export function useRemoteCursors() {
       } catch { /* doodler may already be destroyed */ }
       shapesRef.current.clear();
     };
-  }, []);
+  }, [isReady]);
 
   return null;
 }

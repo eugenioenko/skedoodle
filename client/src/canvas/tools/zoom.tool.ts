@@ -1,7 +1,7 @@
 import { MouseEvent } from "react";
 import { create } from "zustand";
 import { getDoodler } from "../doodler.client";
-import { updateGrid } from "../grid";
+import { updateGrid } from "../canvas.grid";
 import { usePointerStore } from "./pointer.tool";
 
 export interface ZoomState {

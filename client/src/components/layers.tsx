@@ -49,11 +49,10 @@ const DoodleItem = ({ doodle, isSelected }: ShapeProps) => {
   return (
     <button
       type="button"
-      className={`flex items-center hover:bg-default-4 text-left ${
-        isSelected ? "bg-secondary" : ""
-      }`}
+      className={`flex items-center hover:bg-default-4 text-left ${isSelected ? "bg-secondary" : ""
+        }`}
     >
-      <div className="w-8 h-8 flex flex-center text-default-6">
+      <div className="w-8 h-8 flex flex-center text-text-secondary">
         <DoodleIcon type={doodle.type} />
       </div>
       <div className="flex-grow">{doodle.type}</div>
