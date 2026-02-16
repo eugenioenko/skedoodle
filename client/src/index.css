@@ -73,11 +73,15 @@ input.slider-input {
 }
 
 input.color-input {
-  @apply pl-[26px]  pr-1 text-sm max-w-24 rounded-r-none border-r-default-1;
+  @apply pl-[26px] pr-1 text-sm max-w-24 rounded-r-none border-r-default-1;
 }
 
 input.alpha-input {
-  @apply pl-1  pr-[26px] text-sm rounded-l-none max-w-16;
+  @apply pr-[26px] text-sm rounded-l-none max-w-16;
+}
+
+input.app-text-input {
+  @apply mt-1 block w-full px-4 py-3 bg-default-2 border border-default-3 rounded-md text-white placeholder-white/70;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -85,6 +89,7 @@ input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type="number"] {
   -moz-appearance: textfield;
 }
@@ -96,6 +101,7 @@ input[type="number"] {
 .rc-slider-rail {
   @apply !bg-default-3;
 }
+
 .rc-slider-track,
 .rc-slider-tracks {
   @apply !bg-white;
@@ -138,6 +144,7 @@ input[type="number"] {
   from {
     stroke-dashoffset: 490;
   }
+
   to {
     stroke-dashoffset: 0;
   }

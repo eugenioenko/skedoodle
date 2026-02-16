@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  getAllSketchIds,
-  getSketchMeta,
+  storageClient,
   SketchMeta,
 } from "@/services/storage.client";
 
@@ -10,12 +9,7 @@ export const Sketches = () => {
   const [sketches, setSketches] = useState<SketchMeta[]>([]);
 
   useEffect(() => {
-    const ids = getAllSketchIds();
-    const metas = ids
-      .map((id) => getSketchMeta(id))
-      .filter((m): m is SketchMeta => !!m)
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-    setSketches(metas);
+    storageClient.getAllSketches().then(setSketches);
   }, []);
 
   return (

@@ -5,12 +5,13 @@ import {
   IconChevronDown,
   IconFocus2,
   IconHome,
+  IconLogout,
   IconMenu2,
   IconMinus,
   IconPlus,
   IconZoomIn,
 } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Properties } from "./properties";
 import { Button } from "./ui/button";
 import { useOptionsStore } from "@/canvas/canvas.store";
@@ -18,6 +19,7 @@ import { WithTooltip } from "./ui/tooltip";
 import { undo, redo } from "@/canvas/history.service";
 import { useCommandLogStore } from "@/canvas/history.store";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
+import { useAuthStore } from "@/stores/auth.store";
 
 const ZOOM_LEVELS = [25, 50, 75, 100, 150, 200, 400];
 
@@ -28,6 +30,12 @@ export const Panel = () => {
   const undoCount = useCommandLogStore((state) => state.sessionUndoStack.length);
   const redoCount = useCommandLogStore((state) => state.sessionRedoStack.length);
   const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+    navigate('/login');
+  };
 
   return (
     <div
@@ -94,6 +102,11 @@ export const Panel = () => {
                 <IconHome size={20} stroke={1} />
               </Button>
             </Link>
+          </WithTooltip>
+          <WithTooltip tooltip="Logout">
+            <Button onClick={handleLogout}>
+              <IconLogout size={20} stroke={1} />
+            </Button>
           </WithTooltip>
           <WithTooltip tooltip="Toggle panel">
             <Button onClick={() => setIsPanelOpen(!isPanelOpen)}>

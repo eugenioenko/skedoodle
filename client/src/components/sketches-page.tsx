@@ -24,19 +24,11 @@ export const SketchesPage = () => {
   async function loadSketches() {
     if (!user) return;
     try {
-      const sketchIds = await storageClient.getAllSketchIds();
-      const metas: SketchMeta[] = [];
-      for (const id of sketchIds) {
-        const meta = await storageClient.getSketchMeta(id);
-        if (meta) {
-          metas.push(meta);
-        }
-      }
-      setSketches(metas.sort((a, b) => b.updatedAt - a.updatedAt));
+      const metas = await storageClient.getAllSketches();
+      setSketches(metas);
     } catch (error) {
       console.error("Failed to load sketches:", error);
-      // Handle error, e.g., redirect to login if unauthorized
-      if (error instanceof Error && error.message.includes('Authentication failed')) {
+      if (error instanceof Error && error.message.includes('Not authenticated')) {
         useAuthStore.getState().logout();
         navigate('/login');
       }

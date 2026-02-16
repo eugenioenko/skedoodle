@@ -1,6 +1,6 @@
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore } from '@/stores/auth.store';
 
-const API_BASE_URL = 'http://localhost:3013/api/auth';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/auth`;
 
 class AuthService {
 

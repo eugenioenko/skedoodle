@@ -1,9 +1,7 @@
 import { Command } from "@/canvas/history.store";
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore } from '@/stores/auth.store';
 
-const API_BASE_URL = 'http://localhost:3013/api'; // Assuming a REST API on the same port as WS
-
-// --- Sketch-specific storage ---
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface SketchMeta {
   id: string;
@@ -26,35 +24,25 @@ async function authenticatedFetch(url: string, options: RequestInit = {}): Promi
   return fetch(url, { ...options, headers });
 }
 
-export async function getSketchCommands(id: string): Promise<Command[] | null> {
+async function getSketchCommands(id: string): Promise<Command[] | null> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}/commands`);
     if (!response.ok) {
       if (response.status === 404) return null;
       throw new Error(`Failed to fetch sketch commands: ${response.statusText}`);
     }
-    const rawCommands = await response.json();
-    return rawCommands.map((cmd: any) => ({
-      ...cmd,
-      ts: new Date(cmd.ts).getTime(), // Convert ISO string back to timestamp
-      data: JSON.parse(cmd.data), // Parse stringified JSON data
-    }));
+    return await response.json();
   } catch (error) {
     console.error(`Error getting commands for sketch ${id}:`, error);
     return null;
   }
 }
 
-export async function setSketchCommands(id: string, commands: Command[]): Promise<void> {
+async function setSketchCommands(id: string, commands: Command[]): Promise<void> {
   try {
-    const payload = commands.map(cmd => ({
-      ...cmd,
-      ts: new Date(cmd.ts).toISOString(), // Convert timestamp to ISO string for DB
-      data: JSON.stringify(cmd.data), // Stringify complex data for DB storage
-    }));
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}/commands`, {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: JSON.stringify(commands),
     });
     if (!response.ok) {
       throw new Error(`Failed to save sketch commands: ${response.statusText}`);
@@ -64,7 +52,7 @@ export async function setSketchCommands(id: string, commands: Command[]): Promis
   }
 }
 
-export async function getSketchMeta(id: string): Promise<SketchMeta | null> {
+async function getSketchMeta(id: string): Promise<SketchMeta | null> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`);
     if (!response.ok) {
@@ -78,7 +66,7 @@ export async function getSketchMeta(id: string): Promise<SketchMeta | null> {
   }
 }
 
-export async function setSketchMeta(id: string, meta: SketchMeta): Promise<void> {
+async function setSketchMeta(id: string, meta: Partial<SketchMeta>): Promise<void> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`, {
       method: 'PUT',
@@ -92,7 +80,7 @@ export async function setSketchMeta(id: string, meta: SketchMeta): Promise<void>
   }
 }
 
-export async function createSketch(meta: SketchMeta): Promise<void> {
+async function createSketch(meta: SketchMeta): Promise<void> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches`, {
       method: 'POST',
@@ -106,7 +94,7 @@ export async function createSketch(meta: SketchMeta): Promise<void> {
   }
 }
 
-export async function deleteSketch(id: string): Promise<void> {
+async function deleteSketch(id: string): Promise<void> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`, {
       method: 'DELETE',
@@ -119,17 +107,26 @@ export async function deleteSketch(id: string): Promise<void> {
   }
 }
 
-export async function getAllSketchIds(): Promise<string[]> {
+async function getAllSketches(): Promise<SketchMeta[]> {
   try {
     const response = await authenticatedFetch(`${API_BASE_URL}/sketches`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch all sketch IDs: ${response.statusText}`);
+      throw new Error(`Failed to fetch sketches: ${response.statusText}`);
     }
-    const sketches: SketchMeta[] = await response.json();
-    return sketches.map(s => s.id);
+    return await response.json();
   } catch (error) {
-    console.error('Error getting all sketch IDs:', error);
+    console.error('Error getting sketches:', error);
     return [];
   }
 }
+
+export const storageClient = {
+  getSketchCommands,
+  setSketchCommands,
+  getSketchMeta,
+  setSketchMeta,
+  createSketch,
+  deleteSketch,
+  getAllSketches,
+};
 

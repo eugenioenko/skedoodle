@@ -5,8 +5,8 @@ import { SketchesPage } from "./components/sketches-page.tsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import "rc-slider/assets/index.css";
-import { LoginPage } from "./pages/LoginPage.tsx";
-import { RegisterPage } from "./pages/RegisterPage.tsx";
+import { LoginPage } from "./components/login-page.tsx";
+import { RegisterPage } from "./components/register-page.tsx";
 import { AuthGuard } from "./components/AuthGuard.tsx";
 
 createRoot(document.getElementById("root")!).render(

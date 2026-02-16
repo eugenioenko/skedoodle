@@ -20,6 +20,8 @@
 /server/node_modules
 /server/dist
 /server/data
+/server/dev.db
+/server/dev.db-journal
 
 # production
 /build
@@ -35,6 +37,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env*.local
 
 # vercel

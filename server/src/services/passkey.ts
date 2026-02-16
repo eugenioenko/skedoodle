@@ -9,13 +9,14 @@ import type {
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
 } from "@simplewebauthn/types";
-import { PrismaClient, Credential as PrismaCredential } from "@prisma/client";
+import { prisma } from "../prisma";
 
-const prisma = new PrismaClient();
+const rpID = process.env.RP_ID || "localhost";
+const rpName = process.env.RP_NAME || "Skedoodle";
+const rpOrigin = process.env.RP_ORIGIN || "";
 
-const rpID = "localhost";
-const rpName = "Skedoodle";
-const rpOrigin = "http://localhost:5173";
+// In-memory challenge store (per-user, short-lived)
+const challengeStore = new Map<string, string>();
 
 export async function getRegistrationOptions(username: string) {
   const existingUser = await prisma.user.findUnique({
@@ -38,12 +39,7 @@ export async function getRegistrationOptions(username: string) {
     },
   });
 
-  await prisma.challenge.create({
-    data: {
-        challenge: options.challenge,
-    },
-  });
-
+  challengeStore.set(`reg:${username}`, options.challenge);
   return options;
 }
 
@@ -51,18 +47,14 @@ export async function verifyRegistration(
   username: string,
   response: RegistrationResponseJSON
 ) {
-  const challenge = await prisma.challenge.findFirst({
-    where: { challenge: response.id },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  if (!challenge) {
+  const expectedChallenge = challengeStore.get(`reg:${username}`);
+  if (!expectedChallenge) {
     throw new Error("Registration challenge not found or expired");
   }
 
   const verification = await verifyRegistrationResponse({
     response,
-    expectedChallenge: challenge.challenge,
+    expectedChallenge,
     expectedOrigin: rpOrigin,
     expectedRPID: rpID,
     requireUserVerification: false,
@@ -72,7 +64,7 @@ export async function verifyRegistration(
     throw new Error("Registration verification failed");
   }
 
-  await prisma.challenge.delete({ where: { id: challenge.id } });
+  challengeStore.delete(`reg:${username}`);
 
   const { credential } = verification.registrationInfo;
 
@@ -107,7 +99,7 @@ export async function getLoginOptions(username: string) {
 
   const options = await generateAuthenticationOptions({
     rpID,
-    allowCredentials: user.credentials.map((cred: PrismaCredential) => ({
+    allowCredentials: user.credentials.map((cred) => ({
       id: cred.credentialId,
       transports: cred.transports
         ? (JSON.parse(cred.transports) as AuthenticatorTransportFuture[])
@@ -116,12 +108,7 @@ export async function getLoginOptions(username: string) {
     userVerification: "preferred",
   });
 
-  await prisma.challenge.create({
-    data: {
-      challenge: options.challenge,
-    },
-  });
-
+  challengeStore.set(`auth:${user.id}`, options.challenge);
   return { options, userId: user.id };
 }
 
@@ -138,19 +125,13 @@ export async function verifyLogin(
     throw new Error("User not found");
   }
 
-  const challenge = await prisma.challenge.findFirst({
-    where: {
-        challenge: response.id,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  if (!challenge) {
+  const expectedChallenge = challengeStore.get(`auth:${user.id}`);
+  if (!expectedChallenge) {
     throw new Error("Authentication challenge not found or expired");
   }
-  
+
   const credential = user.credentials.find(
-    (c: PrismaCredential) => c.credentialId === response.id
+    (c) => c.credentialId === response.id
   );
   if (!credential) {
     throw new Error("Credential not found");
@@ -158,7 +139,7 @@ export async function verifyLogin(
 
   const verification = await verifyAuthenticationResponse({
     response,
-    expectedChallenge: challenge.challenge,
+    expectedChallenge,
     expectedOrigin: rpOrigin,
     expectedRPID: rpID,
     requireUserVerification: false,
@@ -176,7 +157,7 @@ export async function verifyLogin(
     throw new Error("Authentication verification failed");
   }
 
-  await prisma.challenge.delete({ where: { id: challenge.id } });
+  challengeStore.delete(`auth:${user.id}`);
 
   // Update counter
   await prisma.credential.update({

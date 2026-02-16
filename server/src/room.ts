@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import type { Command, UserInfo } from './protocol';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './prisma';
 
 type Client = {
   ws: WebSocket;
@@ -11,22 +11,21 @@ export class Room {
   private clients = new Map<WebSocket, Client>();
   private commands: Command[] = [];
   private cleanupTimeout: NodeJS.Timeout | null = null;
-  private prisma: PrismaClient;
 
-  constructor(private sketchId: string, private onEmpty: (sketchId: string) => void, prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(private sketchId: string, private onEmpty: (sketchId: string) => void) {
     this.loadInitialCommands();
   }
 
   private async loadInitialCommands() {
-    const dbCommands = await this.prisma.command.findMany({
+    const dbCommands = await prisma.command.findMany({
         where: { sid: this.sketchId }, // Assuming sketchId is used as sid for global commands
         orderBy: { ts: 'asc' },
     });
     this.commands = dbCommands.map(cmd => ({
         ...cmd,
-        ts: cmd.ts.getTime(), // Convert Date to timestamp
-        type: cmd.type as Command['type'], // Cast to correct type
+        ts: cmd.ts.getTime(),
+        type: cmd.type as Command['type'],
+        data: JSON.parse(cmd.data),
     }));
     console.log(`[Room:${this.sketchId}] Loaded ${this.commands.length} initial commands from DB.`);
   }
@@ -80,7 +79,7 @@ export class Room {
     this.commands.push(command);
     this.broadcast(JSON.stringify({ type: 'command', command }), fromWs);
     // Persist command to DB
-    this.prisma.command.create({
+    prisma.command.create({
         data: {
             id: command.id,
             ts: new Date(command.ts),
