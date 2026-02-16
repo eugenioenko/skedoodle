@@ -1,6 +1,6 @@
 export const Loader = () => {
   return (
-    <div className="absolute inset-0 bg-default-1 flex flex-center transition-opacity">
+    <div className="absolute inset-0 bg-default-1 flex flex-center transition-opacity z-50">
       <div className="w-64">
         <svg
           width="100%"
