@@ -11,14 +11,15 @@ export class Room {
   private clients = new Map<WebSocket, Client>();
   private commands: Command[] = [];
   private cleanupTimeout: NodeJS.Timeout | null = null;
+  private ready: Promise<void>;
 
   constructor(private sketchId: string, private onEmpty: (sketchId: string) => void) {
-    this.loadInitialCommands();
+    this.ready = this.loadInitialCommands();
   }
 
   private async loadInitialCommands() {
     const dbCommands = await prisma.command.findMany({
-        where: { sid: this.sketchId }, // Assuming sketchId is used as sid for global commands
+        where: { sketchId: this.sketchId },
         orderBy: { ts: 'asc' },
     });
     this.commands = dbCommands.map(cmd => ({
@@ -30,7 +31,8 @@ export class Room {
     console.log(`[Room:${this.sketchId}] Loaded ${this.commands.length} initial commands from DB.`);
   }
 
-  addClient(ws: WebSocket, user: UserInfo) {
+  async addClient(ws: WebSocket, user: UserInfo) {
+    await this.ready;
     if (this.cleanupTimeout) {
       clearTimeout(this.cleanupTimeout);
       this.cleanupTimeout = null;
@@ -85,8 +87,9 @@ export class Room {
             ts: new Date(command.ts),
             uid: command.uid,
             type: command.type,
-            sid: command.sid, // Assuming sid is sketchId for global commands
+            sid: command.sid,
             data: JSON.stringify(command.data),
+            sketchId: this.sketchId,
         },
     }).catch(err => console.error(`[Room:${this.sketchId}] Failed to persist command:`, err));
   }
