@@ -13,6 +13,8 @@ export interface SketchMeta {
   positionX?: number;
   positionY?: number;
   zoom?: number;
+  public?: boolean;
+  ownerName?: string;
 }
 
 async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
@@ -125,6 +127,19 @@ async function getAllSketches(): Promise<SketchMeta[]> {
   }
 }
 
+async function getCommunitySketches(): Promise<SketchMeta[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/sketches/community`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch community sketches: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting community sketches:', error);
+    return [];
+  }
+}
+
 export const storageClient = {
   getSketchCommands,
   setSketchCommands,
@@ -133,5 +148,6 @@ export const storageClient = {
   createSketch,
   deleteSketch,
   getAllSketches,
+  getCommunitySketches,
 };
 

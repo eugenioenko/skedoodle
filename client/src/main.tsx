@@ -14,9 +14,9 @@ createRoot(document.getElementById("root")!).render(
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/" element={<SketchesPage />} />
+      <Route path="/sketches" element={<SketchesPage />} />
       <Route element={<AuthGuard />}>
-        <Route path="/" element={<SketchesPage />} />
-        <Route path="/sketches" element={<SketchesPage />} />
         <Route path="/sketch/:id" element={<App />} />
       </Route>
     </Routes>

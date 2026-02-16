@@ -22,6 +22,29 @@ app.use(cors({
 }));
 
 app.use('/api/auth', authRoutes);
+
+// Public community endpoint — no auth required
+app.get('/api/sketches/community', async (_req, res) => {
+  try {
+    const sketches = await prisma.sketch.findMany({
+      where: { public: true },
+      select: {
+        id: true, name: true, color: true, public: true,
+        createdAt: true, updatedAt: true, ownerId: true,
+        owner: { select: { username: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    res.json(sketches.map(s => ({
+      ...s,
+      ownerName: s.owner.username,
+      owner: undefined,
+    })));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.use('/api/sketches', sketchRoutes);
 
 app.get('/', (req, res) => {

@@ -4,14 +4,19 @@ import { prisma } from '../prisma';
 
 const router = Router();
 
-router.use(requireAuth); // All routes in this router require authentication
+const sketchSelect = {
+  id: true, name: true, color: true, positionX: true, positionY: true,
+  zoom: true, public: true, createdAt: true, updatedAt: true, ownerId: true,
+} as const;
+
+router.use(requireAuth);
 
 // GET all sketches for the authenticated user
 router.get('/', async (req: any, res) => {
   try {
     const sketches = await prisma.sketch.findMany({
       where: { ownerId: req.userId },
-      select: { id: true, name: true, color: true, positionX: true, positionY: true, zoom: true, createdAt: true, updatedAt: true, ownerId: true },
+      select: sketchSelect,
       orderBy: { updatedAt: 'desc' },
     });
     res.json(sketches);
@@ -41,9 +46,9 @@ router.post('/', async (req: any, res) => {
 router.get('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
-    const sketch = await prisma.sketch.findUnique({
-      where: { id, ownerId: req.userId },
-      select: { id: true, name: true, color: true, positionX: true, positionY: true, zoom: true, createdAt: true, updatedAt: true, ownerId: true },
+    const sketch = await prisma.sketch.findFirst({
+      where: { id, OR: [{ ownerId: req.userId }, { public: true }] },
+      select: sketchSelect,
     });
     if (!sketch) {
       res.status(404).json({ error: 'Sketch not found' });
@@ -60,9 +65,15 @@ router.put('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
     const { name, color } = req.body;
+    const isPublic = req.body.public;
     const updatedSketch = await prisma.sketch.update({
       where: { id, ownerId: req.userId },
-      data: { ...(name !== undefined && { name }), ...(color !== undefined && { color }), updatedAt: new Date() },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(color !== undefined && { color }),
+        ...(isPublic !== undefined && { public: isPublic }),
+        updatedAt: new Date(),
+      },
     });
     res.json(updatedSketch);
   } catch (error: any) {
@@ -87,6 +98,15 @@ router.delete('/:id', async (req: any, res) => {
 router.get('/:id/commands', async (req: any, res) => {
   try {
     const { id } = req.params;
+    // Verify access: owner or public sketch
+    const sketch = await prisma.sketch.findFirst({
+      where: { id, OR: [{ ownerId: req.userId }, { public: true }] },
+      select: { id: true },
+    });
+    if (!sketch) {
+      res.status(404).json({ error: 'Sketch not found' });
+      return;
+    }
     const commands = await prisma.command.findMany({
       where: { sid: id },
       orderBy: { ts: 'asc' },

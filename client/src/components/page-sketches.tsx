@@ -4,9 +4,12 @@ import {
   storageClient,
   SketchMeta,
 } from "@/services/storage.client";
-import { IconPlus, IconEdit, IconClock, IconUser, IconTrash, IconLogout, IconPencil } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconClock, IconUser, IconTrash, IconPencil, IconWorld, IconWorldOff } from "@tabler/icons-react";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
+import { Navbar, NavTab } from "./navbar";
+
+type Tab = "community" | "mine";
 
 const EditableTitle = ({
   name,
@@ -66,19 +69,46 @@ const EditableTitle = ({
   );
 };
 
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getRelativeTime(ts: number): string {
+  const now = Date.now();
+  const diff = now - ts;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return formatDate(ts);
+}
+
 export const SketchesPage = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<Tab>("community");
   const [sketches, setSketches] = useState<SketchMeta[]>([]);
+  const [communitySketches, setCommunitySketches] = useState<SketchMeta[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { user } = useAuthStore();
 
-  const handleLogout = () => {
-    useAuthStore.getState().logout();
-    navigate('/login');
-  };
-
   useEffect(() => {
-    loadSketches();
+    if (user) loadSketches();
+    loadCommunitySketches();
   }, []);
 
   async function loadSketches() {
@@ -92,6 +122,15 @@ export const SketchesPage = () => {
         useAuthStore.getState().logout();
         navigate('/login');
       }
+    }
+  }
+
+  async function loadCommunitySketches() {
+    try {
+      const metas = await storageClient.getCommunitySketches();
+      setCommunitySketches(metas);
+    } catch (error) {
+      console.error("Failed to load community sketches:", error);
     }
   }
 
@@ -117,102 +156,89 @@ export const SketchesPage = () => {
     await storageClient.setSketchMeta(id, { name: newName });
   }
 
+  async function handleTogglePublic(meta: SketchMeta) {
+    const newPublic = !meta.public;
+    setSketches((prev) =>
+      prev.map((s) => (s.id === meta.id ? { ...s, public: newPublic } : s))
+    );
+    await storageClient.setSketchMeta(meta.id, { public: newPublic } as any);
+    loadCommunitySketches();
+  }
+
   async function handleDelete(id: string) {
     if (!user) return;
     try {
       await storageClient.deleteSketch(id);
       loadSketches();
+      loadCommunitySketches();
     } catch (error) {
       console.error("Failed to delete sketch:", error);
     }
   }
 
-  function formatDate(ts: number): string {
-    return new Date(ts).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  function formatTime(ts: number): string {
-    return new Date(ts).toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  function getRelativeTime(ts: number): string {
-    const now = Date.now();
-    const diff = now - ts;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return formatDate(ts);
-  }
+  const displayedSketches = activeTab === "community" ? communitySketches : sketches;
+  const isOwnerView = activeTab === "mine";
 
   return (
     <main className="w-dvw h-dvh bg-default-0 text-text-primary flex flex-col">
-      <div className="bg-default-2 border-b border-default-1 min-h-14 h-14 flex items-center px-8 shadow-lg">
-        <div className="max-w-7xl mx-auto w-full flex items-center">
-          <div className="flex items-center gap-3">
-            <img src="/favicon.svg" alt="Skedoodle" className="w-7 h-7" />
-            <h1 className="text-xl font-semibold">Skedoodle</h1>
-          </div>
-          <div className="ml-auto flex items-center gap-4">
-            <span className="text-sm text-text-secondary">
-              {user?.username && `@${user.username}`}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-default-3 hover:text-text-primary transition-colors"
-            >
-              <IconLogout size={18} stroke={1.5} />
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
+      <Navbar>
+        <NavTab active={activeTab === "community"} onClick={() => setActiveTab("community")}>
+          Community
+        </NavTab>
+        {user && (
+          <NavTab active={activeTab === "mine"} onClick={() => setActiveTab("mine")}>
+            My Sketches
+          </NavTab>
+        )}
+      </Navbar>
       <div className="flex-grow overflow-y-auto p-8 bg-gradient-to-br from-default-0 to-default-1">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-semibold mb-1">My Sketches</h2>
+              <h2 className="text-2xl font-semibold mb-1">
+                {activeTab === "community" ? "Community Sketches" : "My Sketches"}
+              </h2>
               <p className="text-sm text-text-secondary">
-                {sketches.length} {sketches.length === 1 ? "sketch" : "sketches"}
+                {displayedSketches.length} {displayedSketches.length === 1 ? "sketch" : "sketches"}
               </p>
             </div>
-            <button
-              onClick={handleNewSketch}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-text-primary text-sm font-medium hover:opacity-90 transition-opacity shadow-lg"
-            >
-              <IconPlus size={18} stroke={2} />
-              New Sketch
-            </button>
+            {isOwnerView && (
+              <button
+                onClick={handleNewSketch}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-text-primary text-sm font-medium hover:opacity-90 transition-opacity shadow-lg"
+              >
+                <IconPlus size={18} stroke={2} />
+                New Sketch
+              </button>
+            )}
           </div>
-          {sketches.length === 0 && (
+          {displayedSketches.length === 0 && (
             <div className="text-center py-24">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-default-2 mb-4">
                 <IconEdit size={32} stroke={1.5} className="text-text-secondary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">No sketches yet</h3>
-              <p className="text-sm text-text-secondary mb-6">Create your first sketch to get started</p>
-              <button
-                onClick={handleNewSketch}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-text-primary text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                <IconPlus size={18} stroke={2} />
-                Create Sketch
-              </button>
+              {activeTab === "community" ? (
+                <>
+                  <h3 className="text-lg font-medium mb-2">No community sketches yet</h3>
+                  <p className="text-sm text-text-secondary">Be the first to publish a sketch</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-medium mb-2">No sketches yet</h3>
+                  <p className="text-sm text-text-secondary mb-6">Create your first sketch to get started</p>
+                  <button
+                    onClick={handleNewSketch}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-text-primary text-sm font-medium hover:opacity-90 transition-opacity"
+                  >
+                    <IconPlus size={18} stroke={2} />
+                    Create Sketch
+                  </button>
+                </>
+              )}
             </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sketches.map((meta) => (
+            {displayedSketches.map((meta) => (
               <div
                 key={meta.id}
                 className="bg-default-2 rounded-xl border border-default-3 hover:border-default-4 transition-all duration-200 overflow-hidden group shadow-md hover:shadow-xl"
@@ -226,13 +252,19 @@ export const SketchesPage = () => {
                   </div>
                 </button>
                 <div className="p-4">
-                  <EditableTitle
-                    name={meta.name}
-                    editing={editingId === meta.id}
-                    onStartEdit={() => setEditingId(meta.id)}
-                    onSave={(newName) => handleRename(meta.id, newName)}
-                    onCancel={() => setEditingId(null)}
-                  />
+                  {isOwnerView ? (
+                    <EditableTitle
+                      name={meta.name}
+                      editing={editingId === meta.id}
+                      onStartEdit={() => setEditingId(meta.id)}
+                      onSave={(newName) => handleRename(meta.id, newName)}
+                      onCancel={() => setEditingId(null)}
+                    />
+                  ) : (
+                    <h3 className="text-base font-medium mb-2 truncate group-hover:text-primary transition-colors">
+                      {meta.name}
+                    </h3>
+                  )}
                   <div className="flex items-center gap-4 text-xs text-text-secondary">
                     <div className="flex items-center gap-1.5">
                       <IconClock size={14} stroke={1.5} />
@@ -240,7 +272,7 @@ export const SketchesPage = () => {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <IconUser size={14} stroke={1.5} />
-                      <span>You</span>
+                      <span>{isOwnerView ? "You" : meta.ownerName ?? "Unknown"}</span>
                     </div>
                   </div>
                   <div className="mt-3 pt-3 border-t border-default-3 flex items-center justify-between text-xs text-text-secondary">
@@ -248,24 +280,38 @@ export const SketchesPage = () => {
                     <span>{formatTime(meta.updatedAt)}</span>
                   </div>
                 </div>
-                <div className="px-4 pb-3 flex items-center gap-2">
-                  <button
-                    onClick={() => setEditingId(meta.id)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-default-3 hover:text-text-primary transition-colors text-xs opacity-0 group-hover:opacity-100"
-                    title="Rename sketch"
-                  >
-                    <IconPencil size={12} stroke={1.5} />
-                    <span>Rename</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(meta.id)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-red-500/10 hover:text-red-400 transition-colors text-xs opacity-0 group-hover:opacity-100"
-                    title="Delete sketch"
-                  >
-                    <IconTrash size={12} stroke={1.5} />
-                    <span>Delete</span>
-                  </button>
-                </div>
+                {isOwnerView && (
+                  <div className="px-4 pb-3 flex items-center gap-2">
+                    <button
+                      onClick={() => handleTogglePublic(meta)}
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded transition-colors text-xs opacity-0 group-hover:opacity-100 ${
+                        meta.public
+                          ? "text-green-400 hover:bg-green-500/10"
+                          : "text-text-secondary hover:bg-default-3 hover:text-text-primary"
+                      }`}
+                      title={meta.public ? "Unpublish sketch" : "Publish sketch"}
+                    >
+                      {meta.public ? <IconWorld size={12} stroke={1.5} /> : <IconWorldOff size={12} stroke={1.5} />}
+                      <span>{meta.public ? "Public" : "Publish"}</span>
+                    </button>
+                    <button
+                      onClick={() => setEditingId(meta.id)}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-default-3 hover:text-text-primary transition-colors text-xs opacity-0 group-hover:opacity-100"
+                      title="Rename sketch"
+                    >
+                      <IconPencil size={12} stroke={1.5} />
+                      <span>Rename</span>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(meta.id)}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-red-500/10 hover:text-red-400 transition-colors text-xs opacity-0 group-hover:opacity-100"
+                      title="Delete sketch"
+                    >
+                      <IconTrash size={12} stroke={1.5} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
