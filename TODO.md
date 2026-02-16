@@ -3,15 +3,10 @@
 ## Drawing Tools
 
 - [ ] **Ellipse/Circle tool** — drag to draw ellipses, hold Shift for perfect circles
-- [ ] **Line tool** — straight lines from point A to B, hold Shift to snap to 45° angles
-- [ ] **Arrow tool** — line with configurable arrowhead (one or both ends)
-- [ ] **Text tool** — click to place text, editable inline, font size/family/color options
-- [ ] **Polygon tool** — regular polygons (triangle, pentagon, hexagon, star) with configurable sides
 - [ ] **Eyedropper tool** — sample color from any shape on the canvas
 
 ## Editing & Transform
 
-- [ ] **Undo/Redo** — action history stack with Ctrl+Z / Ctrl+Shift+Z
 - [ ] **Resize handles** — scale shapes via drag handles on the selection bounding box
 - [ ] **Rotation handle** — rotate shapes via handle above the selection bounding box
 - [ ] **Selection marquee** — drag on empty space with pointer tool to select shapes within a rectangle
@@ -25,7 +20,6 @@
 
 ## Toolbar & UI
 
-- [ ] **Add bezier tool to toolbar** — it's wired up in the service but missing from the toolbar
 - [ ] **Keyboard shortcuts** — implement the shortcuts shown in tooltips (H, P, E, B, R, Z) and add new ones
 - [ ] **Toolbar sub-menus** — group related shape tools (rect, ellipse, polygon) under one toolbar slot
 
