@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { UserInfo } from './protocol';
 
-const IDENTITY_KEY = 'skedoodle-identity';
+
 
 function getRandomName() {
     const adjectives = ['Flying', 'Red', 'Blue', 'Green', 'Yellow', 'Purple', 'Orange', 'Black', 'White', 'Gray'];

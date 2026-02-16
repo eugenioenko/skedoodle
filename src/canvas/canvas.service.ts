@@ -1,7 +1,6 @@
 import { MouseEvent, TouchEvent } from "react";
 import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
-  eventToSurfacePosition,
   MouseButton,
   touchEventToMouseEvent,
 } from "./canvas.utils";
@@ -19,11 +18,10 @@ import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
 import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
-import { throttle } from "@/utils/throttle";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
 import { undo, redo, exitTimeTravelMode } from "./history.service";
 import { useCommandLogStore } from "./history.store";
-import { syncService } from "@/services/sync.client";
+import { doCursorUpdate } from "./tools/cursor.tool";
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
@@ -92,39 +90,14 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   }
 }
 
-const throttledCursorUpdate = throttle((e: MouseEvent<HTMLDivElement>) => {
-  if (!useCanvasStore.getState().doodler?.two) {
-    // prevents random getDoodler() instance error while in dev mode
-    return;
-  }
-  if (!e.currentTarget) {
-    return;
-  }
-  const doodler = getDoodler();
-  const cursor = eventToSurfacePosition(e, doodler?.zui);
-  const { setCursor } = useCanvasStore.getState();
-  setCursor(cursor);
-}, 16);
 
-const throttledCursorBroadcast = throttle((e: MouseEvent<HTMLDivElement>) => {
-    if (!useCanvasStore.getState().doodler?.two) {
-        return;
-    }
-    if (!e.currentTarget) {
-        return;
-    }
-    const doodler = getDoodler();
-    const cursor = eventToSurfacePosition(e, doodler?.zui);
-    syncService.sendCursor(cursor.x, cursor.y);
-}, 50);
 
 function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
 
   const { activeTool, selectedTool } = useOptionsStore.getState();
 
-  throttledCursorUpdate(e);
-  throttledCursorBroadcast(e);
+  doCursorUpdate(e);
 
   // highlight the shapes but only when not actively erasing
   if (selectedTool === "eraser" && activeTool !== "eraser") {
@@ -236,7 +209,7 @@ function doMouseOut(_: MouseEvent<HTMLDivElement>) {
   setCursor(undefined);
 }
 
-function doMouseOver(_: MouseEvent<HTMLDivElement>) {}
+function doMouseOver(_: MouseEvent<HTMLDivElement>) { }
 
 function doMouseWheel(e: WheelEvent): void {
   e.preventDefault();
@@ -325,7 +298,7 @@ function doKeyDown(e: KeyboardEvent): void {
   }
 }
 
-function doUpdate() {}
+function doUpdate() { }
 
 export const handlers = {
   doMouseWheel,
