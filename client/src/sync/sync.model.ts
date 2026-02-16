@@ -19,7 +19,8 @@ export type UserInfo = {
 export type ClientMessage =
     | { type: 'join'; sketchId: string; user: UserInfo; token: string }
     | { type: 'command'; command: Command }
-    | { type: 'cursor'; x: number; y: number };
+    | { type: 'cursor'; x: number; y: number }
+    | { type: 'meta'; data: { color?: string; positionX?: number; positionY?: number; zoom?: number } };
 
 // Server -> Client
 export type ServerMessage =

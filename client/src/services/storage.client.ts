@@ -9,6 +9,10 @@ export interface SketchMeta {
   createdAt: number;
   updatedAt: number;
   ownerId: string;
+  color?: string;
+  positionX?: number;
+  positionY?: number;
+  zoom?: number;
 }
 
 async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {

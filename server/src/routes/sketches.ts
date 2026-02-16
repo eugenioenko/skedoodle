@@ -11,7 +11,7 @@ router.get('/', async (req: any, res) => {
   try {
     const sketches = await prisma.sketch.findMany({
       where: { ownerId: req.userId },
-      select: { id: true, name: true, createdAt: true, updatedAt: true, ownerId: true },
+      select: { id: true, name: true, color: true, positionX: true, positionY: true, zoom: true, createdAt: true, updatedAt: true, ownerId: true },
       orderBy: { updatedAt: 'desc' },
     });
     res.json(sketches);
@@ -43,7 +43,7 @@ router.get('/:id', async (req: any, res) => {
     const { id } = req.params;
     const sketch = await prisma.sketch.findUnique({
       where: { id, ownerId: req.userId },
-      select: { id: true, name: true, createdAt: true, updatedAt: true, ownerId: true },
+      select: { id: true, name: true, color: true, positionX: true, positionY: true, zoom: true, createdAt: true, updatedAt: true, ownerId: true },
     });
     if (!sketch) {
       res.status(404).json({ error: 'Sketch not found' });
@@ -59,10 +59,10 @@ router.get('/:id', async (req: any, res) => {
 router.put('/:id', async (req: any, res) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, color } = req.body;
     const updatedSketch = await prisma.sketch.update({
       where: { id, ownerId: req.userId },
-      data: { name, updatedAt: new Date() },
+      data: { ...(name !== undefined && { name }), ...(color !== undefined && { color }), updatedAt: new Date() },
     });
     res.json(updatedSketch);
   } catch (error: any) {

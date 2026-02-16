@@ -1,17 +1,81 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   storageClient,
   SketchMeta,
 } from "@/services/storage.client";
-import { IconPlus, IconEdit, IconClock, IconUser, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconEdit, IconClock, IconUser, IconTrash, IconLogout, IconPencil } from "@tabler/icons-react";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
+
+const EditableTitle = ({
+  name,
+  editing,
+  onStartEdit,
+  onSave,
+  onCancel,
+}: {
+  name: string;
+  editing: boolean;
+  onStartEdit: () => void;
+  onSave: (newName: string) => void;
+  onCancel: () => void;
+}) => {
+  const [value, setValue] = useState(name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      setValue(name);
+      setTimeout(() => inputRef.current?.select(), 0);
+    }
+  }, [editing, name]);
+
+  const handleSave = useCallback(() => {
+    const trimmed = value.trim();
+    if (trimmed && trimmed !== name) {
+      onSave(trimmed);
+    } else {
+      onCancel();
+    }
+  }, [value, name, onSave, onCancel]);
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        className="text-base font-medium mb-2 w-full bg-default-3 border border-default-4 rounded px-2 py-1 outline-none focus:border-primary"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={handleSave}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") handleSave();
+          if (e.key === "Escape") onCancel();
+        }}
+      />
+    );
+  }
+
+  return (
+    <h3
+      className="text-base font-medium mb-2 truncate group-hover:text-primary transition-colors cursor-pointer"
+      onDoubleClick={onStartEdit}
+    >
+      {name}
+    </h3>
+  );
+};
 
 export const SketchesPage = () => {
   const navigate = useNavigate();
   const [sketches, setSketches] = useState<SketchMeta[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { user } = useAuthStore();
+
+  const handleLogout = () => {
+    useAuthStore.getState().logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     loadSketches();
@@ -43,6 +107,14 @@ export const SketchesPage = () => {
     };
     await storageClient.createSketch(newSketchMeta);
     navigate(`/sketch/${id}`);
+  }
+
+  async function handleRename(id: string, newName: string) {
+    setEditingId(null);
+    setSketches((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, name: newName } : s))
+    );
+    await storageClient.setSketchMeta(id, { name: newName });
   }
 
   async function handleDelete(id: string) {
@@ -87,11 +159,23 @@ export const SketchesPage = () => {
   return (
     <main className="w-dvw h-dvh bg-default-0 text-text-primary flex flex-col">
       <div className="bg-default-2 border-b border-default-1 min-h-14 h-14 flex items-center px-8 shadow-lg">
-        <h1 className="text-xl font-semibold">Skedoodle</h1>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-sm text-text-secondary">
-            {user?.username && `@${user.username}`}
-          </span>
+        <div className="max-w-7xl mx-auto w-full flex items-center">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="Skedoodle" className="w-7 h-7" />
+            <h1 className="text-xl font-semibold">Skedoodle</h1>
+          </div>
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm text-text-secondary">
+              {user?.username && `@${user.username}`}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-text-secondary hover:bg-default-3 hover:text-text-primary transition-colors"
+            >
+              <IconLogout size={18} stroke={1.5} />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex-grow overflow-y-auto p-8 bg-gradient-to-br from-default-0 to-default-1">
@@ -140,32 +224,41 @@ export const SketchesPage = () => {
                   <div className="aspect-video bg-gradient-to-br from-default-3 to-default-4 flex items-center justify-center">
                     <IconEdit size={48} stroke={1.5} className="text-text-secondary opacity-50" />
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-base font-medium mb-2 truncate group-hover:text-primary transition-colors">
-                      {meta.name}
-                    </h3>
-                    <div className="flex items-center gap-4 text-xs text-text-secondary">
-                      <div className="flex items-center gap-1.5">
-                        <IconClock size={14} stroke={1.5} />
-                        <span>{getRelativeTime(meta.updatedAt)}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <IconUser size={14} stroke={1.5} />
-                        <span>You</span>
-                      </div>
+                </button>
+                <div className="p-4">
+                  <EditableTitle
+                    name={meta.name}
+                    editing={editingId === meta.id}
+                    onStartEdit={() => setEditingId(meta.id)}
+                    onSave={(newName) => handleRename(meta.id, newName)}
+                    onCancel={() => setEditingId(null)}
+                  />
+                  <div className="flex items-center gap-4 text-xs text-text-secondary">
+                    <div className="flex items-center gap-1.5">
+                      <IconClock size={14} stroke={1.5} />
+                      <span>{getRelativeTime(meta.updatedAt)}</span>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-default-3 flex items-center justify-between text-xs text-text-secondary">
-                      <span>Created {formatDate(meta.createdAt)}</span>
-                      <span>{formatTime(meta.updatedAt)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <IconUser size={14} stroke={1.5} />
+                      <span>You</span>
                     </div>
                   </div>
-                </button>
-                <div className="px-4 pb-3">
+                  <div className="mt-3 pt-3 border-t border-default-3 flex items-center justify-between text-xs text-text-secondary">
+                    <span>Created {formatDate(meta.createdAt)}</span>
+                    <span>{formatTime(meta.updatedAt)}</span>
+                  </div>
+                </div>
+                <div className="px-4 pb-3 flex items-center gap-2">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(meta.id);
-                    }}
+                    onClick={() => setEditingId(meta.id)}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-default-3 hover:text-text-primary transition-colors text-xs opacity-0 group-hover:opacity-100"
+                    title="Rename sketch"
+                  >
+                    <IconPencil size={12} stroke={1.5} />
+                    <span>Rename</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(meta.id)}
                     className="flex items-center gap-1.5 px-2 py-1 rounded text-text-secondary hover:bg-red-500/10 hover:text-red-400 transition-colors text-xs opacity-0 group-hover:opacity-100"
                     title="Delete sketch"
                   >

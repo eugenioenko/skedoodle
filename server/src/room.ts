@@ -95,6 +95,18 @@ export class Room {
     this.broadcast(JSON.stringify({ type: 'cursor', uid, x, y }), fromWs);
   }
 
+  handleMeta(data: { color?: string; positionX?: number; positionY?: number; zoom?: number }) {
+    prisma.sketch.update({
+      where: { id: this.sketchId },
+      data: {
+        ...(data.color !== undefined && { color: data.color }),
+        ...(data.positionX !== undefined && { positionX: data.positionX }),
+        ...(data.positionY !== undefined && { positionY: data.positionY }),
+        ...(data.zoom !== undefined && { zoom: data.zoom }),
+      },
+    }).catch(err => console.error(`[Room:${this.sketchId}] Failed to persist meta:`, err));
+  }
+
   private broadcast(message: string, exclude?: WebSocket) {
     for (const client of this.clients.keys()) {
       if (client !== exclude && client.readyState === WebSocket.OPEN) {

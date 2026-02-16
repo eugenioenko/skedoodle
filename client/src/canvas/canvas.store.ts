@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Doodler } from "./doodler.client";
+import type { Doodler } from "./doodler.client";
 import { Point } from "@/models/point.model";
 import { RgbaColor } from "colord";
 import { persist } from "zustand/middleware";

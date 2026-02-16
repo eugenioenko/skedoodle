@@ -164,6 +164,13 @@ class SyncClient {
       this.ws.send(JSON.stringify(message));
     }
   }
+
+  sendMeta(data: { color?: string; positionX?: number; positionY?: number; zoom?: number }) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      const message: ClientMessage = { type: 'meta', data };
+      this.ws.send(JSON.stringify(message));
+    }
+  }
 }
 
 export const syncService = new SyncClient();

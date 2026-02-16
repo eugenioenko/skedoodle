@@ -80,6 +80,9 @@ wss.on('connection', (ws: WebSocket) => {
           case 'cursor':
             room.handleCursor(user.uid, message.x, message.y, ws);
             break;
+          case 'meta':
+            room.handleMeta(message.data);
+            break;
           default:
             console.warn('Unknown message type received:', message.type);
         }

@@ -22,4 +22,5 @@ export function doDragTranslate(dx: number, dy: number) {
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
+  doodler.saveViewport();
 }

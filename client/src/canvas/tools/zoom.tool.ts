@@ -54,6 +54,7 @@ export function doZoom(
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
+  doodler.saveViewport();
 }
 
 export function doZoomTo(level: number): void {
@@ -78,6 +79,7 @@ export function doZoomTo(level: number): void {
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
+  doodler.saveViewport();
 }
 
 export function doZoomStep(direction: 1 | -1): void {
@@ -111,6 +113,7 @@ export function doZoomStep(direction: 1 | -1): void {
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
   doodler.throttledTwoUpdate();
+  doodler.saveViewport();
 }
 
 export function doZoomReset(): void {
@@ -124,6 +127,7 @@ export function doZoomReset(): void {
   setZoom(100);
   updateGrid(1, 0, 0);
   doodler.throttledTwoUpdate();
+  doodler.saveViewport();
 }
 
 /*

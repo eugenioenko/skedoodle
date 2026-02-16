@@ -113,7 +113,10 @@ export const Properties = () => {
             <div className="flex flex-col gap-4">
               <ColorInput
                 value={canvasColor}
-                onChange={(value) => setCanvasColor(value)}
+                onChange={(value) => {
+                  setCanvasColor(value);
+                  getDoodler().saveViewport();
+                }}
               />
             </div>
             <div className="pt-4 pb-1 text-sm">Renderer</div>
