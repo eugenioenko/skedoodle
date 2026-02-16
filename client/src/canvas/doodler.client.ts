@@ -141,22 +141,6 @@ export class Doodler {
       useOptionsStore.getState().setCanvasColor(colord(meta.color).toRgb());
     }
 
-    const commands = await storageClient.getSketchCommands(this.sketchId);
-    if (!commands) {
-      console.warn(`No commands found for sketch ${this.sketchId}`);
-    } else {
-      if (commands.length) {
-        useCommandLogStore.getState().setCommandLog(commands);
-      }
-      for (const cmd of commands) {
-        try {
-          executeForward(cmd);
-        } catch (e) {
-          console.warn("Failed to replay command:", e);
-        }
-      }
-    }
-
     // Restore viewport position and zoom
     if (meta?.zoom && meta.zoom !== 1) {
       const ratio = meta.zoom - 1;

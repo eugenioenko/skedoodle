@@ -4,11 +4,11 @@ import { syncService } from "./sync.client";
 export function useSync(sketchId: string, isReady: boolean) {
   useEffect(() => {
     if (!isReady) return;
-    console.log("Connecting sync service sketch");
+    console.log(`[Sync] Connecting ${sketchId}`);
     syncService.connect(sketchId);
     return () => {
       syncService.disconnect();
-      console.log("Disconnected sync service");
+      console.log(`[Sync] Disconnected ${sketchId}`);
     };
   }, [sketchId, isReady]);
 }
