@@ -102,7 +102,7 @@ wss.on('connection', (ws: WebSocket) => {
             });
             rooms.set(sketchId, room);
           }
-          room.addClient(ws, user);
+          await room.addClient(ws, user);
         } catch (error: any) {
           console.warn('Authentication failed for join request:', error.message);
           ws.send(JSON.stringify({ type: 'error', message: 'Authentication failed' }));

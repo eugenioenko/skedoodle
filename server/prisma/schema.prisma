@@ -49,14 +49,17 @@ model Sketch {
   updatedAt DateTime @updatedAt
   owner     User     @relation(fields: [ownerId], references: [id])
   ownerId   String
+  commands  Command[]
 }
 
 model Command {
-  id   String   @id @default(cuid())
-  ts   DateTime @default(now())
-  uid  String
-  type String
-  sid  String
-  data String
-  user User     @relation(fields: [uid], references: [id])
+  id       String   @id @default(cuid())
+  ts       DateTime @default(now())
+  uid      String
+  type     String
+  sid      String
+  data     String
+  sketchId String
+  user     User     @relation(fields: [uid], references: [id])
+  sketch   Sketch   @relation(fields: [sketchId], references: [id])
 }

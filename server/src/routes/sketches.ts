@@ -108,7 +108,7 @@ router.get('/:id/commands', async (req: any, res) => {
       return;
     }
     const commands = await prisma.command.findMany({
-      where: { sid: id },
+      where: { sketchId: id },
       orderBy: { ts: 'asc' },
     });
     res.json(commands.map(cmd => ({
@@ -132,8 +132,9 @@ router.post('/:id/commands', async (req: any, res) => {
       ts: new Date(cmd.ts),
       uid: req.userId,
       type: cmd.type,
-      sid: id,
+      sid: cmd.sid,
       data: JSON.stringify(cmd.data),
+      sketchId: id,
     }));
     await prisma.command.createMany({
       data: commandsToCreate,
