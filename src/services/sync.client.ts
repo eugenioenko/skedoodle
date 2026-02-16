@@ -1,11 +1,10 @@
+import { getIdentity } from './identity';
 import { useSyncStore } from './sync.store';
 import { applyRemoteCommand } from '@/canvas/history.service';
 import { useCommandLogStore } from '@/canvas/history.store';
 import { ClientMessage, ServerMessage, UserInfo, Command } from './protocol';
 
-import { useAuthStore } from '../stores/auth.store';
-
-const WS_URL = 'ws://localhost:3013';
+const WS_URL = 'ws://localhost:3003';
 
 class SyncClient {
     private ws: WebSocket | null = null;
@@ -20,13 +19,8 @@ class SyncClient {
         }
 
         useSyncStore.getState().setReconnecting(true);
-        // Get user info from auth store, not locally generated
-        const authUser = useAuthStore.getState().user;
-        if (!authUser) {
-            console.error('[Sync] Not authenticated. Cannot connect to sketch.');
-            return;
-        }
-        this.user = { uid: authUser.id, name: authUser.username, color: '#FF0000' }; // TODO: get color from server or local
+        this.sketchId = sketchId;
+        this.user = getIdentity();
         useSyncStore.getState().setLocalUser(this.user);
 
         this.ws = new WebSocket(WS_URL);
@@ -45,7 +39,6 @@ class SyncClient {
                 type: 'join',
                 sketchId,
                 user: this.user!,
-                token: useAuthStore.getState().token!, // Send token with join
             };
             this.ws?.send(JSON.stringify(joinMessage));
         };
@@ -156,7 +149,7 @@ class SyncClient {
             this.ws.send(JSON.stringify(message));
         }
     }
-
+    
     sendCursor(x: number, y: number) {
         if (this.ws?.readyState === WebSocket.OPEN) {
             const message: ClientMessage = { type: 'cursor', x, y };

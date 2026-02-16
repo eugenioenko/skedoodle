@@ -1,46 +1,7 @@
 import { Command } from "@/canvas/history.store";
+import { useAuthStore } from '../stores/auth.store';
 
-// --- Generic helpers ---
-
-const storagePrefix = "Sketch: ";
-const generateKey = (key: string): string => `${storagePrefix}${key}`;
-
-export function get<T>(key: string): T | null {
-  const item = localStorage.getItem(generateKey(key));
-  if (item) {
-    try {
-      return JSON.parse(item) as T;
-    } catch (e) {
-      console.error("Failed to parse localStorage item", e);
-      return null;
-    }
-  }
-  return null;
-}
-
-export function set<T>(key: string, value: T): void {
-  try {
-    const stringifiedValue = JSON.stringify(value);
-    localStorage.setItem(generateKey(key), stringifiedValue);
-  } catch (e) {
-    console.error("Failed to stringify or set localStorage item", e);
-  }
-}
-
-export function remove(key: string): void {
-  localStorage.removeItem(generateKey(key));
-}
-
-export function keys(): string[] {
-  const result: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(storagePrefix)) {
-      result.push(key.substring(storagePrefix.length));
-    }
-  }
-  return result;
-}
+const API_BASE_URL = 'http://localhost:3013/api'; // Assuming a REST API on the same port as WS
 
 // --- Sketch-specific storage ---
 
@@ -49,53 +10,126 @@ export interface SketchMeta {
   name: string;
   createdAt: number;
   updatedAt: number;
+  ownerId: string;
 }
 
-const SKETCH_COMMANDS_PREFIX = "sketches:";
-const SKETCH_META_PREFIX = "sketches:";
-
-function commandsKey(id: string): string {
-  return `${SKETCH_COMMANDS_PREFIX}${id}:commands`;
-}
-
-function metaKey(id: string): string {
-  return `${SKETCH_META_PREFIX}${id}:meta`;
-}
-
-export function getSketchCommands(id: string): Command[] | null {
-  return get<Command[]>(commandsKey(id));
-}
-
-export function setSketchCommands(id: string, commands: Command[]): void {
-  set(commandsKey(id), commands);
-}
-
-export function getSketchMeta(id: string): SketchMeta | null {
-  return get<SketchMeta>(metaKey(id));
-}
-
-export function setSketchMeta(id: string, meta: SketchMeta): void {
-  set(metaKey(id), meta);
-}
-
-export function deleteSketch(id: string): void {
-  remove(commandsKey(id));
-  remove(metaKey(id));
-}
-
-export function getAllSketchIds(): string[] {
-  const ids: string[] = [];
-  const prefix = generateKey(`${SKETCH_META_PREFIX}`);
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith(prefix) && key.endsWith(":meta")) {
-      // Key format: "Sketch: sketches:{id}:meta"
-      const inner = key.substring(prefix.length);
-      const id = inner.replace(/:meta$/, "");
-      if (id) {
-        ids.push(id);
-      }
-    }
+async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new Error('Not authenticated');
   }
-  return ids;
+  const headers = {
+    ...options.headers,
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+  return fetch(url, { ...options, headers });
 }
+
+export async function getSketchCommands(id: string): Promise<Command[] | null> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}/commands`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(`Failed to fetch sketch commands: ${response.statusText}`);
+    }
+    const rawCommands = await response.json();
+    return rawCommands.map((cmd: any) => ({
+      ...cmd,
+      ts: new Date(cmd.ts).getTime(), // Convert ISO string back to timestamp
+      data: JSON.parse(cmd.data), // Parse stringified JSON data
+    }));
+  } catch (error) {
+    console.error(`Error getting commands for sketch ${id}:`, error);
+    return null;
+  }
+}
+
+export async function setSketchCommands(id: string, commands: Command[]): Promise<void> {
+  try {
+    const payload = commands.map(cmd => ({
+      ...cmd,
+      ts: new Date(cmd.ts).toISOString(), // Convert timestamp to ISO string for DB
+      data: JSON.stringify(cmd.data), // Stringify complex data for DB storage
+    }));
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}/commands`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to save sketch commands: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Error setting commands for sketch ${id}:`, error);
+  }
+}
+
+export async function getSketchMeta(id: string): Promise<SketchMeta | null> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`);
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      throw new Error(`Failed to fetch sketch meta: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error getting meta for sketch ${id}:`, error);
+    return null;
+  }
+}
+
+export async function setSketchMeta(id: string, meta: SketchMeta): Promise<void> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(meta),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to save sketch meta: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Error setting meta for sketch ${id}:`, error);
+  }
+}
+
+export async function createSketch(meta: SketchMeta): Promise<void> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches`, {
+      method: 'POST',
+      body: JSON.stringify(meta),
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to create sketch: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Error creating sketch ${meta.id}:`, error);
+  }
+}
+
+export async function deleteSketch(id: string): Promise<void> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to delete sketch: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`Error deleting sketch ${id}:`, error);
+  }
+}
+
+export async function getAllSketchIds(): Promise<string[]> {
+  try {
+    const response = await authenticatedFetch(`${API_BASE_URL}/sketches`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch all sketch IDs: ${response.statusText}`);
+    }
+    const sketches: SketchMeta[] = await response.json();
+    return sketches.map(s => s.id);
+  } catch (error) {
+    console.error('Error getting all sketch IDs:', error);
+    return [];
+  }
+}
+

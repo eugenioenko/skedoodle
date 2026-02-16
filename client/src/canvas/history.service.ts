@@ -9,12 +9,12 @@ import { Command, createCommand, useCommandLogStore } from "./history.store";
 import { usePointerStore } from "./tools/pointer.tool";
 import { Shape } from "two.js/src/shape";
 import {
-  getSketchMeta,
-  setSketchCommands,
-  setSketchMeta,
+  storageClient,
+  SketchMeta,
 } from "@/services/storage.client";
 import { syncService } from "@/services/sync.client";
 import { ulid } from "ulid";
+import { useAuthStore } from "@/stores/auth.store";
 
 // Stores old values for update commands, keyed by command ID
 const preUpdateSnapshots = new Map<string, Record<string, any>>();
@@ -298,22 +298,29 @@ export function scrubTo(position: number): void {
   getDoodler().throttledTwoUpdate();
 }
 
-export function branchFromTimeline(): string {
+export async function branchFromTimeline(): Promise<string> {
   const { commandLog, timelinePosition } = useCommandLogStore.getState();
   const doodler = getDoodler();
+  const { user } = useAuthStore.getState();
+
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
 
   const branchCommands = commandLog.slice(0, timelinePosition);
   const newId = ulid();
 
-  setSketchCommands(newId, branchCommands);
-  const existingMeta = getSketchMeta(doodler.sketchId);
+  await storageClient.setSketchCommands(newId, branchCommands);
+  const existingMeta = await storageClient.getSketchMeta(doodler.sketchId);
   const now = Date.now();
-  setSketchMeta(newId, {
+  const newMeta: SketchMeta = {
     id: newId,
     name: `${existingMeta?.name ?? doodler.sketchId} (branch)`,
     createdAt: now,
     updatedAt: now,
-  });
+    ownerId: user.id,
+  };
+  await storageClient.setSketchMeta(newId, newMeta);
 
   exitTimeTravelMode();
   return newId;

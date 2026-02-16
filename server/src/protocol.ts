@@ -3,22 +3,24 @@ export interface Command<T = any> {
   id: string; // Unique ID for the command
   ts: number; // Timestamp
   uid: string; // User ID
-  type: 'create' | 'update' | 'remove' | 'undo' | 'redo';
+  type: string;
   sid: string; // Shape ID
   data: T;
 }
 
 export type UserInfo = {
   uid: string;
+  userId: string; // Add userId
   name: string;
   color: string;
 };
 
 // Client -> Server
 export type ClientMessage =
-  | { type: 'join'; sketchId: string; user: UserInfo }
+  | { type: 'join'; sketchId: string; user: UserInfo; token: string }
   | { type: 'command'; command: Command }
-  | { type: 'cursor'; x: number; y: number };
+  | { type: 'cursor'; x: number; y: number }
+  | { type: 'auth'; action: 'register-options' | 'register-verify' | 'login-options' | 'login-verify'; payload: any };
 
 // Server -> Client
 export type ServerMessage =
@@ -26,4 +28,5 @@ export type ServerMessage =
   | { type: 'command'; command: Command }
   | { type: 'user-joined'; user: UserInfo }
   | { type: 'user-left'; uid: string }
-  | { type: 'cursor'; uid: string; x: number; y: number };
+  | { type: 'cursor'; uid: string; x: number; y: number }
+  | { type: 'auth'; action: 'register-options' | 'register-verify' | 'login-options' | 'login-verify'; payload: any };

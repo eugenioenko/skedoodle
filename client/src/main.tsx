@@ -5,14 +5,21 @@ import { SketchesPage } from "./components/sketches-page.tsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import "rc-slider/assets/index.css";
+import { LoginPage } from "./pages/LoginPage.tsx";
+import { RegisterPage } from "./pages/RegisterPage.tsx";
+import { AuthGuard } from "./components/AuthGuard.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<SketchesPage />} />
-        <Route path="/sketches" element={<SketchesPage />} />
-        <Route path="/sketch/:id" element={<App />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route element={<AuthGuard />}>
+          <Route path="/" element={<SketchesPage />} />
+          <Route path="/sketches" element={<SketchesPage />} />
+          <Route path="/sketch/:id" element={<App />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </StrictMode>

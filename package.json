@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"@simplewebauthn/browser": "^13.2.2"
+	}
+}

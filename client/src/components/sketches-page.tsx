@@ -1,39 +1,70 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  getAllSketchIds,
-  getSketchMeta,
-  deleteSketch,
+  storageClient,
   SketchMeta,
 } from "@/services/storage.client";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ulid } from "ulid";
+import { useAuthStore } from "@/stores/auth.store";
 
 export const SketchesPage = () => {
   const navigate = useNavigate();
   const [sketches, setSketches] = useState<SketchMeta[]>([]);
-
-  function loadSketches() {
-    const ids = getAllSketchIds();
-    const metas = ids
-      .map((id) => getSketchMeta(id))
-      .filter((m): m is SketchMeta => !!m)
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-    setSketches(metas);
-  }
+  const { token, user } = useAuthStore();
 
   useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     loadSketches();
-  }, []);
+  }, [token, navigate]);
 
-  function handleNewSketch() {
+  async function loadSketches() {
+    if (!user) return;
+    try {
+      const sketchIds = await storageClient.getAllSketchIds();
+      const metas: SketchMeta[] = [];
+      for (const id of sketchIds) {
+        const meta = await storageClient.getSketchMeta(id);
+        if (meta) {
+          metas.push(meta);
+        }
+      }
+      setSketches(metas.sort((a, b) => b.updatedAt - a.updatedAt));
+    } catch (error) {
+      console.error("Failed to load sketches:", error);
+      // Handle error, e.g., redirect to login if unauthorized
+      if (error instanceof Error && error.message.includes('Authentication failed')) {
+        useAuthStore.getState().logout();
+        navigate('/login');
+      }
+    }
+  }
+
+  async function handleNewSketch() {
+    if (!user) return;
     const id = ulid();
+    const newSketchMeta: SketchMeta = {
+      id,
+      name: `Untitled Sketch ${sketches.length + 1}`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      ownerId: user.id,
+    };
+    await storageClient.createSketch(newSketchMeta);
     navigate(`/sketch/${id}`);
   }
 
-  function handleDelete(id: string) {
-    deleteSketch(id);
-    loadSketches();
+  async function handleDelete(id: string) {
+    if (!user) return;
+    try {
+      await storageClient.deleteSketch(id);
+      loadSketches();
+    } catch (error) {
+      console.error("Failed to delete sketch:", error);
+    }
   }
 
   function formatDate(ts: number): string {

@@ -3,11 +3,7 @@ import Two from "two.js";
 import { ZUI } from "two.js/extras/jsm/zui";
 import { Group } from "two.js/src/group";
 import {
-  get,
-  getSketchCommands,
-  getSketchMeta,
-  setSketchCommands,
-  setSketchMeta,
+  storageClient,
   SketchMeta,
 } from "@/services/storage.client";
 import { useCanvasStore, useOptionsStore } from "./canvas.store";
@@ -18,6 +14,8 @@ import {
 import { Command, createCommand, useCommandLogStore } from "./history.store";
 import { executeForward } from "./history.service";
 import { ulid } from "ulid";
+import { useAuthStore } from "@/stores/auth.store";
+
 
 interface DoodlerProps {
   two: Two;
@@ -92,22 +90,26 @@ export class Doodler {
     this.canvas.remove(doodle.shape);
   }
 
-  saveDoodles(): void {
+  async saveDoodles(): Promise<void> {
     const { commandLog } = useCommandLogStore.getState();
-    setSketchCommands(this.sketchId, commandLog);
+    const { user } = useAuthStore.getState();
+    if (!user) return;
+
+    await storageClient.setSketchCommands(this.sketchId, commandLog);
 
     // Update metadata
-    const existing = getSketchMeta(this.sketchId);
+    let existingMeta = await storageClient.getSketchMeta(this.sketchId);
     const now = Date.now();
-    const meta: SketchMeta = existing
-      ? { ...existing, updatedAt: now }
+    const meta: SketchMeta = existingMeta
+      ? { ...existingMeta, updatedAt: now }
       : {
-        id: this.sketchId,
-        name: this.sketchId,
-        createdAt: now,
-        updatedAt: now,
-      };
-    setSketchMeta(this.sketchId, meta);
+          id: this.sketchId,
+          name: this.sketchId, // Fallback name
+          createdAt: now,
+          updatedAt: now,
+          ownerId: user.id,
+        };
+    await storageClient.setSketchMeta(this.sketchId, meta);
   }
 
   async loadDoodles(): Promise<void> {
@@ -116,7 +118,7 @@ export class Doodler {
     }
 
     // Try new storage format first
-    const commands = getSketchCommands(this.sketchId);
+    const commands = await storageClient.getSketchCommands(this.sketchId);
     if (commands && commands.length) {
       useCommandLogStore.getState().setCommandLog(commands);
       for (const cmd of commands) {
@@ -129,54 +131,20 @@ export class Doodler {
       this.throttledTwoUpdate();
       return;
     }
-
-    // Legacy migration: try old format (generic key with SerializedDoodle[] or Command[])
-    const stored = get<Command[] | SerializedDoodle[]>(this.sketchId);
-    if (!stored || !stored.length) {
-      return;
+    // No legacy migration needed as local storage is removed.
+    // If no commands found, create a new sketch entry
+    const { user } = useAuthStore.getState();
+    if (user) {
+        const now = Date.now();
+        const newSketchMeta: SketchMeta = {
+            id: this.sketchId,
+            name: this.sketchId,
+            createdAt: now,
+            updatedAt: now,
+            ownerId: user.id,
+        };
+        await storageClient.createSketch(newSketchMeta);
     }
-
-    const first = stored[0] as any;
-    const isCommandLog = "uid" in first && "type" in first;
-    const migrated: Command[] = [];
-
-    if (isCommandLog) {
-      const cmds = stored as Command[];
-      for (const cmd of cmds) {
-        try {
-          migrated.push(cmd);
-          executeForward(cmd);
-        } catch (e) {
-          console.warn("Failed to replay command:", e);
-        }
-      }
-    } else {
-      const doodles = stored as SerializedDoodle[];
-      for (const serialized of doodles) {
-        try {
-          const cmd = createCommand("create", serialized.id, {
-            data: serialized,
-          });
-          migrated.push(cmd);
-          executeForward(cmd);
-        } catch (e) {
-          console.warn("Failed to migrate doodle:", e);
-        }
-      }
-    }
-
-    // Save in new format and create metadata
-    useCommandLogStore.getState().setCommandLog(migrated);
-    setSketchCommands(this.sketchId, migrated);
-    const now = Date.now();
-    setSketchMeta(this.sketchId, {
-      id: this.sketchId,
-      name: this.sketchId,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    this.throttledTwoUpdate();
   }
 }
 

@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import type { Command, UserInfo } from './protocol';
-import { scheduleWrite, loadCommands } from './persistence';
+import { PrismaClient } from '@prisma/client';
 
 type Client = {
   ws: WebSocket;
@@ -11,14 +11,24 @@ export class Room {
   private clients = new Map<WebSocket, Client>();
   private commands: Command[] = [];
   private cleanupTimeout: NodeJS.Timeout | null = null;
+  private prisma: PrismaClient;
 
-  constructor(private sketchId: string, private onEmpty: (sketchId: string) => void) {
+  constructor(private sketchId: string, private onEmpty: (sketchId: string) => void, prisma: PrismaClient) {
+    this.prisma = prisma;
     this.loadInitialCommands();
   }
 
   private async loadInitialCommands() {
-    this.commands = await loadCommands(this.sketchId);
-    console.log(`[Room:${this.sketchId}] Loaded ${this.commands.length} initial commands.`);
+    const dbCommands = await this.prisma.command.findMany({
+        where: { sid: this.sketchId }, // Assuming sketchId is used as sid for global commands
+        orderBy: { ts: 'asc' },
+    });
+    this.commands = dbCommands.map(cmd => ({
+        ...cmd,
+        ts: cmd.ts.getTime(), // Convert Date to timestamp
+        type: cmd.type as Command['type'], // Cast to correct type
+    }));
+    console.log(`[Room:${this.sketchId}] Loaded ${this.commands.length} initial commands from DB.`);
   }
 
   addClient(ws: WebSocket, user: UserInfo) {
@@ -69,7 +79,17 @@ export class Room {
 
     this.commands.push(command);
     this.broadcast(JSON.stringify({ type: 'command', command }), fromWs);
-    scheduleWrite(this.sketchId, this.commands);
+    // Persist command to DB
+    this.prisma.command.create({
+        data: {
+            id: command.id,
+            ts: new Date(command.ts),
+            uid: command.uid,
+            type: command.type,
+            sid: command.sid, // Assuming sid is sketchId for global commands
+            data: JSON.stringify(command.data),
+        },
+    }).catch(err => console.error(`[Room:${this.sketchId}] Failed to persist command:`, err));
   }
 
   handleCursor(uid: string, x: number, y: number, fromWs: WebSocket) {
@@ -85,8 +105,7 @@ export class Room {
   }
 
   destroy() {
-    console.log(`[Room:${this.sketchId}] Destroying room and flushing commands to disk.`);
-    scheduleWrite(this.sketchId, this.commands);
+    console.log(`[Room:${this.sketchId}] Room destroyed.`);
     if (this.cleanupTimeout) {
       clearTimeout(this.cleanupTimeout);
     }
