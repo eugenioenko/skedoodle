@@ -4,7 +4,7 @@ import { applyRemoteCommand } from '@/canvas/history.service';
 import { useCommandLogStore } from '@/canvas/history.store';
 import { ClientMessage, ServerMessage, UserInfo, Command } from './protocol';
 
-const WS_URL = 'ws://localhost:3003';
+const WS_URL = 'ws://localhost:3013';
 
 class SyncClient {
     private ws: WebSocket | null = null;
@@ -149,7 +149,7 @@ class SyncClient {
             this.ws.send(JSON.stringify(message));
         }
     }
-    
+
     sendCursor(x: number, y: number) {
         if (this.ws?.readyState === WebSocket.OPEN) {
             const message: ClientMessage = { type: 'cursor', x, y };

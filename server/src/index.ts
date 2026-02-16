@@ -2,7 +2,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { Room } from './room';
 import type { ClientMessage, UserInfo } from './protocol';
 
-const PORT = 3003;
+const PORT = 3013;
 const wss = new WebSocketServer({ port: PORT });
 const rooms = new Map<string, Room>();
 

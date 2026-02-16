@@ -13,6 +13,8 @@
 /.next/
 /out/
 /dist/
+/client/dist/
+/client/node_modules/
 
 # server
 /server/node_modules
