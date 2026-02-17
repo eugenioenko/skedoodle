@@ -2,7 +2,6 @@
 
 ## Drawing Tools
 
-- [ ] **Ellipse/Circle tool** — drag to draw ellipses, hold Shift for perfect circles
 - [ ] **Eyedropper tool** — sample color from any shape on the canvas
 
 ## Editing & Transform
@@ -10,8 +9,6 @@
 - [ ] **Resize handles** — scale shapes via drag handles on the selection bounding box
 - [ ] **Rotation handle** — rotate shapes via handle above the selection bounding box
 - [ ] **Selection marquee** — drag on empty space with pointer tool to select shapes within a rectangle
-- [ ] **Copy/Paste/Duplicate** — Ctrl+C, Ctrl+V, Ctrl+D support for selected shapes
-- [ ] **Delete with keyboard** — Delete/Backspace to remove selected shapes
 
 ## Shape Tools Improvements
 

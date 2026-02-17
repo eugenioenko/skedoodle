@@ -157,6 +157,7 @@ export const TooltipContent = React.forwardRef<
         style={{
           ...context.floatingStyles,
           ...style,
+          zIndex: 9999
         }}
         {...context.getFloatingProps(props)}
       />
