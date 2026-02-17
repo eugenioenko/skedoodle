@@ -2,7 +2,7 @@ import { MouseEvent } from "react";
 import { create } from "zustand";
 import { getDoodler } from "../doodler.client";
 import { updateGrid } from "../canvas.grid";
-import { usePointerStore } from "./pointer.tool";
+import { updateOutlineScales } from "./pointer.tool";
 
 export interface ZoomState {
   zoom: number;
@@ -43,13 +43,7 @@ export function doZoom(
   doodler.zui.zoomBy(dy, e.clientX, e.clientY);
   setZoom(Math.floor(doodler.zui.scale * 100));
 
-  const { outlines } = usePointerStore.getState();
-
-  for (const outline of Object.values(outlines)) {
-    if (outline) {
-      outline.linewidth = 1.5 / doodler.zui.scale;
-    }
-  }
+  updateOutlineScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
@@ -69,12 +63,7 @@ export function doZoomTo(level: number): void {
   doodler.zui.zoomBy(ratio - 1, cx, cy);
   setZoom(Math.floor(doodler.zui.scale * 100));
 
-  const { outlines } = usePointerStore.getState();
-  for (const outline of Object.values(outlines)) {
-    if (outline) {
-      outline.linewidth = 1.5 / doodler.zui.scale;
-    }
-  }
+  updateOutlineScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
@@ -103,12 +92,7 @@ export function doZoomStep(direction: 1 | -1): void {
   doodler.zui.zoomBy(ratio - 1, cx, cy);
   setZoom(Math.floor(doodler.zui.scale * 100));
 
-  const { outlines } = usePointerStore.getState();
-  for (const outline of Object.values(outlines)) {
-    if (outline) {
-      outline.linewidth = 1.5 / doodler.zui.scale;
-    }
-  }
+  updateOutlineScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
