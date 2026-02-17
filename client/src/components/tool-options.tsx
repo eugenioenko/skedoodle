@@ -22,6 +22,7 @@ import { useOptionsStore } from "@/canvas/canvas.store";
 import { useSquareStore } from "@/canvas/tools/square.tool";
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
+import { ToolHint } from "./ui/tool-hint";
 
 export const ToolOptions = () => {
   let selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -53,6 +54,27 @@ export const ToolOptions = () => {
   if (selectedTool === "text") {
     return <TextToolOptions />;
   }
+
+  if (selectedTool === "node") {
+    return <ToolHint hint="Click a shape to edit its nodes. Drag to reshape." />;
+  }
+
+  if (selectedTool === "eraser") {
+    return <ToolHint hint="Click a shape to erase it." />;
+  }
+
+  if (selectedTool === "pointer") {
+    return <ToolHint hint="Click a shape to select it." />;
+  }
+
+  if (selectedTool === "hand") {
+    return <ToolHint hint="Click a shape to move it." />;
+  }
+
+  if (selectedTool === "zoom") {
+    return <ToolHint hint="Click canvas to zoom in or out." />;
+  }
+
 
   return null;
 };

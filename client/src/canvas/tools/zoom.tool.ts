@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { getDoodler } from "../doodler.client";
 import { updateGrid } from "../canvas.grid";
 import { updateOutlineScales } from "./pointer.tool";
+import { updateNodeHandleScales } from "./node.tool";
 
 export interface ZoomState {
   zoom: number;
@@ -44,6 +45,7 @@ export function doZoom(
   setZoom(Math.floor(doodler.zui.scale * 100));
 
   updateOutlineScales();
+  updateNodeHandleScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
@@ -64,6 +66,7 @@ export function doZoomTo(level: number): void {
   setZoom(Math.floor(doodler.zui.scale * 100));
 
   updateOutlineScales();
+  updateNodeHandleScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);
@@ -93,6 +96,7 @@ export function doZoomStep(direction: 1 | -1): void {
   setZoom(Math.floor(doodler.zui.scale * 100));
 
   updateOutlineScales();
+  updateNodeHandleScales();
 
   const sm = doodler.zui.surfaceMatrix.elements;
   updateGrid(doodler.zui.scale, sm[2], sm[5]);

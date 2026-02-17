@@ -167,7 +167,7 @@ function makeArrowHead(
   return head;
 }
 
-function updateArrowHead(
+export function updateArrowHead(
   head: Path,
   start: { x: number; y: number },
   end: { x: number; y: number },

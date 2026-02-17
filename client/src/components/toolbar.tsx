@@ -3,13 +3,14 @@ import {
   IconArrowNarrowRight,
   IconBrush,
   IconCircle,
+  IconEaseInOutControlPoints,
   IconEraser,
+  IconHandFinger,
   IconHandStop,
   IconLetterT,
   IconLine,
   IconPointer,
   IconSquare,
-  IconVectorBezier,
   IconZoom,
 } from "@tabler/icons-react";
 import { WithTooltip } from "./ui/tooltip";
@@ -25,17 +26,22 @@ export const Toolbar = () => {
         </WithTooltip>
         <WithTooltip tooltip="Pointer tool [P]">
           <ToggleButton value="pointer">
-            <IconPointer stroke={1} />
+            <IconHandFinger stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Eraser tool [E]">
-          <ToggleButton value="eraser">
-            <IconEraser stroke={1} />
+        <WithTooltip tooltip="Node tool [N]">
+          <ToggleButton value="node">
+            <IconPointer stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Brush tool [B]">
           <ToggleButton value="brush">
             <IconBrush stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Pen tool [C]">
+          <ToggleButton value="bezier">
+            <IconEaseInOutControlPoints stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Rectangle tool [R]">
@@ -58,14 +64,14 @@ export const Toolbar = () => {
             <IconArrowNarrowRight stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Pen tool [C]">
-          <ToggleButton value="bezier">
-            <IconVectorBezier stroke={1} />
-          </ToggleButton>
-        </WithTooltip>
         <WithTooltip tooltip="Text tool [T]">
           <ToggleButton value="text">
             <IconLetterT stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Eraser tool [E]">
+          <ToggleButton value="eraser">
+            <IconEraser stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Zoom tool [Z]">

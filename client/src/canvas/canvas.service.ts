@@ -20,6 +20,7 @@ import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.to
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
+import { doNodeStart, doNodeMove, doNodeUp, clearHandles as clearNodeHandles } from "./tools/node.tool";
 import { undo, redo, exitTimeTravelMode, pushCreateCommand, pushRemoveCommand } from "./history.service";
 import { useCommandLogStore } from "./history.store";
 import { doCursorUpdate } from "./tools/cursor.tool";
@@ -51,6 +52,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "pointer") {
     doPointerStart(e);
+    return;
+  }
+
+  if (selectedTool === "node") {
+    doNodeStart(e);
     return;
   }
 
@@ -119,6 +125,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
+  if (selectedTool === "node") {
+    doNodeMove(e);
+    return;
+  }
+
   if (selectedTool === "bezier") {
     doBezierMove(e);
     return;
@@ -180,6 +191,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "pointer") {
     doPointerEnd(e);
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "node") {
+    doNodeUp();
     setActiveTool(undefined);
     return;
   }
@@ -302,6 +319,16 @@ function doKeyDown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       e.preventDefault();
       cancelBezier();
+      return;
+    }
+  }
+
+  // Node tool: Escape to deselect
+  if (selectedTool === "node") {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      clearNodeHandles();
+      getDoodler().throttledTwoUpdate();
       return;
     }
   }

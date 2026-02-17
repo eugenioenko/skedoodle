@@ -11,6 +11,7 @@ export type Tool =
   | "brush"
   | "square"
   | "ellipse"
+  | "node"
   | "line"
   | "arrow"
   | "text"

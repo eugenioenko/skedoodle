@@ -31,6 +31,16 @@ function clearSelection(): void {
 }
 
 function getShapeField(shape: Shape, field: string): any {
+  if (field === "_vertexData") {
+    const path = shape as any;
+    return (path.vertices || []).map((v: any) => ({
+      x: v.x, y: v.y,
+      lx: v.controls?.left?.x ?? 0,
+      ly: v.controls?.left?.y ?? 0,
+      rx: v.controls?.right?.x ?? 0,
+      ry: v.controls?.right?.y ?? 0,
+    }));
+  }
   const props = field.split(".");
   if (props.length === 2) {
     return (shape as any)[props[0]][props[1]];
@@ -39,6 +49,25 @@ function getShapeField(shape: Shape, field: string): any {
 }
 
 function setShapeField(shape: Shape, field: string, value: any): void {
+  if (field === "_vertexData") {
+    const path = shape as any;
+    if (!path.vertices) return;
+    const data = value as Array<{ x: number; y: number; lx: number; ly: number; rx: number; ry: number }>;
+    for (let i = 0; i < data.length && i < path.vertices.length; i++) {
+      const v = path.vertices[i];
+      v.x = data[i].x;
+      v.y = data[i].y;
+      if (v.controls?.left) {
+        v.controls.left.x = data[i].lx;
+        v.controls.left.y = data[i].ly;
+      }
+      if (v.controls?.right) {
+        v.controls.right.x = data[i].rx;
+        v.controls.right.y = data[i].ry;
+      }
+    }
+    return;
+  }
   const props = field.split(".");
   if (props.length === 2) {
     (shape as any)[props[0]][props[1]] = value;
