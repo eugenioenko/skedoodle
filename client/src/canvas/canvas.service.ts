@@ -14,7 +14,8 @@ import {
   doPointerStart,
   doTryHighlight,
 } from "./tools/pointer.tool";
-import { doShapeMove, doShapeStart, doShapeUp } from "./tools/shape.tool";
+import { doSquareMove, doSquareStart, doSquareUp } from "./tools/square.tool";
+import { doEllipseStart, doEllipseMove, doEllipseUp } from "./tools/ellipse.tool";
 import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
@@ -65,7 +66,12 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   }
 
   if (selectedTool === "square") {
-    doShapeStart(e);
+    doSquareStart(e);
+    return;
+  }
+
+  if (selectedTool === "ellipse") {
+    doEllipseStart(e);
     return;
   }
 
@@ -130,7 +136,12 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
   }
 
   if (activeTool === "square") {
-    doShapeMove(e);
+    doSquareMove(e);
+    return;
+  }
+
+  if (activeTool === "ellipse") {
+    doEllipseMove(e);
     return;
   }
 
@@ -182,7 +193,13 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
   }
 
   if (activeTool === "square") {
-    doShapeUp();
+    doSquareUp();
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "ellipse") {
+    doEllipseUp();
     setActiveTool(undefined);
     return;
   }

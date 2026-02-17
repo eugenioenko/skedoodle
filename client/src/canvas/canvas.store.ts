@@ -10,6 +10,7 @@ export type Tool =
   | "pointer"
   | "brush"
   | "square"
+  | "ellipse"
   | "line"
   | "arrow"
   | "text"

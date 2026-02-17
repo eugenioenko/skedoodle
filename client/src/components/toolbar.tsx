@@ -2,6 +2,7 @@ import { Tool, useOptionsStore } from "@/canvas/canvas.store";
 import {
   IconArrowNarrowRight,
   IconBrush,
+  IconCircle,
   IconEraser,
   IconHandStop,
   IconLetterT,
@@ -40,6 +41,11 @@ export const Toolbar = () => {
         <WithTooltip tooltip="Rectangle tool [R]">
           <ToggleButton value="square">
             <IconSquare stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Ellipse tool [O]">
+          <ToggleButton value="ellipse">
+            <IconCircle stroke={1} />
           </ToggleButton>
         </WithTooltip>
         <WithTooltip tooltip="Line tool [L]">

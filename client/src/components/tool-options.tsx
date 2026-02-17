@@ -19,7 +19,7 @@ import { useLineStore } from "@/canvas/tools/line.tool";
 import { useTextStore } from "@/canvas/tools/text.tool";
 import { ColorInput } from "./ui/color-input";
 import { useOptionsStore } from "@/canvas/canvas.store";
-import { useShapeStore } from "@/canvas/tools/shape.tool";
+import { useSquareStore } from "@/canvas/tools/square.tool";
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 
@@ -36,6 +36,10 @@ export const ToolOptions = () => {
 
   if (selectedTool === "square") {
     return <SquareToolOptions />;
+  }
+
+  if (selectedTool === "ellipse") {
+    return <EllipseToolOptions />;
   }
 
   if (selectedTool === "bezier") {
@@ -141,12 +145,12 @@ const BrushToolOptions = () => {
 };
 
 const SquareToolOptions = () => {
-  const strokeWidth = useShapeStore((state) => state.strokeWidth);
-  const strokeColor = useShapeStore((state) => state.strokeColor);
-  const fillColor = useShapeStore((state) => state.fillColor);
-  const radius = useShapeStore((state) => state.radius);
+  const strokeWidth = useSquareStore((state) => state.strokeWidth);
+  const strokeColor = useSquareStore((state) => state.strokeColor);
+  const fillColor = useSquareStore((state) => state.fillColor);
+  const radius = useSquareStore((state) => state.radius);
   const { setStrokeColor, setStrokeWidth, setFillColor, setRadius } =
-    useShapeStore.getState();
+    useSquareStore.getState();
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
@@ -174,6 +178,35 @@ const SquareToolOptions = () => {
         max={100}
         onChange={(value) => setRadius(value)}
         icon={IconBorderCornerRounded}
+      />
+    </div>
+  );
+};
+
+const EllipseToolOptions = () => {
+  const strokeWidth = useSquareStore((state) => state.strokeWidth);
+  const strokeColor = useSquareStore((state) => state.strokeColor);
+  const fillColor = useSquareStore((state) => state.fillColor);
+  const { setStrokeColor, setStrokeWidth, setFillColor } =
+    useSquareStore.getState();
+
+  return (
+    <div className="flex flex-row gap-2 text-xs items-center">
+      <label>Fill</label>
+      <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
+      <label className="pl-2">Stroke</label>
+      <ColorInput
+        value={strokeColor}
+        onChange={(value) => setStrokeColor(value)}
+      />
+      <label className="pl-2">Width</label>
+      <SlideInput
+        className="max-w-24"
+        value={strokeWidth}
+        min={0}
+        max={100}
+        onChange={(value) => setStrokeWidth(value)}
+        icon={IconSquare}
       />
     </div>
   );
