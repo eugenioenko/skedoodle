@@ -334,10 +334,10 @@ export const Properties = () => {
         <History />
       </div>
       <div>
-        <Timeline />
+        <Layers />
       </div>
       <div>
-        <Layers />
+        <Timeline />
       </div>
       <div className="pt-64"></div>
     </div>
