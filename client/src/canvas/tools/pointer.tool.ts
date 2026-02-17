@@ -41,6 +41,7 @@ export interface PointerState {
   setOrigins: (origins: Vector[]) => void;
   clearHighlight: () => void;
   setIsMoving: (isMoving: boolean) => void;
+  selectShapes: (shapes: Shape[]) => void;
 }
 
 export const usePointerStore = create<PointerState>()((set) => ({
@@ -59,6 +60,8 @@ export const usePointerStore = create<PointerState>()((set) => ({
   clearSelected: () => set((state) => clearSelected(state)),
   addHighlightToSelection: (join: boolean) =>
     set((state) => addToSelection(state, join)),
+  selectShapes: (shapes: Shape[]) =>
+    set((state) => selectShapesDirect(state, shapes)),
 }));
 
 function highlightShape(
@@ -155,6 +158,22 @@ function clearSelected(state: PointerState): PointerState {
   }
 
   return { ...state, selected: [] };
+}
+
+function selectShapesDirect(state: PointerState, shapes: Shape[]): PointerState {
+  // Clear existing selection outline
+  if (state.outlines.selected) {
+    state.outlines.selected.remove();
+    state.outlines.selected = undefined;
+  }
+
+  if (shapes.length === 0) {
+    return { ...state, selected: [] };
+  }
+
+  const outline = makeBorder(0, 0, 0, 0);
+  setSelectionOutline(shapes, outline);
+  return { ...state, selected: shapes, outlines: { ...state.outlines, selected: outline } };
 }
 
 function startMoveSelection(): void {

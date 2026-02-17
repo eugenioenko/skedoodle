@@ -53,6 +53,7 @@ export interface OptionsState {
   gridType: "none" | "dots" | "lines";
   gridColor: RgbaColor;
   gridMinZoom: number;
+  pasteOffset: number;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -84,6 +85,7 @@ export const useOptionsStore = create<OptionsState>()(
       gridType: "dots",
       gridColor: { r: 0, g: 0, b: 0, a: 0.15 },
       gridMinZoom: 50,
+      pasteOffset: 20,
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),

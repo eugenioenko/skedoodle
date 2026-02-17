@@ -20,9 +20,13 @@ import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.to
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
-import { undo, redo, exitTimeTravelMode } from "./history.service";
+import { undo, redo, exitTimeTravelMode, pushCreateCommand } from "./history.service";
 import { useCommandLogStore } from "./history.store";
 import { doCursorUpdate } from "./tools/cursor.tool";
+import { SerializedDoodle, serializeDoodle, unserializeDoodle } from "./doodle.utils";
+import { usePointerStore } from "./tools/pointer.tool";
+
+let clipboard: SerializedDoodle[] = [];
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
@@ -313,6 +317,82 @@ function doKeyDown(e: KeyboardEvent): void {
     undo();
     return;
   }
+
+  if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C") && !e.shiftKey) {
+    e.preventDefault();
+    doCopy();
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V") && !e.shiftKey) {
+    e.preventDefault();
+    doPaste();
+    return;
+  }
+
+  if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D") && !e.shiftKey) {
+    e.preventDefault();
+    doDuplicate();
+    return;
+  }
+}
+
+function doCopy(): void {
+  const { selected } = usePointerStore.getState();
+  const { doodles } = useCanvasStore.getState();
+  if (selected.length === 0) return;
+
+  const selectedIds = new Set(selected.map((s) => s.id));
+  clipboard = doodles
+    .filter((d) => selectedIds.has(d.shape.id))
+    .map((d) => serializeDoodle(d));
+}
+
+function doPaste(): void {
+  if (clipboard.length === 0) return;
+
+  const doodler = getDoodler();
+  const pasteOffset = useOptionsStore.getState().pasteOffset;
+  const { clearSelected } = usePointerStore.getState();
+  clearSelected();
+
+  for (const serialized of clipboard) {
+    const offset = { ...serialized, x: serialized.x + pasteOffset, y: serialized.y + pasteOffset };
+    const doodle = unserializeDoodle(offset);
+    doodler.addDoodle(doodle);
+    pushCreateCommand(doodle);
+  }
+
+  // Shift clipboard so consecutive pastes cascade
+  clipboard = clipboard.map((s) => ({ ...s, x: s.x + pasteOffset, y: s.y + pasteOffset }));
+
+  doodler.throttledTwoUpdate();
+}
+
+function doDuplicate(): void {
+  const { selected } = usePointerStore.getState();
+  const { doodles } = useCanvasStore.getState();
+  if (selected.length === 0) return;
+
+  const doodler = getDoodler();
+  const pasteOffset = useOptionsStore.getState().pasteOffset;
+  const { clearSelected } = usePointerStore.getState();
+
+  const selectedIds = new Set(selected.map((s) => s.id));
+  const serializedItems = doodles
+    .filter((d) => selectedIds.has(d.shape.id))
+    .map((d) => serializeDoodle(d));
+
+  clearSelected();
+
+  for (const serialized of serializedItems) {
+    const offset = { ...serialized, x: serialized.x + pasteOffset, y: serialized.y + pasteOffset };
+    const doodle = unserializeDoodle(offset);
+    doodler.addDoodle(doodle);
+    pushCreateCommand(doodle);
+  }
+
+  doodler.throttledTwoUpdate();
 }
 
 function doUpdate() { }
