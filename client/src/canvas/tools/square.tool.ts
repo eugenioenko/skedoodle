@@ -8,7 +8,7 @@ import { getDoodler } from "../doodler.client";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { pushCreateCommand } from "../history.service";
 
-export interface ShapeState {
+export interface SquareState {
   shape?: RoundedRectangle;
   origin: Vector;
   strokeWidth: number;
@@ -22,7 +22,7 @@ export interface ShapeState {
   setRadius: (radius?: number) => void;
 }
 
-export const useShapeStore = create<ShapeState>()((set) => ({
+export const useSquareStore = create<SquareState>()((set) => ({
   shape: undefined,
   origin: new Vector(),
   strokeWidth: 2,
@@ -36,10 +36,10 @@ export const useShapeStore = create<ShapeState>()((set) => ({
   setRadius: (radius) => set(() => ({ radius })),
 }));
 
-export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
+export function doSquareStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
   const { setShape, origin, fillColor, strokeColor, strokeWidth, radius } =
-    useShapeStore.getState();
+    useSquareStore.getState();
 
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   origin.set(position.x, position.y);
@@ -64,9 +64,9 @@ export function doShapeStart(e: MouseEvent<HTMLDivElement>): void {
   doodler.throttledTwoUpdate();
 }
 
-export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
+export function doSquareMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { shape, origin } = useShapeStore.getState();
+  const { shape, origin } = useSquareStore.getState();
   const position = eventToSurfacePosition(e, doodler.zui);
   if (shape) {
     const width = shape.width;
@@ -87,8 +87,8 @@ export function doShapeMove(e: MouseEvent<HTMLDivElement>): void {
   }
 }
 
-export function doShapeUp() {
-  const { shape, setShape } = useShapeStore.getState();
+export function doSquareUp() {
+  const { shape, setShape } = useSquareStore.getState();
   if (shape) {
     pushCreateCommand({ shape, type: "rect" });
   }

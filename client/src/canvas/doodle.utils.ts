@@ -2,6 +2,7 @@ import { Point } from "@/models/point.model";
 import Two from "two.js";
 import { Path } from "two.js/src/path";
 import { Shape } from "two.js/src/shape";
+import { Ellipse } from "two.js/src/shapes/ellipse";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { Text } from "two.js/src/text";
 
@@ -132,6 +133,13 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
     shape.fill = fc;
     shape.linewidth = lw;
     return { shape: shape, type: "rect" };
+  } else if (type === "ellipse") {
+    const ellipse = new Ellipse(x, y, w / 2, h / 2);
+    ellipse.id = id;
+    ellipse.stroke = sc;
+    ellipse.fill = fc;
+    ellipse.linewidth = lw;
+    return { shape: ellipse, type: "ellipse" };
   } else if (type === "text") {
     const shape = new Text(serialized.txt || "", x, y);
     shape.id = id;
