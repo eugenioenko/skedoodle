@@ -20,7 +20,7 @@ import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.to
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
-import { undo, redo, exitTimeTravelMode, pushCreateCommand } from "./history.service";
+import { undo, redo, exitTimeTravelMode, pushCreateCommand, pushRemoveCommand } from "./history.service";
 import { useCommandLogStore } from "./history.store";
 import { doCursorUpdate } from "./tools/cursor.tool";
 import { SerializedDoodle, serializeDoodle, unserializeDoodle } from "./doodle.utils";
@@ -335,6 +335,31 @@ function doKeyDown(e: KeyboardEvent): void {
     doDuplicate();
     return;
   }
+
+  if (e.key === "Delete" || e.key === "Backspace") {
+    e.preventDefault();
+    doDeleteSelected();
+    return;
+  }
+}
+
+function doDeleteSelected(): void {
+  const { selected, clearSelected } = usePointerStore.getState();
+  if (selected.length === 0) return;
+
+  const doodler = getDoodler();
+  const { doodles } = useCanvasStore.getState();
+  const selectedIds = new Set(selected.map((s) => s.id));
+
+  for (const doodle of doodles) {
+    if (selectedIds.has(doodle.shape.id)) {
+      pushRemoveCommand(doodle);
+      doodler.removeDoodle(doodle);
+    }
+  }
+
+  clearSelected();
+  doodler.throttledTwoUpdate();
 }
 
 function doCopy(): void {
