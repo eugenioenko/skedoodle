@@ -1,4 +1,4 @@
-import { Command, useCommandLogStore } from "@/canvas/history.store";
+import { useCommandLogStore } from "@/canvas/history.store";
 import {
   enterTimeTravelMode,
   scrubTo,
@@ -6,6 +6,7 @@ import {
 } from "@/canvas/history.service";
 import { IconGitBranch } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
+import { Command } from "@/sync/sync.model";
 
 function commandLabel(cmd: Command): string {
   switch (cmd.type) {
@@ -116,13 +117,12 @@ export const History = () => {
               <div
                 key={cmd.id}
                 onClick={() => handleClick(index)}
-                className={`px-2 py-1 text-xs text-left flex items-center gap-2 hover:bg-default-4 cursor-pointer ${
-                  isSelected
+                className={`px-2 py-1 text-xs text-left flex items-center gap-2 hover:bg-default-4 cursor-pointer ${isSelected
                     ? "bg-secondary"
                     : isBeyond
                       ? "opacity-30"
                       : "opacity-70"
-                }`}
+                  }`}
               >
                 <div className="flex-grow min-w-0">
                   <div className="truncate">{commandLabel(cmd)}</div>
@@ -156,13 +156,12 @@ interface HistoryEntryProps {
 const HistoryEntry = ({ command, variant }: HistoryEntryProps) => {
   return (
     <div
-      className={`px-2 py-0.5 text-xs ${
-        variant === "current"
+      className={`px-2 py-0.5 text-xs ${variant === "current"
           ? "bg-secondary"
           : variant === "future"
             ? "opacity-40"
             : "opacity-70"
-      }`}
+        }`}
     >
       {commandLabel(command)}
     </div>

@@ -5,7 +5,7 @@ import {
   unserializeDoodle,
 } from "./doodle.utils";
 import { getDoodler } from "./doodler.client";
-import { Command, createCommand, useCommandLogStore } from "./history.store";
+import { createCommand, useCommandLogStore } from "./history.store";
 import { usePointerStore } from "./tools/pointer.tool";
 import { Shape } from "two.js/src/shape";
 import {
@@ -15,6 +15,7 @@ import {
 import { syncService } from "@/sync/sync.client";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
+import { Command } from "@/sync/sync.model";
 
 // Stores old values for update commands, keyed by command ID
 const preUpdateSnapshots = new Map<string, Record<string, any>>();

@@ -1,5 +1,5 @@
-import { Command } from "@/canvas/history.store";
 import { useAuthStore } from '@/stores/auth.store';
+import { Command } from '@/sync/sync.model';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 

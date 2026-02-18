@@ -9,10 +9,8 @@ import {
 import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   Doodle,
-  SerializedDoodle,
 } from "./doodle.utils";
-import { Command, createCommand, useCommandLogStore } from "./history.store";
-import { executeForward } from "./history.service";
+import { useCommandLogStore } from "./history.store";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
 import { colord } from "colord";

@@ -1,18 +1,10 @@
 import { create } from 'zustand';
 import { useSyncStore } from '@/sync/sync.store';
 import { ulid } from 'ulid';
-
-export interface Command<T = any> {
-  id: string; // Unique ID for the command
-  ts: number; // Timestamp
-  uid: string; // User ID
-  type: 'create' | 'update' | 'remove' | 'undo' | 'redo';
-  sid: string; // Shape ID
-  data: T;
-}
+import { Command, CommandType } from '@/sync/sync.model';
 
 export function createCommand(
-  type: Command['type'],
+  type: CommandType,
   sid: string,
   opts?: { data?: any; }
 ): Command {
