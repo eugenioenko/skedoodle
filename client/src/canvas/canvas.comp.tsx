@@ -11,9 +11,10 @@ import { useSync } from "@/sync/sync.hook";
 interface CanvasProps {
   sketchId: string;
   onReady?: () => void;
+  isLocal?: boolean;
 }
 
-export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
+export const Canvas = ({ sketchId, onReady, isLocal = false }: CanvasProps) => {
   const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -23,15 +24,19 @@ export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
   const bgColor = colord(canvasColor).toHex();
 
   const onTwoReady = useCallback(async () => {
-    console.log("[Canvas] Canvas ready, loading doodles...");
-    await getDoodler().loadDoodles();
+    if (isLocal) {
+      console.log("[Canvas] Canvas ready, local mode.");
+    } else {
+      console.log("[Canvas] Canvas ready, loading doodles...");
+      await getDoodler().loadDoodles();
+    }
     onReady?.();
     setIsReady(true);
-  }, [onReady, sketchId]);
+  }, [onReady, sketchId, isLocal]);
 
   useInitTwoCanvas(containerRef, sketchId, onTwoReady);
   useRemoteCursors(isReady);
-  useSync(sketchId, isReady);
+  useSync(sketchId, isReady, isLocal);
 
   return (
     <div

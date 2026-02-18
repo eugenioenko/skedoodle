@@ -6,12 +6,12 @@ import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
 import { ToolOptions } from "./tool-options";
 import { Loader } from "./loader";
 import { useCallback, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Toasts } from "./ui/toasts";
 import { useCommandLogStore } from "@/canvas/history.store";
 import { exitTimeTravelMode } from "@/canvas/history.service";
 
-export const App = () => {
+export const App = ({ isLocal = false }) => {
   useWindowWheelPrevent();
   const { id } = useParams();
   const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
@@ -21,10 +21,6 @@ export const App = () => {
   const onReady = useCallback(() => {
     setTimeout(() => setIsLoading(false), loadDelay);
   }, [setIsLoading, loadDelay]);
-
-  if (!id) {
-    return <Navigate to="/sketches" replace />;
-  }
 
   return (
     <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
@@ -45,7 +41,7 @@ export const App = () => {
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <div className="relative flex-grow flex">
-          <Canvas sketchId={id} onReady={onReady} />
+          <Canvas sketchId={id || "local"} onReady={onReady} isLocal={isLocal} />
         </div>
         <Panel />
       </div>

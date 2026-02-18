@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./components/app.tsx";
 import { SketchesPage } from "./components/page-sketches.tsx";
@@ -14,6 +13,7 @@ createRoot(document.getElementById("root")!).render(
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/local" element={<App isLocal={true} />} />
       <Route path="/" element={<SketchesPage />} />
       <Route path="/sketches" element={<SketchesPage />} />
       <Route element={<AuthGuard />}>
