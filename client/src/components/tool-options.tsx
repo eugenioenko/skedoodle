@@ -7,6 +7,8 @@ import {
   IconChartScatter3d,
   IconLetterT,
   IconLine,
+  IconLink,
+  IconLinkOff,
   IconSquare,
   IconVectorBezier,
   IconVectorSpline,
@@ -23,6 +25,8 @@ import { useSquareStore } from "@/canvas/tools/square.tool";
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { ToolHint } from "./ui/tool-hint";
+import { useSyncedColor } from "@/hooks/use-synced-color";
+import { RgbaColor } from "colord";
 
 export const ToolOptions = () => {
   let selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -79,23 +83,61 @@ export const ToolOptions = () => {
   return null;
 };
 
+// Toggle button that syncs/unsyncs all tool colors.
+// Receives the current tool's local colors so toggling ON snaps global to them.
+interface SyncColorsButtonProps {
+  strokeColor?: RgbaColor;
+  fillColor?: RgbaColor;
+}
+
+const SyncColorsButton = ({ strokeColor, fillColor }: SyncColorsButtonProps) => {
+  const syncColors = useOptionsStore((state) => state.syncColors);
+  const { setSyncColors, setGlobalStrokeColor, setGlobalFillColor } =
+    useOptionsStore.getState();
+
+  const handleToggle = () => {
+    if (!syncColors) {
+      if (strokeColor) setGlobalStrokeColor(strokeColor);
+      if (fillColor) setGlobalFillColor(fillColor);
+      setSyncColors(true);
+    } else {
+      setSyncColors(false);
+    }
+  };
+
+  return (
+    <WithTooltip tooltip={syncColors ? "Unlink tool colors" : "Link all tool colors"}>
+      <button
+        type="button"
+        className={`p-1 rounded mr-2 ${syncColors ? "bg-primary" : "hover:bg-default-3"}`}
+        onClick={handleToggle}
+      >
+        {syncColors ? <IconLink size={16} stroke={1} /> : <IconLinkOff size={16} stroke={1} />}
+      </button>
+    </WithTooltip>
+  );
+};
+
 const BrushToolOptions = () => {
   const strokeWidth = useBrushStore((state) => state.strokeWidth);
   const tolerance = useBrushStore((state) => state.tolerance);
   const stabilizer = useBrushStore((state) => state.stabilizer);
-  const strokeColor = useBrushStore((state) => state.strokeColor);
+  const localStrokeColor = useBrushStore((state) => state.strokeColor);
   const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
 
   const {
-    setStrokeColor,
+    setStrokeColor: setLocalStrokeColor,
     setStrokeWidth,
     setStabilizer,
     setTolerance,
     setSimplifyAlgo,
   } = useBrushStore.getState();
 
+  const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
+
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
+      <SyncColorsButton strokeColor={localStrokeColor} />
       <label>Color</label>
       <ColorInput
         value={strokeColor}
@@ -168,21 +210,22 @@ const BrushToolOptions = () => {
 
 const SquareToolOptions = () => {
   const strokeWidth = useSquareStore((state) => state.strokeWidth);
-  const strokeColor = useSquareStore((state) => state.strokeColor);
-  const fillColor = useSquareStore((state) => state.fillColor);
+  const localStrokeColor = useSquareStore((state) => state.strokeColor);
+  const localFillColor = useSquareStore((state) => state.fillColor);
   const radius = useSquareStore((state) => state.radius);
-  const { setStrokeColor, setStrokeWidth, setFillColor, setRadius } =
+  const { setStrokeColor: setLocalStrokeColor, setStrokeWidth, setFillColor: setLocalFillColor, setRadius } =
     useSquareStore.getState();
+
+  const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
+  const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
-      <label>Fill</label>
+      <SyncColorsButton strokeColor={localStrokeColor} fillColor={localFillColor} />
+      <label>Stroke</label>
+      <ColorInput value={strokeColor} onChange={(value) => setStrokeColor(value)} />
+      <label className="pl-2">Fill</label>
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
-      <label className="pl-2">Stroke</label>
-      <ColorInput
-        value={strokeColor}
-        onChange={(value) => setStrokeColor(value)}
-      />
       <label className="pl-2">Width</label>
       <SlideInput
         className="max-w-24"
@@ -207,20 +250,21 @@ const SquareToolOptions = () => {
 
 const EllipseToolOptions = () => {
   const strokeWidth = useSquareStore((state) => state.strokeWidth);
-  const strokeColor = useSquareStore((state) => state.strokeColor);
-  const fillColor = useSquareStore((state) => state.fillColor);
-  const { setStrokeColor, setStrokeWidth, setFillColor } =
+  const localStrokeColor = useSquareStore((state) => state.strokeColor);
+  const localFillColor = useSquareStore((state) => state.fillColor);
+  const { setStrokeColor: setLocalStrokeColor, setStrokeWidth, setFillColor: setLocalFillColor } =
     useSquareStore.getState();
+
+  const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
+  const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
-      <label>Fill</label>
+      <SyncColorsButton strokeColor={localStrokeColor} fillColor={localFillColor} />
+      <label>Stroke</label>
+      <ColorInput value={strokeColor} onChange={(value) => setStrokeColor(value)} />
+      <label className="pl-2">Fill</label>
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
-      <label className="pl-2">Stroke</label>
-      <ColorInput
-        value={strokeColor}
-        onChange={(value) => setStrokeColor(value)}
-      />
       <label className="pl-2">Width</label>
       <SlideInput
         className="max-w-24"
@@ -236,13 +280,16 @@ const EllipseToolOptions = () => {
 
 const TextToolOptions = () => {
   const fontSize = useTextStore((state) => state.fontSize);
-  const fillColor = useTextStore((state) => state.fillColor);
+  const localFillColor = useTextStore((state) => state.fillColor);
   const fontFamily = useTextStore((state) => state.fontFamily);
-  const { setFillColor, setFontSize, setFontFamily } =
+  const { setFillColor: setLocalFillColor, setFontSize, setFontFamily } =
     useTextStore.getState();
+
+  const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
+      <SyncColorsButton fillColor={localFillColor} />
       <label>Color</label>
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
       <label className="pl-2">Size</label>
@@ -271,20 +318,21 @@ const TextToolOptions = () => {
 
 const BezierToolOptions = () => {
   const strokeWidth = useBezierStore((state) => state.strokeWidth);
-  const strokeColor = useBezierStore((state) => state.strokeColor);
-  const fillColor = useBezierStore((state) => state.fillColor);
-  const { setStrokeColor, setStrokeWidth, setFillColor } =
+  const localStrokeColor = useBezierStore((state) => state.strokeColor);
+  const localFillColor = useBezierStore((state) => state.fillColor);
+  const { setStrokeColor: setLocalStrokeColor, setStrokeWidth, setFillColor: setLocalFillColor } =
     useBezierStore.getState();
+
+  const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
+  const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
-      <label>Fill</label>
+      <SyncColorsButton strokeColor={localStrokeColor} fillColor={localFillColor} />
+      <label>Stroke</label>
+      <ColorInput value={strokeColor} onChange={(value) => setStrokeColor(value)} />
+      <label className="pl-2">Fill</label>
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
-      <label className="pl-2">Stroke</label>
-      <ColorInput
-        value={strokeColor}
-        onChange={(value) => setStrokeColor(value)}
-      />
       <label className="pl-2">Width</label>
       <SlideInput
         className="max-w-24"
@@ -300,14 +348,17 @@ const BezierToolOptions = () => {
 
 const LineToolOptions = () => {
   const strokeWidth = useLineStore((state) => state.strokeWidth);
-  const strokeColor = useLineStore((state) => state.strokeColor);
+  const localStrokeColor = useLineStore((state) => state.strokeColor);
   const doubleArrow = useLineStore((state) => state.doubleArrow);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
-  const { setStrokeColor, setStrokeWidth, setDoubleArrow } =
+  const { setStrokeColor: setLocalStrokeColor, setStrokeWidth, setDoubleArrow } =
     useLineStore.getState();
+
+  const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
+      <SyncColorsButton strokeColor={localStrokeColor} />
       <label>Color</label>
       <ColorInput
         value={strokeColor}

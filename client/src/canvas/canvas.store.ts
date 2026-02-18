@@ -55,6 +55,9 @@ export interface OptionsState {
   gridColor: RgbaColor;
   gridMinZoom: number;
   pasteOffset: number;
+  syncColors: boolean;
+  globalStrokeColor: RgbaColor;
+  globalFillColor: RgbaColor;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -68,6 +71,9 @@ export interface OptionsState {
   setGridType: (gridType: "none" | "dots" | "lines") => void;
   setGridColor: (gridColor: RgbaColor) => void;
   setGridMinZoom: (gridMinZoom: number) => void;
+  setSyncColors: (syncColors: boolean) => void;
+  setGlobalStrokeColor: (globalStrokeColor: RgbaColor) => void;
+  setGlobalFillColor: (globalFillColor: RgbaColor) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -87,6 +93,9 @@ export const useOptionsStore = create<OptionsState>()(
       gridColor: { r: 0, g: 0, b: 0, a: 0.15 },
       gridMinZoom: 50,
       pasteOffset: 20,
+      syncColors: false,
+      globalStrokeColor: { r: 33, g: 33, b: 33, a: 1 },
+      globalFillColor: { r: 255, g: 255, b: 255, a: 1 },
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
@@ -100,7 +109,10 @@ export const useOptionsStore = create<OptionsState>()(
       setGridType: (gridType) => set(() => ({ gridType })),
       setGridColor: (gridColor) => set(() => ({ gridColor })),
       setGridMinZoom: (gridMinZoom) => set(() => ({ gridMinZoom })),
+      setSyncColors: (syncColors) => set(() => ({ syncColors })),
+      setGlobalStrokeColor: (globalStrokeColor) => set(() => ({ globalStrokeColor })),
+      setGlobalFillColor: (globalFillColor) => set(() => ({ globalFillColor })),
     }),
-    { name: "options", version: 1 }
+    { name: "options", version: 2 }
   )
 );
