@@ -12,13 +12,13 @@ interface Point {
 }
 
 function getSqSegDist(p: Point, p1: Point, p2: Point): number {
-  var x = p1.x,
+  let x = p1.x,
     y = p1.y,
     dx = p2.x - x,
     dy = p2.y - y;
 
   if (dx !== 0 || dy !== 0) {
-    var t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+    const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
 
     if (t > 1) {
       x = p2.x;
@@ -45,8 +45,8 @@ function simplifyDPStep(
   let maxSqDist = sqTolerance;
   let index = 1;
 
-  for (var i = first + 1; i < last; i++) {
-    var sqDist = getSqSegDist(points[i], points[first], points[last]);
+  for (let i = first + 1; i < last; i++) {
+    const sqDist = getSqSegDist(points[i], points[first], points[last]);
 
     if (sqDist > maxSqDist) {
       index = i;
@@ -65,9 +65,9 @@ function simplifyDPStep(
 
 // simplification using Ramer-Douglas-Peucker algorithm
 function simplifyDouglasPeucker(points: Point[], sqTolerance: number): Point[] {
-  var last = points.length - 1;
+  const last = points.length - 1;
 
-  var simplified = [points[0]];
+  const simplified = [points[0]];
   simplifyDPStep(points, 0, last, sqTolerance, simplified);
   simplified.push(points[last]);
 
@@ -80,7 +80,7 @@ export function simplifyPath(points: Point[], tolerance: number): Point[] {
     return points;
   }
 
-  var sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
+  const sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
   //points = highestQuality ? points : simplifyRadialDist(points, sqTolerance);
   points = simplifyDouglasPeucker(points, sqTolerance);
 

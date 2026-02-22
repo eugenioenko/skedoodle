@@ -319,8 +319,8 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
     return;
   }
 
-  var dx = pointer.x - origin.x;
-  var dy = pointer.y - origin.y;
+  const dx = pointer.x - origin.x;
+  const dy = pointer.y - origin.y;
   for (let i = 0; i < selected.length; ++i) {
     const shape = selected[i];
     const origin = origins[i];

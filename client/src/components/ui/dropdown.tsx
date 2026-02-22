@@ -117,6 +117,7 @@ export const MenuComponent = React.forwardRef<
     }
   }, [tree, isOpen, nodeId, parentId]);
 
+  // eslint-disable-next-line react-hooks/refs
   const mergedRefs = useMergeRefs([refs.setReference, item.ref, forwardedRef]);
   return (
     <FloatingNode id={nodeId}>
@@ -138,6 +139,7 @@ export const MenuComponent = React.forwardRef<
           {isOpen && (
             <FloatingPortal>
               <div
+                // eslint-disable-next-line react-hooks/refs
                 ref={refs.setFloating}
                 className="card flex flex-col border border-white/10 rounded overflow-hidden"
                 style={floatingStyles}
@@ -161,7 +163,7 @@ interface DropdownItemProps {
 export const DropdownItem = React.forwardRef<
   HTMLButtonElement,
   DropdownItemProps & React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ label, children, disabled, icon, ...props }, forwardedRef) => {
+>(({ label, children: _children, disabled, icon, ...props }, forwardedRef) => {
   const menu = React.useContext(MenuContext);
   const item = useListItem({ label });
   const tree = useFloatingTree();

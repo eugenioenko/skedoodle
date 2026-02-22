@@ -141,6 +141,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
   const { getReferenceProps, getFloatingProps } = useInteractions([hover, dismiss]);
 
   return (
+    // eslint-disable-next-line react-hooks/refs
     <div ref={refs.setReference} {...getReferenceProps()}>
       <button
         type="button"
@@ -162,6 +163,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
       {isOpen && (
         <FloatingPortal>
           <div
+            // eslint-disable-next-line react-hooks/refs
             ref={refs.setFloating}
             style={floatingStyles}
             {...getFloatingProps()}

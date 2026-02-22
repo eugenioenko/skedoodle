@@ -3,15 +3,15 @@ import Two from "two.js";
 import { getDoodler } from "../doodler.client";
 import { updateGrid } from "../canvas.grid";
 
-let mouse = new Two.Vector();
+const mouse = new Two.Vector();
 
 export function doDragStart(e: MouseEvent<HTMLDivElement>): void {
   mouse.set(e.clientX, e.clientY);
 }
 
 export function doDragMove(e: MouseEvent<HTMLDivElement>): void {
-  var dx = e.clientX - mouse.x;
-  var dy = e.clientY - mouse.y;
+  const dx = e.clientX - mouse.x;
+  const dy = e.clientY - mouse.y;
   mouse.set(e.clientX, e.clientY);
   doDragTranslate(dx, dy);
 }

@@ -105,7 +105,8 @@ Create `~/skedoodle/.env`:
 
 ```env
 SKEDOODLE_DOMAIN=skedoodle.yourdomain.com
-JWT_SECRET=generate-a-secure-random-string
+OIDC_ISSUER_URL=https://your-pocket-id-instance.com
+OIDC_CLIENT_ID=skedoodle
 ```
 
 Create `~/skedoodle/data/` directory for the SQLite database:
@@ -136,6 +137,8 @@ Go to GitHub repo → Settings → Secrets and variables → Actions:
 |---|---|---|
 | `VITE_API_URL` | `https://skedoodle.yourdomain.com/api` | Baked into client at build time |
 | `VITE_WS_URL` | `wss://skedoodle.yourdomain.com/ws` | Baked into client at build time |
+| `VITE_OIDC_ISSUER_URL` | `https://your-pocket-id-instance.com` | Baked into client at build time |
+| `VITE_OIDC_CLIENT_ID` | `skedoodle` | Baked into client at build time |
 | `VPS_HOST` | `123.45.67.89` | VPS IP address |
 | `VPS_USER` | `root` (or your user) | SSH username |
 | `VPS_SSH_KEY` | SSH private key content | For SSH access |

@@ -32,7 +32,7 @@ export const Canvas = ({ sketchId, onReady, isLocal = false }: CanvasProps) => {
     }
     onReady?.();
     setIsReady(true);
-  }, [onReady, sketchId, isLocal]);
+  }, [onReady, isLocal]);
 
   useInitTwoCanvas(containerRef, sketchId, onTwoReady);
   useRemoteCursors(isReady);

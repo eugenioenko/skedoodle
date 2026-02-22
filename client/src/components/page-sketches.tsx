@@ -29,6 +29,7 @@ const EditableTitle = ({
 
   useEffect(() => {
     if (editing) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue(name);
       setTimeout(() => inputRef.current?.select(), 0);
     }
@@ -106,11 +107,6 @@ export const SketchesPage = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const { user } = useAuthStore();
 
-  useEffect(() => {
-    if (user) loadSketches();
-    loadCommunitySketches();
-  }, []);
-
   async function loadSketches() {
     if (!user) return;
     try {
@@ -133,6 +129,12 @@ export const SketchesPage = () => {
       console.error("Failed to load community sketches:", error);
     }
   }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  useEffect(() => {
+    if (user) loadSketches();
+    loadCommunitySketches();
+  }, []);
 
   async function handleNewSketch() {
     if (!user) return;

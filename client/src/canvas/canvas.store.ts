@@ -81,7 +81,7 @@ export const useOptionsStore = create<OptionsState>()(
     (set) => ({
       canvasColor: { r: 249, g: 250, b: 251, a: 1 },
       throttleRate: 1,
-      rendererType: "canvas",
+      rendererType: "svg",
       updateFrequency: 0,
       selectedTool: "brush",
       activeTool: undefined,
