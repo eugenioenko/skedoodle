@@ -80,7 +80,7 @@ export function usePopover({
       setLabelId,
       setDescriptionId,
     }),
-    [open, setOpen, interactions, data, modal, labelId, descriptionId]
+    [open, setOpen, interactions, data, modal, labelId, descriptionId, setLabelId, setDescriptionId]
   );
 }
 
@@ -140,6 +140,7 @@ export const PopoverTrigger = React.forwardRef<
     return React.cloneElement(
       children,
       {
+        // eslint-disable-next-line react-hooks/refs
         ...context.getReferenceProps({
           ref,
           ...props,

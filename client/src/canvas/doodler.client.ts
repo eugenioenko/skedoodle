@@ -115,7 +115,7 @@ export class Doodler {
     await storageClient.setSketchCommands(this.sketchId, commandLog);
 
     // Update metadata timestamp
-    let existingMeta = await storageClient.getSketchMeta(this.sketchId);
+    const existingMeta = await storageClient.getSketchMeta(this.sketchId);
     const now = Date.now();
     const meta: SketchMeta = existingMeta
       ? { ...existingMeta, updatedAt: now }

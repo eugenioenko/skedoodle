@@ -39,7 +39,7 @@ export function doZoom(
 ): void {
   const doodler = getDoodler();
   const { setZoom } = useZoomStore.getState();
-  var dy = amount / 100;
+  const dy = amount / 100;
 
   doodler.zui.zoomBy(dy, e.clientX, e.clientY);
   setZoom(Math.floor(doodler.zui.scale * 100));

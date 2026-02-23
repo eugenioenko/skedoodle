@@ -36,7 +36,10 @@ export const useSliderInput = ({
     if (convertFrom) {
       initialValue = convertFrom(initialValue);
     }
+    // Syncing external prop changes into controlled local state
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setStrValue(initialValue.toString());
+     
     setNumValue(value);
   }, [value, convertFrom]);
 
@@ -49,7 +52,7 @@ export const useSliderInput = ({
 
   const onMouseMove = (e: MouseEvent) => {
     requestAnimationFrame(() => {
-      let newValue =
+      const newValue =
         Number(strValue) + (e.screenX - screenXRef.current) * sensitivity;
       updateInputValue(newValue);
     });
@@ -74,7 +77,7 @@ export const useSliderInput = ({
   };
 
   const doChange = (newValue: string) => {
-    let numValue = Number(newValue);
+    const numValue = Number(newValue);
     if (newValue === "" || newValue.endsWith(".") || isNaN(numValue)) {
       setStrValue(newValue);
       return;

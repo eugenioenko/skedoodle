@@ -35,6 +35,8 @@ jobs:
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_WS_URL=${{ secrets.VITE_WS_URL }}
+            VITE_OIDC_ISSUER_URL=${{ secrets.VITE_OIDC_ISSUER_URL }}
+            VITE_OIDC_CLIENT_ID=${{ secrets.VITE_OIDC_CLIENT_ID }}
 
   deploy:
     needs: build-and-push

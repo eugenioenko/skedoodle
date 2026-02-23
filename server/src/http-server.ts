@@ -7,7 +7,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 import authRoutes from './routes/auth';
 import sketchRoutes from './routes/sketches';
-import { verifyToken } from './utils/auth';
+import { verifyOidcToken } from './utils/auth';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Room } from './room';
 import type { ClientMessage, UserInfo } from './protocol';
@@ -82,7 +82,7 @@ wss.on('connection', (ws: WebSocket) => {
       if (message.type === 'join') {
         try {
           // Authenticate the token passed in the join message
-          const decodedToken = verifyToken(message.token);
+          const decodedToken = await verifyOidcToken(message.token);
           // Use the authenticated user's ID and username
           user = {
             uid: decodedToken.userId,

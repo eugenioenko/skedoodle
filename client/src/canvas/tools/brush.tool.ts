@@ -48,7 +48,7 @@ export const useBrushStore = create<BrushState>()(
   )
 );
 
-let previousPosition = new Vector();
+const previousPosition = new Vector();
 let circle: Circle | undefined;
 let path: Path | undefined;
 
@@ -187,6 +187,6 @@ function normalizePathToCenterPoint(path: Path): void {
 */
 
 function makeAnchor({ x, y }: Point) {
-  var anchor = new Two.Anchor(x, y);
+  const anchor = new Two.Anchor(x, y);
   return anchor;
 }

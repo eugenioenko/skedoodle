@@ -66,18 +66,19 @@ export function useRemoteCursors(isReady: boolean) {
     });
 
     doodler.throttledTwoUpdate();
-  }, [remoteCursors, isConnected, localUser, zoom]);
+  }, [remoteCursors, isConnected, localUser, zoom, isReady]);
 
   // Cleanup on unmount
   useEffect(() => {
+    const shapes = shapesRef.current;
     return () => {
       try {
         const doodler = getDoodler();
-        shapesRef.current.forEach(entry => {
+        shapes.forEach(entry => {
           doodler.canvas.remove(entry.group);
         });
       } catch { /* doodler may already be destroyed */ }
-      shapesRef.current.clear();
+      shapes.clear();
     };
   }, [isReady]);
 

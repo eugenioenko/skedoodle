@@ -7,7 +7,9 @@ RUN pnpm install --frozen-lockfile
 COPY client/ .
 ARG VITE_API_URL="/api"
 ARG VITE_WS_URL="ws://localhost:3014"
-RUN VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL npx vite build
+ARG VITE_OIDC_ISSUER_URL=""
+ARG VITE_OIDC_CLIENT_ID=""
+RUN VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL VITE_OIDC_ISSUER_URL=$VITE_OIDC_ISSUER_URL VITE_OIDC_CLIENT_ID=$VITE_OIDC_CLIENT_ID npx vite build
 
 # Stage 2: Build server
 FROM node:22-alpine AS server-build

@@ -16,8 +16,12 @@ export const useColorInput = ({ value, onChange }: UseColorInputProps) => {
 
   useEffect(() => {
     if (value) {
+      // Syncing external prop changes into controlled local state
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAlphaValue(`${Math.round((value.a || 0) * 100)}`);
+       
       setRgbStrValue(rgbaToRgbStr(value));
+       
       setRgbaValue(value);
     }
   }, [value]);

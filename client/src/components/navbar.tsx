@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { IconLogout } from "@tabler/icons-react";
 import { useAuthStore } from "@/stores/auth.store";
+import { authService } from "@/services/auth.service";
 import { ReactNode } from "react";
 
 export const Navbar = ({ children }: { children?: ReactNode }) => {
@@ -8,8 +9,10 @@ export const Navbar = ({ children }: { children?: ReactNode }) => {
   const { user } = useAuthStore();
 
   const handleLogout = () => {
-    useAuthStore.getState().logout();
-    navigate('/login');
+    authService.logout().catch(() => {
+      useAuthStore.getState().logout();
+      navigate('/login');
+    });
   };
 
   return (

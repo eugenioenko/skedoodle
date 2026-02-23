@@ -57,15 +57,17 @@ Commands are typed as `create`, `update`, `remove`, `undo`, or `redo`. Each has 
 
 The server is stateless: rooms load their command log from the database when the first client joins, then relay commands between participants. On reconnect, the client compares log lengths and replays the delta in either direction.
 
-### Authentication: passkeys today, identity provider next
+### Authentication: PocketID OIDC
 
-Authentication uses WebAuthn/passkeys via `@simplewebauthn` — no passwords, no OAuth provider. The server issues JWTs after passkey verification. This keeps the auth stack self-contained with zero external dependencies.
+Authentication is delegated to [PocketID](https://pocket-id.org/), a self-hosted OIDC Identity Provider. The client uses Authorization Code + PKCE flow via `oidc-client-ts`. PocketID issues access tokens; the server validates them directly against PocketID's JWKS endpoint (using `jose`) — no internal JWT issuance.
 
-The next step is integrating an identity provider and switching to [OpenTDF](https://opentdf.io/) for attribute-based access control (ABAC). This would allow fine-grained authorization — e.g., per-sketch permissions based on user attributes, roles, or organizational policies — without hardcoding access rules into the application layer.
+On first login the server automatically creates a local user record from the OIDC claims (`sub`, `preferred_username`). Subsequent logins update the username if it changed in PocketID.
+
+Future: integrating [OpenTDF](https://opentdf.io/) for attribute-based access control (ABAC) — per-sketch permissions based on user attributes, roles, or organizational policies.
 
 ### SQLite, optimized for append-only writes
 
-The database stores users, credentials, sketches (metadata), and the command log. The schema is designed around the append-only pattern: commands are inserted but never updated or deleted. SQLite is a good fit here — single-writer, no connection pool overhead, and the write pattern is sequential appends.
+The database stores users, sketches (metadata), and the command log. The schema is designed around the append-only pattern: commands are inserted but never updated or deleted. SQLite is a good fit here — single-writer, no connection pool overhead, and the write pattern is sequential appends.
 
 ### Sync and conflict resolution
 
@@ -91,7 +93,7 @@ Conflict resolution is last-write-wins by command order. If user A deletes a sha
 | Frontend | React, Vite, TypeScript, Two.js (vector rendering), Zustand, Tailwind CSS |
 | Backend | Express 5, TypeScript, WebSocket (`ws`), JWT |
 | Database | SQLite via Prisma ORM |
-| Auth | WebAuthn passkeys (`@simplewebauthn`) |
+| Auth | PocketID OIDC (`oidc-client-ts` + `jose`) |
 | Infra | Docker, Caddy, GitHub Actions → GHCR → VPS |
 
 ## Getting started
@@ -114,9 +116,29 @@ cd server && pnpm install && cd ..
 # Configure environment
 cp client/.env.example client/.env
 cp server/.env.example server/.env
+```
 
-# Create database
-cd server && npx prisma migrate dev && cd ..
+#### PocketID (local Identity Provider)
+
+```bash
+# Start PocketID — runs at http://localhost:1411
+docker compose -f docker-compose.dev.yml up -d
+```
+
+1. Open `http://localhost:1411` and complete the first-run admin setup.
+2. In the PocketID admin UI, go to **OIDC Clients → Create**.
+   - Name: `Skedoodle`
+   - Client ID: `skedoodle`
+   - Redirect URIs: `http://localhost:5173/auth/callback`
+   - Post-logout redirect URIs: `http://localhost:5173/auth/logout`
+   - Grant type: Authorization Code (PKCE — no client secret required)
+3. Copy the **Client ID** (`skedoodle`) into both `.env` files:
+   - `client/.env`: set `VITE_OIDC_CLIENT_ID=skedoodle`
+   - `server/.env`: set `OIDC_CLIENT_ID=skedoodle`
+
+```bash
+# Apply database migrations
+cd server && npx prisma migrate deploy && cd ..
 ```
 
 ### Run
@@ -129,7 +151,7 @@ cd server && pnpm run dev:http
 cd client && pnpm dev
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:5173`. You'll be redirected to your local PocketID instance to sign in.
 
 ## Project structure
 
@@ -145,8 +167,7 @@ skedoodle/
 ├── server/                # Express + WebSocket backend
 │   └── src/
 │       ├── routes/        # REST API (auth, sketches)
-│       ├── services/      # Passkey verification
-│       └── utils/         # JWT utilities
+│       └── utils/         # OIDC token validation, auth middleware
 │   └── prisma/            # Schema and migrations
 ├── scripts/               # Docker build/run helpers
 ├── Dockerfile             # Multi-stage build (client + server)
