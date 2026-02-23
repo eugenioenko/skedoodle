@@ -57,4 +57,4 @@ jobs:
               echo "SKEDOODLE_DOMAIN=${{ secrets.SKEDOODLE_DOMAIN }}"
             } > ~/skedoodle/.env
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            docker compose -f ~/skedoodle/docker-compose.yml up -d
+            docker compose -f ~/skedoodle/docker-compose.yml up -d --force-recreate
