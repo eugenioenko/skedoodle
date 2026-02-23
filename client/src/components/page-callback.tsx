@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/auth.service';
+import { IconSpiral } from '@tabler/icons-react';
 
 export function CallbackPage() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ export function CallbackPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-default-0">
-      <p className="text-text-primary">Signing in…</p>
+      <IconSpiral size={64} stroke={1} className="text-text-primary animate-spin" />
     </div>
   );
 }
