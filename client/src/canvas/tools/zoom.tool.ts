@@ -4,104 +4,93 @@ import { getDoodler } from "../doodler.client";
 import { updateGrid } from "../canvas.grid";
 import { updateOutlineScales } from "./pointer.tool";
 import { updateNodeHandleScales } from "./node.tool";
+import { doDragTranslate } from "./drag.tool";
 
 export interface ZoomState {
   zoom: number;
-  initialDistance?: number;
+  lastMidX: number;
+  lastMidY: number;
+  lastDist: number;
   setZoom: (zoom?: number) => void;
-  setInitialDistance: (initialDistance?: number) => void;
+  setGestureState: (midX: number, midY: number, dist: number) => void;
 }
 
 export const useZoomStore = create<ZoomState>()((set) => ({
   zoom: 100,
+  lastMidX: 0,
+  lastMidY: 0,
+  lastDist: 0,
   setZoom: (zoom) => set((state) => ({ ...state, zoom })),
-  initialDistance: undefined,
-  setInitialDistance: (initialDistance) =>
-    set((state) => ({ ...state, initialDistance })),
+  setGestureState: (lastMidX, lastMidY, lastDist) =>
+    set((state) => ({ ...state, lastMidX, lastMidY, lastDist })),
 }));
 
-export function onZoomStart(e: TouchEvent): void {
-  const { setInitialDistance } = useZoomStore.getState();
-  if (e.touches.length === 2) {
-    // Calculate the initial distance between two fingers
-    const [touch1, touch2] = e.touches;
-    const initialDistance = Math.hypot(
-      touch2.clientX - touch1.clientX,
-      touch2.clientY - touch1.clientY
-    );
-    setInitialDistance(initialDistance);
+function applyZoomAt(ratio: number, x: number, y: number): void {
+  const doodler = getDoodler();
+  const { setZoom } = useZoomStore.getState();
+  doodler.zui.zoomBy(ratio - 1, x, y);
+  setZoom(Math.floor(doodler.zui.scale * 100));
+  updateOutlineScales();
+  updateNodeHandleScales();
+  const sm = doodler.zui.surfaceMatrix.elements;
+  updateGrid(doodler.zui.scale, sm[2], sm[5]);
+  doodler.throttledTwoUpdate();
+  doodler.saveViewport();
+}
+
+export function onGestureStart(e: TouchEvent): void {
+  if (e.touches.length !== 2) return;
+  const [t1, t2] = e.touches;
+  const midX = (t1.clientX + t2.clientX) / 2;
+  const midY = (t1.clientY + t2.clientY) / 2;
+  const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+  useZoomStore.getState().setGestureState(midX, midY, dist);
+}
+
+export function onGestureMove(e: TouchEvent): void {
+  if (e.touches.length !== 2) return;
+  const { lastMidX, lastMidY, lastDist, setGestureState } = useZoomStore.getState();
+  const [t1, t2] = e.touches;
+  const midX = (t1.clientX + t2.clientX) / 2;
+  const midY = (t1.clientY + t2.clientY) / 2;
+  const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+
+  doDragTranslate(midX - lastMidX, midY - lastMidY);
+  if (lastDist > 0) {
+    applyZoomAt(dist / lastDist, midX, midY);
   }
+
+  setGestureState(midX, midY, dist);
 }
 
 export function doZoom(
   e: WheelEvent | MouseEvent<HTMLDivElement>,
   amount: number
 ): void {
-  const doodler = getDoodler();
-  const { setZoom } = useZoomStore.getState();
-  const dy = amount / 100;
-
-  doodler.zui.zoomBy(dy, e.clientX, e.clientY);
-  setZoom(Math.floor(doodler.zui.scale * 100));
-
-  updateOutlineScales();
-  updateNodeHandleScales();
-
-  const sm = doodler.zui.surfaceMatrix.elements;
-  updateGrid(doodler.zui.scale, sm[2], sm[5]);
-  doodler.throttledTwoUpdate();
-  doodler.saveViewport();
+  applyZoomAt(1 + amount / 100, e.clientX, e.clientY);
 }
 
 export function doZoomTo(level: number): void {
   const doodler = getDoodler();
-  const { setZoom } = useZoomStore.getState();
-  const currentScale = doodler.zui.scale;
-  const targetScale = level / 100;
-  const ratio = targetScale / currentScale;
-
+  const ratio = (level / 100) / doodler.zui.scale;
   const cx = doodler.two.width / 2;
   const cy = doodler.two.height / 2;
-  doodler.zui.zoomBy(ratio - 1, cx, cy);
-  setZoom(Math.floor(doodler.zui.scale * 100));
-
-  updateOutlineScales();
-  updateNodeHandleScales();
-
-  const sm = doodler.zui.surfaceMatrix.elements;
-  updateGrid(doodler.zui.scale, sm[2], sm[5]);
-  doodler.throttledTwoUpdate();
-  doodler.saveViewport();
+  applyZoomAt(ratio, cx, cy);
 }
 
 export function doZoomStep(direction: 1 | -1): void {
   const doodler = getDoodler();
-  const { setZoom } = useZoomStore.getState();
-  const currentScale = doodler.zui.scale;
-  const currentPercent = Math.round(currentScale * 100);
+  const currentPercent = Math.round(doodler.zui.scale * 100);
 
   const STEPS = [10, 25, 50, 75, 100, 150, 200, 300, 400];
-  let target: number;
-  if (direction === 1) {
-    target = STEPS.find((s) => s > currentPercent) ?? STEPS[STEPS.length - 1];
-  } else {
-    target = [...STEPS].reverse().find((s) => s < currentPercent) ?? STEPS[0];
-  }
+  const target = direction === 1
+    ? STEPS.find((s) => s > currentPercent) ?? STEPS[STEPS.length - 1]
+    : [...STEPS].reverse().find((s) => s < currentPercent) ?? STEPS[0];
 
-  const targetScale = target / 100;
-  const ratio = targetScale / currentScale;
+  const ratio = (target / 100) / doodler.zui.scale;
   const cx = doodler.two.width / 2;
   const cy = doodler.two.height / 2;
-  doodler.zui.zoomBy(ratio - 1, cx, cy);
-  setZoom(Math.floor(doodler.zui.scale * 100));
-
-  updateOutlineScales();
-  updateNodeHandleScales();
-
-  const sm = doodler.zui.surfaceMatrix.elements;
-  updateGrid(doodler.zui.scale, sm[2], sm[5]);
-  doodler.throttledTwoUpdate();
-  doodler.saveViewport();
+  applyZoomAt(ratio, cx, cy);
 }
 
 export function doZoomReset(): void {
@@ -117,36 +106,3 @@ export function doZoomReset(): void {
   doodler.throttledTwoUpdate();
   doodler.saveViewport();
 }
-
-/*
-function onZoomMove(event): void {
-  const { initialDistance, setInitialDistance } = useZoomStore.getState();
-  if (event.touches.length === 2 && initialDistance !== undefined) {
-    // Calculate the new distance between two fingers
-    const [touch1, touch2] = event.touches;
-    const currentDistance = Math.hypot(
-      touch2.clientX - touch1.clientX,
-      touch2.clientY - touch1.clientY
-    );
-
-    // If current distance is greater than initial, it's a zoom in; if less, zoom out
-    if (currentDistance > initialDistance) {
-     // pinch zoom in
-    } else {
-
-      // pinch zoom out
-    }
-
-    // Update the initial distance to the new distance
-    setInitialDistance(currentDistance);
-  }
-}
-
-export function onZoomEnd(event): void {
-  const { setInitialDistance } = useZoomStore.getState();
-  // Reset initial distance when gesture ends
-  if (event.touches.length < 2) {
-    setInitialDistance(undefined);
-  }
-}
-  */

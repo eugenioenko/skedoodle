@@ -7,6 +7,7 @@ import { handlers } from "./canvas.service";
 import { debounce } from "./canvas.utils";
 import { Doodler, setDoodlerInstance } from "./doodler.client";
 import { destroyGrid, initGrid } from "./canvas.grid";
+import { onGestureStart, onGestureMove } from "./tools/zoom.tool";
 
 export const useInitTwoCanvas = (
   containerRef: MutableRefObject<HTMLDivElement | null>,
@@ -50,6 +51,18 @@ export const useInitTwoCanvas = (
       passive: false,
     });
 
+    // Non-passive touch listeners: prevent browser swipe/scroll gestures and handle two-finger pan+pinch
+    const onNativeTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length === 2) onGestureStart(e);
+    };
+    const onNativeTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length === 2) onGestureMove(e);
+    };
+    currentContainer.addEventListener("touchstart", onNativeTouchStart, { passive: false });
+    currentContainer.addEventListener("touchmove", onNativeTouchMove, { passive: false });
+
     const debouncesWindowResize = debounce(handlers.doWindowResize, 250);
     window.addEventListener("resize", debouncesWindowResize);
     window.addEventListener("keydown", handlers.doKeyDown);
@@ -61,6 +74,8 @@ export const useInitTwoCanvas = (
       window.removeEventListener("resize", debouncesWindowResize);
       window.removeEventListener("keydown", handlers.doKeyDown);
       currentContainer.removeEventListener("wheel", handlers.doMouseWheel);
+      currentContainer.removeEventListener("touchstart", onNativeTouchStart);
+      currentContainer.removeEventListener("touchmove", onNativeTouchMove);
       destroyGrid();
       if (currentContainer.firstChild) {
         currentContainer.removeChild(currentContainer.firstChild);
