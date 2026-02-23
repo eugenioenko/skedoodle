@@ -139,6 +139,7 @@ Go to GitHub repo → Settings → Secrets and variables → Actions:
 | `VITE_WS_URL` | `wss://skedoodle.yourdomain.com/ws` | Baked into client at build time |
 | `VITE_OIDC_ISSUER_URL` | `https://your-pocket-id-instance.com` | Baked into client at build time |
 | `VITE_OIDC_CLIENT_ID` | `skedoodle` | Baked into client at build time |
+| `SKEDOODLE_DOMAIN` | `skedoodle.yourdomain.com` | Used at deploy time for CORS and docker-compose |
 | `VPS_HOST` | `123.45.67.89` | VPS IP address |
 | `VPS_USER` | `root` (or your user) | SSH username |
 | `VPS_SSH_KEY` | SSH private key content | For SSH access |
@@ -157,6 +158,21 @@ On push to `main`:
 - Mapped to `~/skedoodle/data/skedoodle.db` on the host via volume mount
 - Prisma migrations run automatically on container startup (`prisma migrate deploy`)
 - Upgrading the container preserves the DB
+
+## Resetting the database (fresh start)
+
+If you need to wipe the database (e.g. after a breaking schema change):
+
+1. Merge the new schema/migrations to `main` and wait for the deploy workflow to finish
+2. SSH into the VPS and delete the DB file:
+   ```bash
+   rm ~/skedoodle/data/skedoodle.db
+   ```
+3. Restart the container:
+   ```bash
+   docker compose -f ~/skedoodle/docker-compose.yml up -d --force-recreate
+   ```
+   Prisma will apply the fresh migration and create a new empty DB on startup.
 
 ## Useful commands
 
