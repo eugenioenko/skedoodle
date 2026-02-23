@@ -2,7 +2,7 @@
 
 A real-time collaborative sketching app built with event sourcing and WebSockets.
 
-**Try it live:** [skedoodle.top](https://skedoodle.top)
+**Try it live:** [skedoodle.top](https://skedoodle.top/local)
 
 ## What it does
 
