@@ -24,11 +24,14 @@ userManager.events.addUserUnloaded(() => {
 
 class AuthService {
     login() {
-        return userManager.signinRedirect();
+        const returnTo = sessionStorage.getItem('returnTo');
+        return userManager.signinRedirect(returnTo ? { state: returnTo } : undefined);
     }
 
-    async handleCallback(): Promise<{ id: string; username: string }> {
+    async handleCallback(): Promise<{ id: string; username: string; returnTo?: string }> {
         const user = await userManager.signinRedirectCallback();
+        const returnTo = user.state as string | undefined;
+        sessionStorage.removeItem('returnTo');
         useAuthStore.getState().setToken(user.access_token);
 
         // Fetch internal user record (server upserts on token validation)
@@ -41,7 +44,7 @@ class AuthService {
         }
         const appUser: { id: string; username: string } = await response.json();
         useAuthStore.getState().setUser(appUser);
-        return appUser;
+        return { ...appUser, returnTo };
     }
 
     async logout() {

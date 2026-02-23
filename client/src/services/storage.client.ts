@@ -27,7 +27,14 @@ async function authenticatedFetch(url: string, options: RequestInit = {}): Promi
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
   };
-  return fetch(url, { ...options, headers });
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401) {
+    useAuthStore.getState().logout();
+    sessionStorage.setItem('returnTo', window.location.pathname + window.location.search);
+    window.location.href = '/login';
+    throw new Error('Session expired');
+  }
+  return response;
 }
 
 async function getSketchCommands(id: string): Promise<Command[] | null> {

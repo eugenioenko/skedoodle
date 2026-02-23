@@ -10,7 +10,7 @@ export function CallbackPage() {
   React.useEffect(() => {
     authService
       .handleCallback()
-      .then(() => navigate('/sketches', { replace: true }))
+      .then(({ returnTo }) => navigate(returnTo ?? '/sketches', { replace: true }))
       .catch((err: unknown) => {
         console.error('OIDC callback failed:', err);
         setError(err instanceof Error ? err.message : 'Authentication failed');
