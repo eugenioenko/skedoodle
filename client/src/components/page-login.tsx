@@ -2,6 +2,7 @@ import React from 'react';
 import { authService } from '@/services/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
+import { IconSpiral } from '@tabler/icons-react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-default-0">
-      <p className="text-text-primary">Redirecting to sign in…</p>
+      <IconSpiral size={64} stroke={1} className="text-text-primary animate-spin" />
     </div>
   );
 }
