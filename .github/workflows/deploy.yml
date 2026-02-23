@@ -48,5 +48,11 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            mkdir -p ~/skedoodle
+            {
+              echo "OIDC_ISSUER_URL=${{ secrets.VITE_OIDC_ISSUER_URL }}"
+              echo "OIDC_CLIENT_ID=${{ secrets.VITE_OIDC_CLIENT_ID }}"
+              echo "SKEDOODLE_DOMAIN=${{ secrets.SKEDOODLE_DOMAIN }}"
+            } > ~/skedoodle/.env
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             docker compose -f ~/skedoodle/docker-compose.yml up -d
