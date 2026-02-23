@@ -9,10 +9,29 @@ const sketchSelect = {
   zoom: true, public: true, createdAt: true, updatedAt: true, ownerId: true,
 } as const;
 
-router.use(requireAuth);
+router.get('/community', async (_req, res) => {
+  try {
+    const sketches = await prisma.sketch.findMany({
+      where: { public: true },
+      select: {
+        id: true, name: true, color: true, public: true,
+        createdAt: true, updatedAt: true, ownerId: true,
+        owner: { select: { username: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+    res.json(sketches.map(s => ({
+      ...s,
+      ownerName: s.owner.username,
+      owner: undefined,
+    })));
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // GET all sketches for the authenticated user
-router.get('/', async (req: any, res) => {
+router.get('/', requireAuth, async (req: any, res) => {
   try {
     const sketches = await prisma.sketch.findMany({
       where: { ownerId: req.userId },
@@ -26,7 +45,7 @@ router.get('/', async (req: any, res) => {
 });
 
 // POST a new sketch
-router.post('/', async (req: any, res) => {
+router.post('/', requireAuth, async (req: any, res) => {
   try {
     const { id, name } = req.body;
     const newSketch = await prisma.sketch.create({
@@ -43,7 +62,7 @@ router.post('/', async (req: any, res) => {
 });
 
 // GET a specific sketch's metadata
-router.get('/:id', async (req: any, res) => {
+router.get('/:id', requireAuth, async (req: any, res) => {
   try {
     const { id } = req.params;
     const sketch = await prisma.sketch.findFirst({
@@ -61,7 +80,7 @@ router.get('/:id', async (req: any, res) => {
 });
 
 // PUT (update) a sketch's metadata
-router.put('/:id', async (req: any, res) => {
+router.put('/:id', requireAuth, async (req: any, res) => {
   try {
     const { id } = req.params;
     const { name, color } = req.body;
@@ -82,7 +101,7 @@ router.put('/:id', async (req: any, res) => {
 });
 
 // DELETE a sketch
-router.delete('/:id', async (req: any, res) => {
+router.delete('/:id', requireAuth, async (req: any, res) => {
   try {
     const { id } = req.params;
     await prisma.sketch.delete({
@@ -95,7 +114,7 @@ router.delete('/:id', async (req: any, res) => {
 });
 
 // GET all commands for a specific sketch
-router.get('/:id/commands', async (req: any, res) => {
+router.get('/:id/commands', requireAuth, async (req: any, res) => {
   try {
     const { id } = req.params;
     // Verify access: owner or public sketch
@@ -122,7 +141,7 @@ router.get('/:id/commands', async (req: any, res) => {
 });
 
 // POST (save) commands for a specific sketch
-router.post('/:id/commands', async (req: any, res) => {
+router.post('/:id/commands', requireAuth, async (req: any, res) => {
   try {
     const { id } = req.params;
     const newCommands = req.body; // Array of commands
