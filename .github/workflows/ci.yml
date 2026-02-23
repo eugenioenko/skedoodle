@@ -30,8 +30,12 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: client
 
+      - name: Lint client
+        run: pnpm lint
+        working-directory: client
+
       - name: Build client
-        run: npx vite build
+        run: pnpm build
         working-directory: client
 
       - name: Install server dependencies
@@ -40,6 +44,10 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+        working-directory: server
+
+      - name: Lint server
+        run: npx tsc --noEmit
         working-directory: server
 
       - name: Build server
