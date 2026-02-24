@@ -2,6 +2,7 @@ import { SlideInput } from "./ui/slide-input";
 import {
   IconAngle,
   IconArrowsHorizontal,
+  IconBolt,
   IconBorderCornerRounded,
   IconBrush,
   IconChartScatter3d,
@@ -124,6 +125,7 @@ const BrushToolOptions = () => {
   const tolerance = useBrushStore((state) => state.tolerance);
   const stabilizer = useBrushStore((state) => state.stabilizer);
   const showStabilizerDot = useBrushStore((state) => state.showStabilizerDot);
+  const liveSimplification = useBrushStore((state) => state.liveSimplification);
   const localStrokeColor = useBrushStore((state) => state.strokeColor);
   const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
 
@@ -132,6 +134,7 @@ const BrushToolOptions = () => {
     setStrokeWidth,
     setStabilizer,
     setShowStabilizerDot,
+    setLiveSimplification,
     setTolerance,
     setSimplifyAlgo,
   } = useBrushStore.getState();
@@ -173,7 +176,16 @@ const BrushToolOptions = () => {
         onChange={(value) => setStabilizer(value)}
         icon={IconChartScatter3d}
       />
-      <label className="pl-2">Smoothing</label>
+      <WithTooltip tooltip={liveSimplification ? "Disable live simplification" : "Enable live simplification"}>
+        <button
+          type="button"
+          className={`p-1 rounded ${liveSimplification ? "bg-primary" : "hover:bg-default-3"}`}
+          onClick={() => setLiveSimplification(!liveSimplification)}
+        >
+          <IconBolt size={16} stroke={1} />
+        </button>
+      </WithTooltip>
+      <label>Smoothing</label>
       <SlideInput
         className="max-w-20"
         value={tolerance}

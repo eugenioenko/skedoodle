@@ -23,12 +23,14 @@ export interface BrushState {
   tolerance: number;
   stabilizer: number;
   showStabilizerDot: boolean;
+  liveSimplification: boolean;
   simplifyAlgo: PathSimplifyType;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
   setStabilizer: (stabilizer: number) => void;
   setShowStabilizerDot: (show: boolean) => void;
+  setLiveSimplification: (live: boolean) => void;
   setSimplifyAlgo: (algo: PathSimplifyType) => void;
 }
 
@@ -39,6 +41,7 @@ export const useBrushStore = create<BrushState>()(
       tolerance: 30,
       stabilizer: 30,
       showStabilizerDot: false,
+      liveSimplification: false,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "triangle",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
@@ -46,16 +49,24 @@ export const useBrushStore = create<BrushState>()(
       setTolerance: (tolerance) => set(() => ({ tolerance })),
       setStabilizer: (stabilizer) => set(() => ({ stabilizer })),
       setShowStabilizerDot: (showStabilizerDot) => set(() => ({ showStabilizerDot })),
+      setLiveSimplification: (liveSimplification) => set(() => ({ liveSimplification })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
     }),
     { name: "brush-tool", version: 3 }
   )
 );
 
+type TwoAnchor = ReturnType<typeof makeAnchor>;
+
 const drawPosition = new Vector();
+let rawAnchors: TwoAnchor[] = [];
 let circle: Circle | undefined;
 let ghostDot: Circle | undefined;
 let path: Path | undefined;
+
+// Run simplification every N raw points during drawing to progressively
+// smooth the stroke so the final mouseup pass causes minimal visual change.
+const LIVE_SIMPLIFY_INTERVAL = 10;
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
@@ -63,6 +74,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const fillColor = colord(strokeColor).toRgbString();
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   drawPosition.set(position.x, position.y);
+  rawAnchors = [makeAnchor(drawPosition)];
   path = undefined;
 
   // add dot for starting point reference only when no opacity
@@ -88,7 +100,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { strokeColor, strokeWidth, stabilizer } = useBrushStore.getState();
+  const { strokeColor, strokeWidth, stabilizer, tolerance, simplifyAlgo, liveSimplification } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToSurfacePosition(e, doodler.zui);
@@ -106,10 +118,13 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     ghostDot.linewidth = 1.5 / scale;
   }
 
+  const anchor = makeAnchor(drawPosition);
+  rawAnchors.push(anchor);
+
   if (!path) {
     // TODO there is a type definition issue here, investigate why the mismatch
     path = doodler.two.makeCurve(
-      [makeAnchor(drawPosition), makeAnchor(drawPosition)] as never,
+      [rawAnchors[0], anchor] as never,
       true as never
     );
     path.cap = "round";
@@ -120,8 +135,20 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     }
     path.position.clear();
     doodler.addDoodle({ shape: path, type: "brush" });
+
+    // remove the initial dot now that the stroke has started
+    if (circle) {
+      doodler.canvas.remove(circle);
+      circle = undefined;
+    }
   } else {
-    path.vertices.push(makeAnchor(drawPosition));
+    path.vertices.push(anchor);
+
+    // Live simplification: every LIVE_SIMPLIFY_INTERVAL raw points re-simplify
+    // the whole path so the final mouseup pass causes minimal visual change.
+    if (liveSimplification && tolerance !== 0 && rawAnchors.length % LIVE_SIMPLIFY_INTERVAL === 0) {
+      path.vertices = runSimplification(rawAnchors, tolerance, simplifyAlgo) as never;
+    }
   }
   doodler.throttledTwoUpdate();
 }
@@ -155,33 +182,31 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const alpha = stabilizer === 0 ? 1.0 : Math.max(0.01, 1.0 - stabilizer / 100);
   drawPosition.x += (position.x - drawPosition.x) * alpha;
   drawPosition.y += (position.y - drawPosition.y) * alpha;
-  path.vertices.push(makeAnchor(drawPosition));
+  rawAnchors.push(makeAnchor(drawPosition));
 
+  // Restore full raw set before final pass so live-simplified intermediate
+  // state doesn't cause the final simplification to work on a reduced input.
+  path.vertices = rawAnchors as never;
   normalizePathOrigin(path);
-  // path.vertices = simplifyPathPointsByMinDist(path.vertices, 1);
+  // rawAnchors elements are normalized in-place (same object references)
 
   if (tolerance !== 0) {
-    // Area of Triangle:	Smooth and general-purpose; preserves curves and shape.
-    // Perpendicular Distance:	Prioritizes straight-line segments, sharper results on straight paths.
-    // Angle:	Retains sharp corners, may oversimplify smooth curves.
-    if (simplifyAlgo === "douglas") {
-      const limit = tolerance / 100;
-      const simplified = simplifyPath(path.vertices, limit);
-      path.vertices = simplified as never;
-    } else {
-      const limit = Math.floor(
-        ((100 - tolerance) * path.vertices.length) / 100
-      );
-      const simplified = simplifyEdge(
-        pathSimplifyTypeToFunc(simplifyAlgo),
-        path.vertices,
-        limit
-      );
-      path.vertices = simplified;
-    }
+    path.vertices = runSimplification(rawAnchors, tolerance, simplifyAlgo) as never;
   }
   doodler.throttledTwoUpdate();
   pushCreateCommand({ shape: path, type: "brush" });
+}
+
+function runSimplification(
+  vertices: TwoAnchor[],
+  tolerance: number,
+  simplifyAlgo: PathSimplifyType
+): TwoAnchor[] {
+  if (simplifyAlgo === "douglas") {
+    return simplifyPath(vertices, tolerance / 100) as unknown as TwoAnchor[];
+  }
+  const limit = Math.floor(((100 - tolerance) * vertices.length) / 100);
+  return simplifyEdge(pathSimplifyTypeToFunc(simplifyAlgo), vertices, limit);
 }
 
 /**
