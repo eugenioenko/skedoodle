@@ -35,7 +35,7 @@ export const useBrushStore = create<BrushState>()(
     (set) => ({
       strokeWidth: 5,
       tolerance: 30,
-      stabilizer: 1,
+      stabilizer: 30,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "triangle",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
@@ -44,11 +44,11 @@ export const useBrushStore = create<BrushState>()(
       setStabilizer: (stabilizer) => set(() => ({ stabilizer })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
     }),
-    { name: "brush-tool", version: 1 }
+    { name: "brush-tool", version: 2 }
   )
 );
 
-const previousPosition = new Vector();
+const drawPosition = new Vector();
 let circle: Circle | undefined;
 let path: Path | undefined;
 
@@ -57,7 +57,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const { strokeWidth, strokeColor } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
-  previousPosition.set(position.x, position.y);
+  drawPosition.set(position.x, position.y);
   path = undefined;
 
   // add dot for starting point reference only when no opacity
@@ -76,11 +76,17 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToSurfacePosition(e, doodler.zui);
+
+  // Lag-based stabilizer: lerp drawPosition toward the actual cursor.
+  // stabilizer 0 = instant (no lag), 100 = very heavy lag/smoothing.
+  const alpha = stabilizer === 0 ? 1.0 : Math.max(0.01, 1.0 - stabilizer / 100);
+  drawPosition.x += (position.x - drawPosition.x) * alpha;
+  drawPosition.y += (position.y - drawPosition.y) * alpha;
+
   if (!path) {
-    // make new line, each line starts with a circle and ends with a circle
     // TODO there is a type definition issue here, investigate why the mismatch
     path = doodler.two.makeCurve(
-      [makeAnchor(previousPosition), makeAnchor(position)] as never,
+      [makeAnchor(drawPosition), makeAnchor(drawPosition)] as never,
       true as never
     );
     path.cap = "round";
@@ -92,30 +98,14 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     path.position.clear();
     doodler.addDoodle({ shape: path, type: "brush" });
   } else {
-    // continue drawing
-    let skipVertices = false;
-    if (path.vertices.length) {
-      const lastVertices = path.vertices[path.vertices.length - 1];
-      const distance = Two.Vector.distanceBetween(
-        lastVertices,
-        position as never
-      );
-
-      if (distance < stabilizer) {
-        skipVertices = true;
-      }
-    }
-    if (!skipVertices) {
-      path.vertices.push(makeAnchor(position));
-    }
+    path.vertices.push(makeAnchor(drawPosition));
   }
-  previousPosition.set(position.x, position.y);
   doodler.throttledTwoUpdate();
 }
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
-  const { tolerance, simplifyAlgo } = useBrushStore.getState();
+  const { tolerance, simplifyAlgo, stabilizer } = useBrushStore.getState();
   if (!path) {
     return;
   }
@@ -124,8 +114,12 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
     doodler.canvas.remove(circle);
     circle = undefined;
   }
+  // Apply one final lerp step so the stroke ends at (or near) where the mouse was released.
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
-  path.vertices.push(makeAnchor(position));
+  const alpha = stabilizer === 0 ? 1.0 : Math.max(0.01, 1.0 - stabilizer / 100);
+  drawPosition.x += (position.x - drawPosition.x) * alpha;
+  drawPosition.y += (position.y - drawPosition.y) * alpha;
+  path.vertices.push(makeAnchor(drawPosition));
 
   normalizePathOrigin(path);
   // path.vertices = simplifyPathPointsByMinDist(path.vertices, 1);

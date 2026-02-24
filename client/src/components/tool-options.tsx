@@ -157,7 +157,7 @@ const BrushToolOptions = () => {
         className="max-w-20"
         value={stabilizer}
         min={0}
-        max={10}
+        max={100}
         onChange={(value) => setStabilizer(value)}
         icon={IconChartScatter3d}
       />
