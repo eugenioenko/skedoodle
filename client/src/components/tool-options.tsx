@@ -108,13 +108,9 @@ const SyncColorsButton = ({ strokeColor, fillColor }: SyncColorsButtonProps) => 
 
   return (
     <WithTooltip tooltip={syncColors ? "Unlink tool colors" : "Link all tool colors"}>
-      <button
-        type="button"
-        className={`p-1 rounded mr-2 ${syncColors ? "bg-primary" : "hover:bg-default-3"}`}
-        onClick={handleToggle}
-      >
+      <ToggleButton isSelected={syncColors} onClick={handleToggle}>
         {syncColors ? <IconLink size={16} stroke={1} /> : <IconLinkOff size={16} stroke={1} />}
-      </button>
+      </ToggleButton>
     </WithTooltip>
   );
 };
@@ -145,90 +141,83 @@ const BrushToolOptions = () => {
   const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
 
   return (
-    <div className="flex flex-row gap-2 text-xs items-center">
+    <div className="flex flex-row gap-1.5 text-xs items-center">
+      {/* Color */}
       <SyncColorsButton strokeColor={localStrokeColor} />
-      <label>Color</label>
-      <ColorInput
-        value={strokeColor}
-        onChange={(value) => setStrokeColor(value)}
-      />
-      <label className="pl-2">Stroke</label>
-      <SlideInput
-        className="max-w-20"
-        value={strokeWidth}
-        min={1}
-        max={256}
-        onChange={(value) => setStrokeWidth(value)}
-        icon={IconBrush}
-      />
+      <ColorInput value={strokeColor} onChange={(value) => setStrokeColor(value)} />
+
+      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+
+      {/* Stroke width */}
+      <WithTooltip tooltip="Stroke width">
+        <SlideInput
+          className="max-w-20"
+          value={strokeWidth}
+          min={1}
+          max={256}
+          onChange={(value) => setStrokeWidth(value)}
+          icon={IconBrush}
+        />
+      </WithTooltip>
+
+      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+
+      {/* Stabilizer */}
       <WithTooltip tooltip={showStabilizerDot ? "Hide stabilizer dot" : "Show stabilizer dot"}>
-        <button
-          type="button"
-          className={`p-1 rounded ${showStabilizerDot ? "bg-primary" : "hover:bg-default-3"}`}
-          onClick={() => setShowStabilizerDot(!showStabilizerDot)}
-        >
+        <ToggleButton isSelected={showStabilizerDot} onClick={() => setShowStabilizerDot(!showStabilizerDot)}>
           <IconCircleDot size={16} stroke={1} />
-        </button>
+        </ToggleButton>
       </WithTooltip>
-      <label>Stabilizer</label>
-      <SlideInput
-        className="max-w-20"
-        value={stabilizer}
-        min={0}
-        max={100}
-        onChange={(value) => setStabilizer(value)}
-        icon={IconChartScatter3d}
-      />
-      <WithTooltip tooltip={liveSimplification ? "Disable live simplification" : "Enable live simplification"}>
-        <button
-          type="button"
-          className={`p-1 rounded ${liveSimplification ? "bg-primary" : "hover:bg-default-3"}`}
-          onClick={() => setLiveSimplification(!liveSimplification)}
-        >
+      <WithTooltip tooltip="Stabilizer — lags the stroke behind the cursor to reduce hand tremor (0 = off)">
+        <SlideInput
+          className="max-w-20"
+          value={stabilizer}
+          min={0}
+          max={100}
+          onChange={(value) => setStabilizer(value)}
+          icon={IconChartScatter3d}
+        />
+      </WithTooltip>
+
+      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+
+      {/* Simplification */}
+      <WithTooltip tooltip={liveSimplification ? "Disable live simplification" : "Enable live simplification — applies smoothing during drawing for a consistent preview"}>
+        <ToggleButton isSelected={liveSimplification} onClick={() => setLiveSimplification(!liveSimplification)}>
           <IconBolt size={16} stroke={1} />
-        </button>
+        </ToggleButton>
       </WithTooltip>
-      <label>Smoothing</label>
-      <SlideInput
-        className="max-w-20"
-        value={tolerance}
-        min={0}
-        max={100}
-        onChange={(value) => setTolerance(value)}
-        icon={IconWaveSine}
-      />
+      <WithTooltip tooltip="Smoothing — reduces node count on stroke completion (0 = off)">
+        <SlideInput
+          className="max-w-20"
+          value={tolerance}
+          min={0}
+          max={100}
+          onChange={(value) => setTolerance(value)}
+          icon={IconWaveSine}
+        />
+      </WithTooltip>
       <ToggleGroup>
-        <WithTooltip tooltip="Smooth: All nodes rendered as curves. Best for flowing, organic strokes. Not recommended for writing text or angular shapes.">
-          <ToggleButton
-            isSelected={simplifyAlgo === "smooth"}
-            onClick={() => setSimplifyAlgo("smooth")}
-          >
+        <WithTooltip tooltip="Smooth — all nodes stay curved, best for organic flowing strokes">
+          <ToggleButton isSelected={simplifyAlgo === "smooth"} onClick={() => setSimplifyAlgo("smooth")}>
             <IconVectorSpline size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Precise: Detects sharp corners and keeps them as hard edges. Best for writing, geometric shapes, and any stroke with angular detail.">
-          <ToggleButton
-            isSelected={simplifyAlgo === "precise"}
-            onClick={() => setSimplifyAlgo("precise")}
-          >
+        <WithTooltip tooltip="Precise — preserves visually significant nodes, best for writing and geometric shapes">
+          <ToggleButton isSelected={simplifyAlgo === "precise"} onClick={() => setSimplifyAlgo("precise")}>
             <IconVectorTriangle size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
       </ToggleGroup>
       {simplifyAlgo === "precise" && (
         <>
-          <WithTooltip tooltip={cornerDetection ? "Disable corner detection" : "Enable corner detection"}>
-            <button
-              type="button"
-              className={`p-1 rounded ${cornerDetection ? "bg-primary" : "hover:bg-default-3"}`}
-              onClick={() => setCornerDetection(!cornerDetection)}
-            >
+          <WithTooltip tooltip={cornerDetection ? "Disable corner detection" : "Enable corner detection — sharp turns render as hard edges instead of curves"}>
+            <ToggleButton isSelected={cornerDetection} onClick={() => setCornerDetection(!cornerDetection)}>
               <IconAngle size={16} stroke={1} />
-            </button>
+            </ToggleButton>
           </WithTooltip>
           {cornerDetection && (
-            <>
-              <label>Corner</label>
+            <WithTooltip tooltip="Corner angle — minimum turn angle to detect as a hard corner (lower = more corners detected)">
               <SlideInput
                 className="max-w-20"
                 value={cornerAngle}
@@ -237,7 +226,7 @@ const BrushToolOptions = () => {
                 onChange={(value) => setCornerAngle(value)}
                 icon={IconAngle}
               />
-            </>
+            </WithTooltip>
           )}
         </>
       )}
