@@ -48,7 +48,7 @@ export const useBrushStore = create<BrushState>()(
       liveSimplification: false,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "precise",
-      cornerDetection: true,
+      cornerDetection: false,
       cornerAngle: 45,
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
@@ -60,7 +60,7 @@ export const useBrushStore = create<BrushState>()(
       setCornerDetection: (cornerDetection) => set(() => ({ cornerDetection })),
       setCornerAngle: (cornerAngle) => set(() => ({ cornerAngle })),
     }),
-    { name: "brush-tool", version: 10 }
+    { name: "brush-tool", version: 11 }
   )
 );
 
