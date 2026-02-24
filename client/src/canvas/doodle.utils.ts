@@ -2,6 +2,7 @@ import { Point } from "@/models/point.model";
 import Two from "two.js";
 import { Path } from "two.js/src/path";
 import { Shape } from "two.js/src/shape";
+import { Circle } from "two.js/src/shapes/circle";
 import { Ellipse } from "two.js/src/shapes/ellipse";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { Text } from "two.js/src/text";
@@ -172,6 +173,12 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
     shape.translation.y = y;
 
     return { type, shape };
+  } else if (type === "circle") {
+    const shape = new Circle(x, y, r);
+    shape.id = id;
+    shape.fill = fc;
+    shape.noStroke();
+    return { shape, type: "circle" };
   } else {
     throw new Error(`Unknown doodle unserialization of type "${type}"`);
   }

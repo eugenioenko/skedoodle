@@ -128,7 +128,8 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
-  const { tolerance, simplifyAlgo, stabilizer } = useBrushStore.getState();
+  const { tolerance, simplifyAlgo, stabilizer, strokeColor, strokeWidth } = useBrushStore.getState();
+  const fillColor = colord(strokeColor).toRgbString();
 
   if (circle) {
     doodler.canvas.remove(circle);
@@ -140,6 +141,13 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   }
 
   if (!path) {
+    // click without drag: leave a permanent dot at the click position
+    const dot = doodler.two.makeCircle(drawPosition.x, drawPosition.y, strokeWidth / 2);
+    dot.fill = fillColor;
+    dot.noStroke();
+    doodler.addDoodle({ shape: dot, type: "circle" });
+    pushCreateCommand({ shape: dot, type: "circle" });
+    doodler.throttledTwoUpdate();
     return;
   }
   // Apply one final lerp step so the stroke ends at (or near) where the mouse was released.
