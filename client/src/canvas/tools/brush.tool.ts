@@ -25,6 +25,8 @@ export interface BrushState {
   showStabilizerDot: boolean;
   liveSimplification: boolean;
   simplifyAlgo: PathSimplifyType;
+  cornerDetection: boolean;
+  cornerAngle: number;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
@@ -32,6 +34,8 @@ export interface BrushState {
   setShowStabilizerDot: (show: boolean) => void;
   setLiveSimplification: (live: boolean) => void;
   setSimplifyAlgo: (algo: PathSimplifyType) => void;
+  setCornerDetection: (enabled: boolean) => void;
+  setCornerAngle: (angle: number) => void;
 }
 
 export const useBrushStore = create<BrushState>()(
@@ -43,7 +47,9 @@ export const useBrushStore = create<BrushState>()(
       showStabilizerDot: false,
       liveSimplification: false,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
-      simplifyAlgo: "smooth",
+      simplifyAlgo: "precise",
+      cornerDetection: false,
+      cornerAngle: 60,
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
       setTolerance: (tolerance) => set(() => ({ tolerance })),
@@ -51,8 +57,10 @@ export const useBrushStore = create<BrushState>()(
       setShowStabilizerDot: (showStabilizerDot) => set(() => ({ showStabilizerDot })),
       setLiveSimplification: (liveSimplification) => set(() => ({ liveSimplification })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
+      setCornerDetection: (cornerDetection) => set(() => ({ cornerDetection })),
+      setCornerAngle: (cornerAngle) => set(() => ({ cornerAngle })),
     }),
-    { name: "brush-tool", version: 4 }
+    { name: "brush-tool", version: 8 }
   )
 );
 
@@ -104,7 +112,7 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { strokeColor, strokeWidth, stabilizer, tolerance, simplifyAlgo, liveSimplification } = useBrushStore.getState();
+  const { strokeColor, strokeWidth, stabilizer, tolerance, simplifyAlgo, liveSimplification, cornerDetection, cornerAngle } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
   const position = eventToSurfacePosition(e, doodler.zui);
@@ -153,9 +161,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
     if (liveSimplification && tolerance !== 0 && rawAnchors.length >= LIVE_SIMPLIFY_MIN_ANCHORS && rawAnchors.length % LIVE_SIMPLIFY_INTERVAL === 0) {
       const liveSimplified = runSimplification(rawAnchors, tolerance, simplifyAlgo);
       path.vertices = liveSimplified as never;
-      if (simplifyAlgo === "precise") {
-        applyHybridCurve(path, liveSimplified);
-      }
+      if (simplifyAlgo === "precise" && cornerDetection) applyHybridCurve(path, liveSimplified, cornerAngle);
     }
   }
   doodler.throttledTwoUpdate();
@@ -163,7 +169,7 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
-  const { tolerance, simplifyAlgo, stabilizer, strokeColor, strokeWidth } = useBrushStore.getState();
+  const { tolerance, simplifyAlgo, stabilizer, strokeColor, strokeWidth, cornerDetection, cornerAngle } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
 
   if (circle) {
@@ -200,9 +206,7 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
 
   const simplified = tolerance !== 0 ? runSimplification(rawAnchors, tolerance, simplifyAlgo) : rawAnchors;
   path.vertices = simplified as never;
-  if (simplifyAlgo === "precise") {
-    applyHybridCurve(path, simplified);
-  }
+  if (simplifyAlgo === "precise" && cornerDetection) applyHybridCurve(path, simplified, cornerAngle);
   doodler.throttledTwoUpdate();
   pushCreateCommand({ shape: path, type: "brush" });
 }
@@ -221,18 +225,17 @@ function runSimplification(
   return simplifyEdge(areaOfTriangle as never, vertices, limit);
 }
 
-// Angle (in radians) between two consecutive path segments above which a
-// vertex is treated as a sharp corner (cusp) instead of a smooth curve point.
-const CUSP_ANGLE_THRESHOLD = Math.PI / 3; // 60°
-
 /**
  * Converts a catmull-rom curved path into a hybrid path where sharp corners
  * become hard line segments and smooth segments retain bezier curves.
  * Sets path.curved = false and assigns Two.js anchor commands + control points.
+ * @param cornerAngleDeg - turn angle in degrees above which a vertex is a hard corner (default 60)
  */
-function applyHybridCurve(path: Path, vertices: TwoAnchor[]): void {
+function applyHybridCurve(path: Path, vertices: TwoAnchor[], cornerAngleDeg: number): void {
   const n = vertices.length;
   if (n < 2) return;
+
+  const threshold = (cornerAngleDeg * Math.PI) / 180;
 
   // Detect corners: turn angle > threshold at an internal vertex
   const isCorner = new Array<boolean>(n).fill(false);
@@ -243,8 +246,13 @@ function applyHybridCurve(path: Path, vertices: TwoAnchor[]): void {
     const m1 = Math.hypot(dx1, dy1), m2 = Math.hypot(dx2, dy2);
     if (m1 < 0.01 || m2 < 0.01) continue;
     const cos = Math.max(-1, Math.min(1, (dx1 * dx2 + dy1 * dy2) / (m1 * m2)));
-    if (Math.acos(cos) > CUSP_ANGLE_THRESHOLD) isCorner[i] = true;
+    if (Math.acos(cos) > threshold) isCorner[i] = true;
   }
+
+  // No corners detected — leave path.curved = true so Two.js uses its internal
+  // catmull-rom renderer, which produces smoother results than our manual
+  // bezier approximation, especially when few vertices remain after simplification.
+  if (!isCorner.some((v) => v)) return;
 
   // First vertex is always a move
   vertices[0].command = Two.Commands.move;

@@ -1,5 +1,6 @@
 import { SlideInput } from "./ui/slide-input";
 import {
+  IconAngle,
   IconArrowsHorizontal,
   IconBolt,
   IconBorderCornerRounded,
@@ -126,6 +127,8 @@ const BrushToolOptions = () => {
   const liveSimplification = useBrushStore((state) => state.liveSimplification);
   const localStrokeColor = useBrushStore((state) => state.strokeColor);
   const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
+  const cornerDetection = useBrushStore((state) => state.cornerDetection);
+  const cornerAngle = useBrushStore((state) => state.cornerAngle);
 
   const {
     setStrokeColor: setLocalStrokeColor,
@@ -135,6 +138,8 @@ const BrushToolOptions = () => {
     setLiveSimplification,
     setTolerance,
     setSimplifyAlgo,
+    setCornerDetection,
+    setCornerAngle,
   } = useBrushStore.getState();
 
   const [strokeColor, setStrokeColor] = useSyncedColor(localStrokeColor, setLocalStrokeColor, "stroke");
@@ -193,7 +198,7 @@ const BrushToolOptions = () => {
         icon={IconWaveSine}
       />
       <ToggleGroup>
-        <WithTooltip tooltip="Smooth: Best for organic, flowing strokes like handwriting and freehand curves.">
+        <WithTooltip tooltip="Smooth: All nodes rendered as curves. Best for flowing, organic strokes. Not recommended for writing text or angular shapes.">
           <ToggleButton
             isSelected={simplifyAlgo === "smooth"}
             onClick={() => setSimplifyAlgo("smooth")}
@@ -201,7 +206,7 @@ const BrushToolOptions = () => {
             <IconVectorSpline size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Precise: Best for strokes with sharp corners and fine detail, like geometric shapes and angular paths.">
+        <WithTooltip tooltip="Precise: Detects sharp corners and keeps them as hard edges. Best for writing, geometric shapes, and any stroke with angular detail.">
           <ToggleButton
             isSelected={simplifyAlgo === "precise"}
             onClick={() => setSimplifyAlgo("precise")}
@@ -210,6 +215,32 @@ const BrushToolOptions = () => {
           </ToggleButton>
         </WithTooltip>
       </ToggleGroup>
+      {simplifyAlgo === "precise" && (
+        <>
+          <WithTooltip tooltip={cornerDetection ? "Disable corner detection" : "Enable corner detection"}>
+            <button
+              type="button"
+              className={`p-1 rounded ${cornerDetection ? "bg-primary" : "hover:bg-default-3"}`}
+              onClick={() => setCornerDetection(!cornerDetection)}
+            >
+              <IconAngle size={16} stroke={1} />
+            </button>
+          </WithTooltip>
+          {cornerDetection && (
+            <>
+              <label>Corner</label>
+              <SlideInput
+                className="max-w-20"
+                value={cornerAngle}
+                min={1}
+                max={180}
+                onChange={(value) => setCornerAngle(value)}
+                icon={IconAngle}
+              />
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 };
