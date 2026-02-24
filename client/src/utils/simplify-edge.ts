@@ -2,7 +2,7 @@ import { pop, push, replace } from "mnemonist/heap";
 
 // Visvalingam-Whyatt
 
-export type PathSimplifyType = "douglas" | "triangle" | "angle" | "distance";
+export type PathSimplifyType = "smooth" | "precise";
 
 interface Point {
   x: number;
@@ -168,11 +168,3 @@ export function simplifyEdge<T extends object>(
   return points.filter((it) => !removed.has(it));
 }
 
-export function pathSimplifyTypeToFunc<T extends object>(
-  type: PathSimplifyType
-): WeightFn<T> {
-  if (type === "triangle") return areaOfTriangle as WeightFn<T>;
-  if (type === "distance") return perpendicularDistance as WeightFn<T>;
-  if (type === "angle") return angleWeight as WeightFn<T>;
-  return null as never;
-}

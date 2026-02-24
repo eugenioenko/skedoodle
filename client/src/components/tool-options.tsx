@@ -1,6 +1,5 @@
 import { SlideInput } from "./ui/slide-input";
 import {
-  IconAngle,
   IconArrowsHorizontal,
   IconBolt,
   IconBorderCornerRounded,
@@ -12,7 +11,6 @@ import {
   IconLink,
   IconLinkOff,
   IconSquare,
-  IconVectorBezier,
   IconVectorSpline,
   IconVectorTriangle,
   IconWaveSine,
@@ -195,36 +193,20 @@ const BrushToolOptions = () => {
         icon={IconWaveSine}
       />
       <ToggleGroup>
-        <WithTooltip tooltip="Douglas-Peucker: High-performance general-purpose simplification. Preserves the path's overall shape efficiently. The number represents the acceptable tolerance x 10 times">
+        <WithTooltip tooltip="Smooth: Best for organic, flowing strokes like handwriting and freehand curves.">
           <ToggleButton
-            isSelected={simplifyAlgo === "douglas"}
-            onClick={() => setSimplifyAlgo("douglas")}
+            isSelected={simplifyAlgo === "smooth"}
+            onClick={() => setSimplifyAlgo("smooth")}
           >
             <IconVectorSpline size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Area of Triangle smoothing: General-purpose line simplification, especially for preserving visual shapes and smooth curves. The number represents the percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
+        <WithTooltip tooltip="Precise: Best for strokes with sharp corners and fine detail, like geometric shapes and angular paths.">
           <ToggleButton
-            isSelected={simplifyAlgo === "triangle"}
-            onClick={() => setSimplifyAlgo("triangle")}
+            isSelected={simplifyAlgo === "precise"}
+            onClick={() => setSimplifyAlgo("precise")}
           >
             <IconVectorTriangle size={20} stroke={1} />
-          </ToggleButton>
-        </WithTooltip>
-        <WithTooltip tooltip="Angle smoothing: Best for straight-line approximations and paths where deviations from linearity are critical to detect. The number represents the percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
-          <ToggleButton
-            isSelected={simplifyAlgo === "angle"}
-            onClick={() => setSimplifyAlgo("angle")}
-          >
-            <IconAngle size={20} stroke={1} />
-          </ToggleButton>
-        </WithTooltip>
-        <WithTooltip tooltip="Perpendicular Distance smoothing: Best for straight-line approximations and paths where deviations from linearity are critical to detect. The number the represents percentage of nodes to simplify. (Visvalingam-Whyatt algorithm)">
-          <ToggleButton
-            isSelected={simplifyAlgo === "distance"}
-            onClick={() => setSimplifyAlgo("distance")}
-          >
-            <IconVectorBezier size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
       </ToggleGroup>

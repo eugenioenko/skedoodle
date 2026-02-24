@@ -1,7 +1,7 @@
 import { Point } from "@/models/point.model";
 import {
   PathSimplifyType,
-  pathSimplifyTypeToFunc,
+  areaOfTriangle,
   simplifyEdge,
 } from "@/utils/simplify-edge";
 import { simplifyPath } from "@/utils/simplify-path";
@@ -43,7 +43,7 @@ export const useBrushStore = create<BrushState>()(
       showStabilizerDot: false,
       liveSimplification: false,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
-      simplifyAlgo: "triangle",
+      simplifyAlgo: "smooth",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
       setTolerance: (tolerance) => set(() => ({ tolerance })),
@@ -52,7 +52,7 @@ export const useBrushStore = create<BrushState>()(
       setLiveSimplification: (liveSimplification) => set(() => ({ liveSimplification })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
     }),
-    { name: "brush-tool", version: 3 }
+    { name: "brush-tool", version: 4 }
   )
 );
 
@@ -190,9 +190,9 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   normalizePathOrigin(path);
   // rawAnchors elements are normalized in-place (same object references)
 
-  if (tolerance !== 0) {
-    path.vertices = runSimplification(rawAnchors, tolerance, simplifyAlgo) as never;
-  }
+  const simplified = tolerance !== 0 ? runSimplification(rawAnchors, tolerance, simplifyAlgo) : rawAnchors;
+  path.vertices = simplified as never;
+  applyHybridCurve(path, simplified);
   doodler.throttledTwoUpdate();
   pushCreateCommand({ shape: path, type: "brush" });
 }
@@ -202,11 +202,66 @@ function runSimplification(
   tolerance: number,
   simplifyAlgo: PathSimplifyType
 ): TwoAnchor[] {
-  if (simplifyAlgo === "douglas") {
+  if (simplifyAlgo === "smooth") {
+    // Douglas-Peucker: produces curvy, smooth-feeling output
     return simplifyPath(vertices, tolerance / 100) as unknown as TwoAnchor[];
   }
+  // "precise" = Visvalingam-Whyatt with triangle area weight: preserves sharp detail
   const limit = Math.floor(((100 - tolerance) * vertices.length) / 100);
-  return simplifyEdge(pathSimplifyTypeToFunc(simplifyAlgo), vertices, limit);
+  return simplifyEdge(areaOfTriangle as never, vertices, limit);
+}
+
+// Angle (in radians) between two consecutive path segments above which a
+// vertex is treated as a sharp corner (cusp) instead of a smooth curve point.
+const CUSP_ANGLE_THRESHOLD = Math.PI / 3; // 60°
+
+/**
+ * Converts a catmull-rom curved path into a hybrid path where sharp corners
+ * become hard line segments and smooth segments retain bezier curves.
+ * Sets path.curved = false and assigns Two.js anchor commands + control points.
+ */
+function applyHybridCurve(path: Path, vertices: TwoAnchor[]): void {
+  const n = vertices.length;
+  if (n < 2) return;
+
+  // Detect corners: turn angle > threshold at an internal vertex
+  const isCorner = new Array<boolean>(n).fill(false);
+  for (let i = 1; i < n - 1; i++) {
+    const a = vertices[i - 1], b = vertices[i], c = vertices[i + 1];
+    const dx1 = b.x - a.x, dy1 = b.y - a.y;
+    const dx2 = c.x - b.x, dy2 = c.y - b.y;
+    const m1 = Math.hypot(dx1, dy1), m2 = Math.hypot(dx2, dy2);
+    if (m1 < 0.01 || m2 < 0.01) continue;
+    const cos = Math.max(-1, Math.min(1, (dx1 * dx2 + dy1 * dy2) / (m1 * m2)));
+    if (Math.acos(cos) > CUSP_ANGLE_THRESHOLD) isCorner[i] = true;
+  }
+
+  // First vertex is always a move
+  vertices[0].command = Two.Commands.move;
+  vertices[0].controls.left.set(0, 0);
+  vertices[0].controls.right.set(0, 0);
+
+  for (let i = 1; i < n; i++) {
+    const v = vertices[i];
+    // Use a straight line if either endpoint of the segment is a corner
+    if (isCorner[i] || isCorner[i - 1]) {
+      v.command = Two.Commands.line;
+      v.controls.left.set(0, 0);
+      v.controls.right.set(0, 0);
+    } else {
+      v.command = Two.Commands.curve;
+      const prev = vertices[i - 1];
+      // Catmull-rom → bezier (T = 1/6), with clamped boundary conditions
+      const prevPrev = i >= 2 ? vertices[i - 2] : prev;
+      const next = i + 1 < n ? vertices[i + 1] : v;
+      // Right (outgoing) handle of prev for this segment: (v - prevPrev) / 6
+      prev.controls.right.set((v.x - prevPrev.x) / 6, (v.y - prevPrev.y) / 6);
+      // Left (incoming) handle of v for this segment: -(next - prev) / 6
+      v.controls.left.set(-(next.x - prev.x) / 6, -(next.y - prev.y) / 6);
+    }
+  }
+
+  path.curved = false;
 }
 
 /**

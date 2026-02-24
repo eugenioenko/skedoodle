@@ -9,7 +9,7 @@
 - [ ] **Stroke catch-up on mouseup** — after mouseup, continue lerping `drawPosition` toward the release point over a few animation frames so the stroke fully reaches the cursor instead of ending at the lag position
 - [ ] **Fix mouseout during drawing** — SVG rendering fires `mouseleave` when the cursor passes over child shapes, which can silently interrupt strokes; terminate strokes only on `mouseup` outside the window
 - [x] **Click-only dot (no drag)** — when the user clicks without moving, the start-point circle is removed on mouseup but no path is created, leaving no mark; handle this as a minimum-size dot stroke
-- [ ] **Simplify algo UI** — consider collapsing the four algorithm buttons into a simpler choice (e.g. "Smooth" vs "Accurate") since the technical names (Visvalingam-Whyatt, perpendicular distance) are not meaningful to most users
+- [x] **Simplify algo UI** — collapsed to two choices: "Smooth" (Visvalingam-Whyatt triangle area) and "Precise" (Douglas-Peucker); hybrid cusp detection applied on mouseup so sharp corners stay sharp while smooth segments get bezier curves
 
 ## Drawing Tools
 
