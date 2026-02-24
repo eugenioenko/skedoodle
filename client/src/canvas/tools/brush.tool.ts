@@ -67,6 +67,10 @@ let path: Path | undefined;
 // Run simplification every N raw points during drawing to progressively
 // smooth the stroke so the final mouseup pass causes minimal visual change.
 const LIVE_SIMPLIFY_INTERVAL = 10;
+// Don't start live simplification until we have enough raw points — avoids
+// jitter at the start of a stroke where aggressive simplification collapses
+// the path to just 2–3 vertices and the shape changes wildly each interval.
+const LIVE_SIMPLIFY_MIN_ANCHORS = 30;
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
@@ -146,8 +150,12 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 
     // Live simplification: every LIVE_SIMPLIFY_INTERVAL raw points re-simplify
     // the whole path so the final mouseup pass causes minimal visual change.
-    if (liveSimplification && tolerance !== 0 && rawAnchors.length % LIVE_SIMPLIFY_INTERVAL === 0) {
-      path.vertices = runSimplification(rawAnchors, tolerance, simplifyAlgo) as never;
+    if (liveSimplification && tolerance !== 0 && rawAnchors.length >= LIVE_SIMPLIFY_MIN_ANCHORS && rawAnchors.length % LIVE_SIMPLIFY_INTERVAL === 0) {
+      const liveSimplified = runSimplification(rawAnchors, tolerance, simplifyAlgo);
+      path.vertices = liveSimplified as never;
+      if (simplifyAlgo === "precise") {
+        applyHybridCurve(path, liveSimplified);
+      }
     }
   }
   doodler.throttledTwoUpdate();
@@ -192,7 +200,9 @@ export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
 
   const simplified = tolerance !== 0 ? runSimplification(rawAnchors, tolerance, simplifyAlgo) : rawAnchors;
   path.vertices = simplified as never;
-  applyHybridCurve(path, simplified);
+  if (simplifyAlgo === "precise") {
+    applyHybridCurve(path, simplified);
+  }
   doodler.throttledTwoUpdate();
   pushCreateCommand({ shape: path, type: "brush" });
 }
@@ -203,8 +213,8 @@ function runSimplification(
   simplifyAlgo: PathSimplifyType
 ): TwoAnchor[] {
   if (simplifyAlgo === "smooth") {
-    // Douglas-Peucker: produces curvy, smooth-feeling output
-    return simplifyPath(vertices, tolerance / 100) as unknown as TwoAnchor[];
+    // Douglas-Peucker: scale tolerance to canvas units (0–50px deviation allowed)
+    return simplifyPath(vertices, tolerance * 0.5) as unknown as TwoAnchor[];
   }
   // "precise" = Visvalingam-Whyatt with triangle area weight: preserves sharp detail
   const limit = Math.floor(((100 - tolerance) * vertices.length) / 100);
@@ -298,5 +308,6 @@ function normalizePathToCenterPoint(path: Path): void {
 
 function makeAnchor({ x, y }: Point) {
   const anchor = new Two.Anchor(x, y);
+  anchor.command = Two.Commands.curve;
   return anchor;
 }
