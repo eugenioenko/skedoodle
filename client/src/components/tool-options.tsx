@@ -5,6 +5,7 @@ import {
   IconBorderCornerRounded,
   IconBrush,
   IconChartScatter3d,
+  IconCircleDot,
   IconLetterT,
   IconLine,
   IconLink,
@@ -122,6 +123,7 @@ const BrushToolOptions = () => {
   const strokeWidth = useBrushStore((state) => state.strokeWidth);
   const tolerance = useBrushStore((state) => state.tolerance);
   const stabilizer = useBrushStore((state) => state.stabilizer);
+  const showStabilizerDot = useBrushStore((state) => state.showStabilizerDot);
   const localStrokeColor = useBrushStore((state) => state.strokeColor);
   const simplifyAlgo = useBrushStore((state) => state.simplifyAlgo);
 
@@ -129,6 +131,7 @@ const BrushToolOptions = () => {
     setStrokeColor: setLocalStrokeColor,
     setStrokeWidth,
     setStabilizer,
+    setShowStabilizerDot,
     setTolerance,
     setSimplifyAlgo,
   } = useBrushStore.getState();
@@ -152,7 +155,16 @@ const BrushToolOptions = () => {
         onChange={(value) => setStrokeWidth(value)}
         icon={IconBrush}
       />
-      <label className="pl-2">Stabilizer</label>
+      <WithTooltip tooltip={showStabilizerDot ? "Hide stabilizer dot" : "Show stabilizer dot"}>
+        <button
+          type="button"
+          className={`p-1 rounded ${showStabilizerDot ? "bg-primary" : "hover:bg-default-3"}`}
+          onClick={() => setShowStabilizerDot(!showStabilizerDot)}
+        >
+          <IconCircleDot size={16} stroke={1} />
+        </button>
+      </WithTooltip>
+      <label>Stabilizer</label>
       <SlideInput
         className="max-w-20"
         value={stabilizer}

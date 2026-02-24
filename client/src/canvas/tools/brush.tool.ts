@@ -22,11 +22,13 @@ export interface BrushState {
   strokeWidth: number;
   tolerance: number;
   stabilizer: number;
+  showStabilizerDot: boolean;
   simplifyAlgo: PathSimplifyType;
   setStrokeWidth: (strokeWidth?: number) => void;
   setStrokeColor: (strokeColor: RgbaColor) => void;
   setTolerance: (tolerance: number) => void;
   setStabilizer: (stabilizer: number) => void;
+  setShowStabilizerDot: (show: boolean) => void;
   setSimplifyAlgo: (algo: PathSimplifyType) => void;
 }
 
@@ -36,25 +38,28 @@ export const useBrushStore = create<BrushState>()(
       strokeWidth: 5,
       tolerance: 30,
       stabilizer: 30,
+      showStabilizerDot: false,
       strokeColor: { r: 33, g: 33, b: 33, a: 1 },
       simplifyAlgo: "triangle",
       setStrokeColor: (strokeColor) => set(() => ({ strokeColor })),
       setStrokeWidth: (strokeWidth) => set(() => ({ strokeWidth })),
       setTolerance: (tolerance) => set(() => ({ tolerance })),
       setStabilizer: (stabilizer) => set(() => ({ stabilizer })),
+      setShowStabilizerDot: (showStabilizerDot) => set(() => ({ showStabilizerDot })),
       setSimplifyAlgo: (simplifyAlgo) => set(() => ({ simplifyAlgo })),
     }),
-    { name: "brush-tool", version: 2 }
+    { name: "brush-tool", version: 3 }
   )
 );
 
 const drawPosition = new Vector();
 let circle: Circle | undefined;
+let ghostDot: Circle | undefined;
 let path: Path | undefined;
 
 export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { strokeWidth, strokeColor } = useBrushStore.getState();
+  const { strokeWidth, strokeColor, stabilizer, showStabilizerDot } = useBrushStore.getState();
   const fillColor = colord(strokeColor).toRgbString();
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
   drawPosition.set(position.x, position.y);
@@ -67,6 +72,17 @@ export function doBrushStart(e: MouseEvent<HTMLDivElement>): void {
     circle.noStroke();
     doodler.canvas.add(circle);
   }
+
+  // ghost dot: shows the lagged draw position while stabilizer is active
+  if (stabilizer > 0 && showStabilizerDot) {
+    const scale = doodler.zui.scale || 1;
+    ghostDot = doodler.two.makeCircle(position.x, position.y, 4 / scale);
+    ghostDot.fill = fillColor;
+    ghostDot.stroke = "rgba(255, 255, 255, 0.8)";
+    ghostDot.linewidth = 1.5 / scale;
+    doodler.canvas.add(ghostDot);
+  }
+
   doodler.throttledTwoUpdate();
 }
 
@@ -82,6 +98,13 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
   const alpha = stabilizer === 0 ? 1.0 : Math.max(0.01, 1.0 - stabilizer / 100);
   drawPosition.x += (position.x - drawPosition.x) * alpha;
   drawPosition.y += (position.y - drawPosition.y) * alpha;
+
+  if (ghostDot) {
+    const scale = doodler.zui.scale || 1;
+    ghostDot.position.set(drawPosition.x, drawPosition.y);
+    ghostDot.radius = 4 / scale;
+    ghostDot.linewidth = 1.5 / scale;
+  }
 
   if (!path) {
     // TODO there is a type definition issue here, investigate why the mismatch
@@ -106,13 +129,18 @@ export function doBrushMove(e: MouseEvent<HTMLDivElement>): void {
 export function doBrushUp(e: MouseEvent<HTMLDivElement>) {
   const doodler = getDoodler();
   const { tolerance, simplifyAlgo, stabilizer } = useBrushStore.getState();
-  if (!path) {
-    return;
-  }
 
   if (circle) {
     doodler.canvas.remove(circle);
     circle = undefined;
+  }
+  if (ghostDot) {
+    doodler.canvas.remove(ghostDot);
+    ghostDot = undefined;
+  }
+
+  if (!path) {
+    return;
   }
   // Apply one final lerp step so the stroke ends at (or near) where the mouse was released.
   const position = doodler.zui.clientToSurface(eventToClientPosition(e));
