@@ -20,12 +20,12 @@ import {
 import { colord } from "colord";
 import { Shape } from "two.js/src/shape";
 import { Rectangle } from "two.js/src/shapes/rectangle";
+import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { Layers } from "./layers";
 import { History } from "./history";
 import { Timeline } from "./timeline";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
-import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/canvas.grid";
 import { ToggleButton, ToggleGroup } from "./ui/button";
@@ -54,7 +54,6 @@ function trackPropertyChange(shapeId: string, field: string, oldValue: any, newV
     entry = { shapeId, newValues: new Map(), oldValues: new Map() };
     pendingChanges.set(shapeId, entry);
   }
-  // Keep the original oldValue from the first change in a batch
   if (!entry.oldValues.has(field)) {
     entry.oldValues.set(field, oldValue);
   }
@@ -72,19 +71,23 @@ function getShapeField(shape: Shape, field: string): any {
   return (shape as any)[field];
 }
 
-export const Properties = () => {
+interface SectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+const Section = ({ title, children }: SectionProps) => (
+  <div className="pt-4">
+    <div className="pb-1 text-sm text-text-secondary">{title}</div>
+    {children}
+  </div>
+);
+
+export const PropertiesTab = () => {
   const selection = usePointerStore((state) => state.selected);
   const shape = selection?.[0];
   const strokeColor = colord((shape as any)?.stroke as string).toRgb();
   const fillColor = colord((shape as any)?.fill as string).toRgb();
-  const canvasColor = useOptionsStore((state) => state.canvasColor);
-  const setCanvasColor = useOptionsStore.getState().setCanvasColor;
-  const gridSize = useOptionsStore((state) => state.gridSize);
-  const gridType = useOptionsStore((state) => state.gridType);
-  const gridColor = useOptionsStore((state) => state.gridColor);
-  const gridMinZoom = useOptionsStore((state) => state.gridMinZoom);
-  const rendererType = useOptionsStore((state) => state.rendererType);
-  const updateFrequency = useOptionsStore((state) => state.updateFrequency);
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
@@ -105,123 +108,16 @@ export const Properties = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col min-h-full">
       <div className="flex-grow">
-        {!selection?.length && (
-          <>
-            <div className="pt-4 pb-1 text-sm">Page</div>
-            <div className="flex flex-col gap-4">
-              <ColorInput
-                value={canvasColor}
-                onChange={(value) => {
-                  setCanvasColor(value);
-                  getDoodler().saveViewport();
-                }}
-              />
-            </div>
-            <div className="pt-4 pb-1 text-sm">Renderer</div>
-            <div className="flex flex-col gap-2">
-              <select
-                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
-                value={rendererType}
-                onChange={(e) => {
-                  const newType = e.target.value as "svg" | "canvas" | "webgl";
-                  useOptionsStore.getState().setRendererType(newType);
-                  useToastStore.getState().addToast("Reload page to apply renderer change");
-                }}
-              >
-                <option value="svg">SVG</option>
-                <option value="canvas">Canvas</option>
-                <option value="webgl">WebGL</option>
-              </select>
-            </div>
-            <div className="pt-4 pb-1 text-sm">Update Frequency</div>
-            <div className="flex flex-col gap-2">
-              <select
-                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
-                value={updateFrequency}
-                onChange={(e) => {
-                  const newFreq = Number(e.target.value) as 0 | 16 | 33;
-                  useOptionsStore.getState().setUpdateFrequency(newFreq);
-                }}
-              >
-                <option value={0}>High Performance</option>
-                <option value={8}>Performance (120 FPS)</option>
-                <option value={16}>Balanced (60 FPS)</option>
-                <option value={33}>Battery Saver (30 FPS)</option>
-                <option value={100}>Save my Battery (10 FPS)</option>
-              </select>
-            </div>
-            <div className="pt-4 pb-1 text-sm">Grid</div>
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <ToggleGroup>
-                  <ToggleButton
-                    isSelected={gridType === "none"}
-                    onClick={() => {
-                      useOptionsStore.getState().setGridType("none");
-                      setGridTypeDom("none");
-                    }}
-                  >
-                    <IconEyeClosed size={20} stroke={1} />
-                  </ToggleButton>
-                  <ToggleButton
-                    isSelected={gridType === "dots"}
-                    onClick={() => {
-                      useOptionsStore.getState().setGridType("dots");
-                      setGridTypeDom("dots");
-                    }}
-                  >
-                    <IconGridDots size={20} stroke={1} />
-                  </ToggleButton>
-                  <ToggleButton
-                    isSelected={gridType === "lines"}
-                    onClick={() => {
-                      useOptionsStore.getState().setGridType("lines");
-                      setGridTypeDom("lines");
-                    }}
-                  >
-                    <IconGrid3x3 size={20} stroke={1} />
-                  </ToggleButton>
-                </ToggleGroup>
-                <ColorInput
-                  value={gridColor}
-                  onChange={(value) => {
-                    useOptionsStore.getState().setGridColor(value);
-                    setGridColorDom(value);
-                  }}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <SlideInput
-                  label="Size"
-                  icon={IconGridDots}
-                  min={5}
-                  max={100}
-                  value={gridSize}
-                  onChange={(value) => {
-                    useOptionsStore.getState().setGridSize(value);
-                    setGridSizeDom(value);
-                  }}
-                />
-                <SlideInput
-                  label="Min zoom"
-                  icon={IconZoomOut}
-                  min={5}
-                  max={100}
-                  value={gridMinZoom}
-                  onChange={(value) => {
-                    useOptionsStore.getState().setGridMinZoom(value);
-                    setGridMinZoomDom(value);
-                  }}
-                />
-              </div>
-            </div>
-          </>
-        )}
-        {!!selection?.length && (
-          <>
-            <div className="pt-4 pb-1 text-sm">Color</div>
+      {!selection?.length && (
+        <div className="pt-12 pb-4 text-center text-text-secondary text-sm">
+          Select a shape to edit its properties
+        </div>
+      )}
+      {!!selection?.length && (
+        <>
+          <Section title="Color">
             <div className="flex flex-col gap-4">
               {strokeColor && (
                 <ColorInput
@@ -236,7 +132,8 @@ export const Properties = () => {
                 />
               )}
             </div>
-            <div className="pt-4 pb-1 text-sm">Stroke</div>
+          </Section>
+          <Section title="Stroke">
             <div className="grid grid-cols-2 gap-4">
               <SlideInput
                 icon={IconBrush}
@@ -253,7 +150,8 @@ export const Properties = () => {
                 onChange={(value) => updateShape("radius", value)}
               />
             </div>
-            <div className="pt-4 pb-1 text-sm">Size</div>
+          </Section>
+          <Section title="Size">
             <div className="grid grid-cols-2 gap-4">
               <SlideInput
                 icon={IconRulerMeasure}
@@ -270,7 +168,8 @@ export const Properties = () => {
                 onChange={(value) => updateShape("height", value)}
               />
             </div>
-            <div className="pt-4 pb-1 text-sm">Position</div>
+          </Section>
+          <Section title="Position">
             <div className="grid grid-cols-2 gap-4">
               <SlideInput
                 icon={IconSquareLetterX}
@@ -287,7 +186,8 @@ export const Properties = () => {
                 onChange={(value) => updateShape("position.y", value)}
               />
             </div>
-            <div className="pt-4 pb-1 text-sm">Transform</div>
+          </Section>
+          <Section title="Transform">
             <div className="grid grid-cols-2 gap-4">
               <SlideInput
                 icon={IconAngle}
@@ -309,7 +209,6 @@ export const Properties = () => {
                 convertFrom={(n) => n * 100}
                 convertTo={(n) => n / 100}
               />
-
               <SlideInput
                 icon={IconSkewX}
                 min={-Math.PI}
@@ -327,19 +226,144 @@ export const Properties = () => {
                 onChange={(value) => updateShape("skewY", value)}
               />
             </div>
-          </>
-        )}
+          </Section>
+        </>
+      )}
       </div>
-      <div>
-        <History />
-      </div>
-      <div>
+      <Section title="Layers">
         <Layers />
-      </div>
-      <div>
-        <Timeline />
-      </div>
-      <div className="pt-64"></div>
+      </Section>
+    </div>
+  );
+};
+
+export const HistoryTab = () => {
+  return (
+    <div className="flex flex-col">
+      <History />
+      <Timeline />
+    </div>
+  );
+};
+
+export const SettingsTab = () => {
+  const canvasColor = useOptionsStore((state) => state.canvasColor);
+  const setCanvasColor = useOptionsStore.getState().setCanvasColor;
+  const gridSize = useOptionsStore((state) => state.gridSize);
+  const gridType = useOptionsStore((state) => state.gridType);
+  const gridColor = useOptionsStore((state) => state.gridColor);
+  const gridMinZoom = useOptionsStore((state) => state.gridMinZoom);
+  const rendererType = useOptionsStore((state) => state.rendererType);
+  const updateFrequency = useOptionsStore((state) => state.updateFrequency);
+
+  return (
+    <div className="flex flex-col">
+      <Section title="Page">
+        <ColorInput
+          value={canvasColor}
+          onChange={(value) => {
+            setCanvasColor(value);
+            getDoodler().saveViewport();
+          }}
+        />
+      </Section>
+      <Section title="Renderer">
+        <select
+          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
+          value={rendererType}
+          onChange={(e) => {
+            const newType = e.target.value as "svg" | "canvas" | "webgl";
+            useOptionsStore.getState().setRendererType(newType);
+            useToastStore.getState().addToast("Reload page to apply renderer change");
+          }}
+        >
+          <option value="svg">SVG</option>
+          <option value="canvas">Canvas</option>
+          <option value="webgl">WebGL</option>
+        </select>
+      </Section>
+      <Section title="Update Frequency">
+        <select
+          className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-sm focus:outline-none focus:border-neutral-500"
+          value={updateFrequency}
+          onChange={(e) => {
+            const newFreq = Number(e.target.value) as 0 | 16 | 33;
+            useOptionsStore.getState().setUpdateFrequency(newFreq);
+          }}
+        >
+          <option value={0}>High Performance</option>
+          <option value={8}>Performance (120 FPS)</option>
+          <option value={16}>Balanced (60 FPS)</option>
+          <option value={33}>Battery Saver (30 FPS)</option>
+          <option value={100}>Save my Battery (10 FPS)</option>
+        </select>
+      </Section>
+      <Section title="Grid">
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <ToggleGroup>
+              <ToggleButton
+                isSelected={gridType === "none"}
+                onClick={() => {
+                  useOptionsStore.getState().setGridType("none");
+                  setGridTypeDom("none");
+                }}
+              >
+                <IconEyeClosed size={20} stroke={1} />
+              </ToggleButton>
+              <ToggleButton
+                isSelected={gridType === "dots"}
+                onClick={() => {
+                  useOptionsStore.getState().setGridType("dots");
+                  setGridTypeDom("dots");
+                }}
+              >
+                <IconGridDots size={20} stroke={1} />
+              </ToggleButton>
+              <ToggleButton
+                isSelected={gridType === "lines"}
+                onClick={() => {
+                  useOptionsStore.getState().setGridType("lines");
+                  setGridTypeDom("lines");
+                }}
+              >
+                <IconGrid3x3 size={20} stroke={1} />
+              </ToggleButton>
+            </ToggleGroup>
+            <ColorInput
+              value={gridColor}
+              onChange={(value) => {
+                useOptionsStore.getState().setGridColor(value);
+                setGridColorDom(value);
+              }}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SlideInput
+              label="Size"
+              icon={IconGridDots}
+              min={5}
+              max={100}
+              value={gridSize}
+              onChange={(value) => {
+                useOptionsStore.getState().setGridSize(value);
+                setGridSizeDom(value);
+              }}
+            />
+            <SlideInput
+              label="Min zoom"
+              icon={IconZoomOut}
+              min={5}
+              max={100}
+              value={gridMinZoom}
+              onChange={(value) => {
+                useOptionsStore.getState().setGridMinZoom(value);
+                setGridMinZoomDom(value);
+              }}
+            />
+          </div>
+        </div>
+      </Section>
     </div>
   );
 };

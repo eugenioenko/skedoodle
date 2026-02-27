@@ -50,6 +50,7 @@ export interface OptionsState {
   toolOption?: string;
   restoreTool?: Tool;
   isPanelOpen: boolean;
+  activePanel: "properties" | "history" | "settings";
   gridSize: number;
   gridType: "none" | "dots" | "lines";
   gridColor: RgbaColor;
@@ -67,6 +68,7 @@ export interface OptionsState {
   setRendererType: (rendererType: "svg" | "canvas" | "webgl") => void;
   setUpdateFrequency: (updateFrequency: 0 | 16 | 33) => void;
   setIsPanelOpen: (isPanelOpen: boolean) => void;
+  setActivePanel: (activePanel: "properties" | "history" | "settings") => void;
   setGridSize: (gridSize: number) => void;
   setGridType: (gridType: "none" | "dots" | "lines") => void;
   setGridColor: (gridColor: RgbaColor) => void;
@@ -88,6 +90,7 @@ export const useOptionsStore = create<OptionsState>()(
       restoreTool: undefined,
       toolOption: "",
       isPanelOpen: true,
+      activePanel: "properties",
       gridSize: 20,
       gridType: "dots",
       gridColor: { r: 0, g: 0, b: 0, a: 0.15 },
@@ -105,6 +108,7 @@ export const useOptionsStore = create<OptionsState>()(
       setRendererType: (rendererType) => set(() => ({ rendererType })),
       setUpdateFrequency: (updateFrequency) => set(() => ({ updateFrequency })),
       setIsPanelOpen: (isPanelOpen) => set(() => ({ isPanelOpen })),
+      setActivePanel: (activePanel) => set(() => ({ activePanel })),
       setGridSize: (gridSize) => set(() => ({ gridSize })),
       setGridType: (gridType) => set(() => ({ gridType })),
       setGridColor: (gridColor) => set(() => ({ gridColor })),
@@ -113,6 +117,6 @@ export const useOptionsStore = create<OptionsState>()(
       setGlobalStrokeColor: (globalStrokeColor) => set(() => ({ globalStrokeColor })),
       setGlobalFillColor: (globalFillColor) => set(() => ({ globalFillColor })),
     }),
-    { name: "options", version: 2 }
+    { name: "options", version: 3 }
   )
 );

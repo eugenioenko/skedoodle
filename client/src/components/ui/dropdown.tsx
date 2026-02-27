@@ -6,6 +6,7 @@ import {
   FloatingPortal,
   FloatingTree,
   offset,
+  Placement,
   safePolygon,
   shift,
   useClick,
@@ -41,12 +42,14 @@ interface MenuProps {
   label?: string;
   children?: React.ReactNode;
   trigger?: React.ReactElement;
+  hover?: boolean;
+  placement?: Placement;
 }
 
 export const MenuComponent = React.forwardRef<
   HTMLButtonElement,
   MenuProps & React.HTMLProps<HTMLButtonElement>
->(({ children, trigger, label }, forwardedRef) => {
+>(({ children, trigger, label, hover: hoverEnabled = true, placement = "bottom-start" }, forwardedRef) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
@@ -62,13 +65,13 @@ export const MenuComponent = React.forwardRef<
     nodeId,
     open: isOpen,
     onOpenChange: setIsOpen,
-    placement: "bottom-start",
+    placement,
     middleware: [offset({ mainAxis: 4, alignmentAxis: 0 }), flip(), shift()],
     whileElementsMounted: autoUpdate,
   });
 
   const hover = useHover(context, {
-    enabled: true,
+    enabled: hoverEnabled,
     delay: { open: 75 },
     handleClose: safePolygon({ blockPointerEvents: true }),
   });
