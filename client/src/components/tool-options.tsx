@@ -73,7 +73,7 @@ export const ToolOptions = () => {
   }
 
   if (selectedTool === "hand") {
-    return <ToolHint hint="Click a shape to move it." />;
+    return <ToolHint hint="Drag canvas to move it." />;
   }
 
   if (selectedTool === "zoom") {

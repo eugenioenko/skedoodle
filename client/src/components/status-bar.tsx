@@ -1,10 +1,8 @@
 import { useCanvasStore } from "@/canvas/canvas.store";
-import { useZoomStore } from "@/canvas/tools/zoom.tool";
 import { useSyncStore } from "@/sync/sync.store";
 
 export const StatusBar = () => {
   const cursor = useCanvasStore((state) => state.cursor);
-  const zoom = useZoomStore((state) => state.zoom);
   const { isConnected, isReconnecting, roomUsers } = useSyncStore();
 
   const connectionDotColor = isReconnecting ? "bg-yellow-500" : isConnected ? "bg-green-500" : "bg-gray-500";
@@ -25,14 +23,11 @@ export const StatusBar = () => {
           ))}
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        {cursor && (
-          <div>
-            {Math.floor(cursor.x)}:{Math.floor(cursor.y)}
-          </div>
-        )}
-        <div className="w-24 text-right">{zoom}%</div>
-      </div>
+      {cursor && (
+        <div className="text-xs tabular-nums">
+          {Math.floor(cursor.x)}:{Math.floor(cursor.y)}
+        </div>
+      )}
     </div>
   );
 };
