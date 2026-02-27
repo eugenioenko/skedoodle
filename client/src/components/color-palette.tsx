@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { colord } from "colord";
 import { RgbaColorPicker } from "react-colorful";
-import { IconCheck, IconPencil, IconRefresh } from "@tabler/icons-react";
+import { IconBrush, IconBucketDroplet, IconCheck, IconPencil, IconRefresh } from "@tabler/icons-react";
 import { DEFAULT_PALETTE, useOptionsStore } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
@@ -66,16 +66,16 @@ export const ColorPalette = ({ onApply }: ColorPaletteProps) => {
 
   return (
     <div className="flex flex-col gap-2 pt-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-4">
         <ToggleGroup>
           <WithTooltip tooltip="Apply to stroke">
             <ToggleButton isSelected={target === "stroke"} onClick={() => setTarget("stroke")}>
-              S
+              <IconBrush size={21} stroke={1} />
             </ToggleButton>
           </WithTooltip>
           <WithTooltip tooltip="Apply to fill">
             <ToggleButton isSelected={target === "fill"} onClick={() => setTarget("fill")}>
-              F
+              <IconBucketDroplet size={21} stroke={1} />
             </ToggleButton>
           </WithTooltip>
         </ToggleGroup>
@@ -83,15 +83,15 @@ export const ColorPalette = ({ onApply }: ColorPaletteProps) => {
           {editMode && (
             <WithTooltip tooltip="Reset to defaults">
               <Button onClick={() => useOptionsStore.getState().setColorPalette(DEFAULT_PALETTE)}>
-                <IconRefresh size={14} stroke={1.5} />
+                <IconRefresh size={14} stroke={1} />
               </Button>
             </WithTooltip>
           )}
           <WithTooltip tooltip={editMode ? "Done" : "Edit palette"}>
             <Button onClick={() => setEditMode(!editMode)}>
               {editMode
-                ? <IconCheck size={14} stroke={1.5} />
-                : <IconPencil size={14} stroke={1.5} />
+                ? <IconCheck size={14} stroke={1} />
+                : <IconPencil size={14} stroke={1} />
               }
             </Button>
           </WithTooltip>
