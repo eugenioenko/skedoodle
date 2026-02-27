@@ -9,12 +9,8 @@ import {
   IconEyeClosed,
   IconGridDots,
   IconZoomOut,
-  IconRulerMeasure,
-  IconRulerMeasure2,
   IconSkewX,
   IconSkewY,
-  IconSquareLetterX,
-  IconSquareLetterY,
   IconGrid3x3
 } from "@tabler/icons-react";
 import { colord } from "colord";
@@ -31,6 +27,7 @@ import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridCo
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
 import { pushUpdateCommand } from "@/canvas/history.service";
+import { ColorPalette } from "./color-palette";
 
 // Debounced property edit tracking for undo/redo
 let pendingChanges: Map<string, { shapeId: string; newValues: Map<string, any>; oldValues: Map<string, any> }> = new Map();
@@ -83,6 +80,7 @@ const Section = ({ title, children }: SectionProps) => (
   </div>
 );
 
+
 export const PropertiesTab = () => {
   const selection = usePointerStore((state) => state.selected);
   const shape = selection?.[0];
@@ -132,6 +130,7 @@ export const PropertiesTab = () => {
                 />
               )}
             </div>
+            <ColorPalette onApply={updateShape} />
           </Section>
           <Section title="Stroke">
             <div className="grid grid-cols-2 gap-4">
@@ -148,42 +147,6 @@ export const PropertiesTab = () => {
                 max={100}
                 value={(shape as RoundedRectangle)?.radius as number}
                 onChange={(value) => updateShape("radius", value)}
-              />
-            </div>
-          </Section>
-          <Section title="Size">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconRulerMeasure}
-                min={1}
-                max={5000}
-                value={(shape as Rectangle)?.width}
-                onChange={(value) => updateShape("width", value)}
-              />
-              <SlideInput
-                icon={IconRulerMeasure2}
-                min={1}
-                max={5000}
-                value={(shape as Rectangle)?.height}
-                onChange={(value) => updateShape("height", value)}
-              />
-            </div>
-          </Section>
-          <Section title="Position">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconSquareLetterX}
-                min={-5000}
-                max={5000}
-                value={shape?.position.x}
-                onChange={(value) => updateShape("position.x", value)}
-              />
-              <SlideInput
-                icon={IconSquareLetterY}
-                min={-5000}
-                max={5000}
-                value={shape?.position.y}
-                onChange={(value) => updateShape("position.y", value)}
               />
             </div>
           </Section>

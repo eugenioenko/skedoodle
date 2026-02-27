@@ -5,6 +5,15 @@ import { RgbaColor } from "colord";
 import { persist } from "zustand/middleware";
 import { Doodle } from "./doodle.utils";
 
+export const DEFAULT_PALETTE: string[][] = [
+  // Colors
+  ["#ef4444", "#f97316", "#f59e0b", "#84cc16", "#22c55e", "#14b8a6", "#0ea5e9", "#3b82f6", "#8b5cf6", "#d946ef", "#ec4899", "#f43f5e"],
+  // Grays
+  ["#ffffff", "#f5f5f5", "#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373", "#525252", "#404040", "#262626", "#171717", "#0a0a0a", "#000000"],
+  // Pastels
+  ["#fca5a5", "#fdba74", "#fde68a", "#bbf7d0", "#a7f3d0", "#99f6e4", "#bae6fd", "#bfdbfe", "#ddd6fe", "#f5d0fe", "#fbcfe8", "#fecdd3"],
+];
+
 export type Tool =
   | "hand"
   | "pointer"
@@ -59,6 +68,7 @@ export interface OptionsState {
   syncColors: boolean;
   globalStrokeColor: RgbaColor;
   globalFillColor: RgbaColor;
+  colorPalette: string[][];
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -76,6 +86,7 @@ export interface OptionsState {
   setSyncColors: (syncColors: boolean) => void;
   setGlobalStrokeColor: (globalStrokeColor: RgbaColor) => void;
   setGlobalFillColor: (globalFillColor: RgbaColor) => void;
+  setColorPalette: (colorPalette: string[][]) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -114,9 +125,11 @@ export const useOptionsStore = create<OptionsState>()(
       setGridColor: (gridColor) => set(() => ({ gridColor })),
       setGridMinZoom: (gridMinZoom) => set(() => ({ gridMinZoom })),
       setSyncColors: (syncColors) => set(() => ({ syncColors })),
+      colorPalette: DEFAULT_PALETTE,
       setGlobalStrokeColor: (globalStrokeColor) => set(() => ({ globalStrokeColor })),
       setGlobalFillColor: (globalFillColor) => set(() => ({ globalFillColor })),
+      setColorPalette: (colorPalette) => set(() => ({ colorPalette })),
     }),
-    { name: "options", version: 3 }
+    { name: "options", version: 4 }
   )
 );
