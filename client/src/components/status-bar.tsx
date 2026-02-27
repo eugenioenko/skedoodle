@@ -23,11 +23,9 @@ export const StatusBar = () => {
           ))}
         </div>
       </div>
-      {cursor && (
-        <div className="text-xs tabular-nums">
-          {Math.floor(cursor.x)}:{Math.floor(cursor.y)}
-        </div>
-      )}
+      <div className="text-xs tabular-nums">
+        {cursor ? `${Math.floor(cursor.x)}:${Math.floor(cursor.y)}` : '-:-'}
+      </div>
     </div>
   );
 };

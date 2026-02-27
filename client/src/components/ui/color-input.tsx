@@ -9,9 +9,10 @@ import Slider from "rc-slider";
 interface ColorInputProps {
   value: RgbaColor;
   onChange?: (value: RgbaColor) => void;
+  disabled?: boolean;
 }
 
-export const ColorInput = ({ value, onChange }: ColorInputProps) => {
+export const ColorInput = ({ value, onChange, disabled }: ColorInputProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -30,7 +31,7 @@ export const ColorInput = ({ value, onChange }: ColorInputProps) => {
     onChange,
   });
   return (
-    <div className="relative max-w-40 ">
+    <div className={`relative max-w-40 ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
       <Popover
         open={isOpen}
         onOpenChange={setIsOpen}

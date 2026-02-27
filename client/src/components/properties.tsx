@@ -9,12 +9,8 @@ import {
   IconEyeClosed,
   IconGridDots,
   IconZoomOut,
-  IconRulerMeasure,
-  IconRulerMeasure2,
   IconSkewX,
   IconSkewY,
-  IconSquareLetterX,
-  IconSquareLetterY,
   IconGrid3x3
 } from "@tabler/icons-react";
 import { colord } from "colord";
@@ -27,10 +23,16 @@ import { Timeline } from "./timeline";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
 import { useOptionsStore } from "@/canvas/canvas.store";
+import { useBrushStore } from "@/canvas/tools/brush.tool";
+import { useSquareStore } from "@/canvas/tools/square.tool";
+import { useBezierStore } from "@/canvas/tools/bezier.tool";
+import { useLineStore } from "@/canvas/tools/line.tool";
+import { useTextStore } from "@/canvas/tools/text.tool";
 import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/canvas.grid";
 import { ToggleButton, ToggleGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
 import { pushUpdateCommand } from "@/canvas/history.service";
+import { ColorPalette } from "./color-palette";
 
 // Debounced property edit tracking for undo/redo
 let pendingChanges: Map<string, { shapeId: string; newValues: Map<string, any>; oldValues: Map<string, any> }> = new Map();
@@ -71,6 +73,32 @@ function getShapeField(shape: Shape, field: string): any {
   return (shape as any)[field];
 }
 
+function applyColorToActiveTool(field: string, value: string): void {
+  const { selectedTool } = useOptionsStore.getState();
+  const rgba = colord(value).toRgb();
+  switch (selectedTool) {
+    case "brush":
+      if (field === "stroke") useBrushStore.getState().setStrokeColor(rgba);
+      break;
+    case "square":
+    case "ellipse":
+      if (field === "stroke") useSquareStore.getState().setStrokeColor(rgba);
+      if (field === "fill") useSquareStore.getState().setFillColor(rgba);
+      break;
+    case "bezier":
+      if (field === "stroke") useBezierStore.getState().setStrokeColor(rgba);
+      if (field === "fill") useBezierStore.getState().setFillColor(rgba);
+      break;
+    case "line":
+    case "arrow":
+      if (field === "stroke") useLineStore.getState().setStrokeColor(rgba);
+      break;
+    case "text":
+      if (field === "fill") useTextStore.getState().setFillColor(rgba);
+      break;
+  }
+}
+
 interface SectionProps {
   title: string;
   children: React.ReactNode;
@@ -82,6 +110,7 @@ const Section = ({ title, children }: SectionProps) => (
     {children}
   </div>
 );
+
 
 export const PropertiesTab = () => {
   const selection = usePointerStore((state) => state.selected);
@@ -110,29 +139,23 @@ export const PropertiesTab = () => {
   return (
     <div className="flex flex-col min-h-full">
       <div className="flex-grow">
-      {!selection?.length && (
-        <div className="pt-12 pb-4 text-center text-text-secondary text-sm">
-          Select a shape to edit its properties
+      <Section title="Color">
+        <div className="flex flex-col gap-4">
+          <ColorInput
+            value={strokeColor}
+            onChange={(value) => updateShape("stroke", value)}
+            disabled={!selection?.length}
+          />
+          <ColorInput
+            value={fillColor}
+            onChange={(value) => updateShape("fill", value)}
+            disabled={!selection?.length}
+          />
         </div>
-      )}
+        <ColorPalette onApply={selection?.length ? updateShape : applyColorToActiveTool} />
+      </Section>
       {!!selection?.length && (
         <>
-          <Section title="Color">
-            <div className="flex flex-col gap-4">
-              {strokeColor && (
-                <ColorInput
-                  value={strokeColor}
-                  onChange={(value) => updateShape("stroke", value)}
-                />
-              )}
-              {fillColor && (
-                <ColorInput
-                  value={fillColor}
-                  onChange={(value) => updateShape("fill", value)}
-                />
-              )}
-            </div>
-          </Section>
           <Section title="Stroke">
             <div className="grid grid-cols-2 gap-4">
               <SlideInput
@@ -148,42 +171,6 @@ export const PropertiesTab = () => {
                 max={100}
                 value={(shape as RoundedRectangle)?.radius as number}
                 onChange={(value) => updateShape("radius", value)}
-              />
-            </div>
-          </Section>
-          <Section title="Size">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconRulerMeasure}
-                min={1}
-                max={5000}
-                value={(shape as Rectangle)?.width}
-                onChange={(value) => updateShape("width", value)}
-              />
-              <SlideInput
-                icon={IconRulerMeasure2}
-                min={1}
-                max={5000}
-                value={(shape as Rectangle)?.height}
-                onChange={(value) => updateShape("height", value)}
-              />
-            </div>
-          </Section>
-          <Section title="Position">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconSquareLetterX}
-                min={-5000}
-                max={5000}
-                value={shape?.position.x}
-                onChange={(value) => updateShape("position.x", value)}
-              />
-              <SlideInput
-                icon={IconSquareLetterY}
-                min={-5000}
-                max={5000}
-                value={shape?.position.y}
-                onChange={(value) => updateShape("position.y", value)}
               />
             </div>
           </Section>
