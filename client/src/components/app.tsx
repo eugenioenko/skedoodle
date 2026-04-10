@@ -12,7 +12,7 @@ import { useCommandLogStore } from "@/canvas/history.store";
 import { exitTimeTravelMode } from "@/canvas/history.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
-import { IconChevronDown, IconLayoutSidebarRight, IconLogout, IconPhoto } from "@tabler/icons-react";
+import { IconChevronDown, IconHome, IconLayoutSidebarRight, IconLogout, IconPhoto } from "@tabler/icons-react";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
@@ -73,6 +73,7 @@ const UserAvatar = () => {
 
 export const App = ({ isLocal = false }) => {
   useWindowWheelPrevent();
+  const navigate = useNavigate();
   const { id } = useParams();
   const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
   const loadDelay = 650;
@@ -89,6 +90,11 @@ export const App = ({ isLocal = false }) => {
           <ToolOptions />
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
+          <WithTooltip tooltip="Home">
+            <Button onClick={() => navigate("/sketches")}>
+              <IconHome size={20} stroke={1} />
+            </Button>
+          </WithTooltip>
           <UserAvatar />
           <WithTooltip tooltip="Toggle panel">
             <Button onClick={() => useOptionsStore.getState().setIsPanelOpen(!useOptionsStore.getState().isPanelOpen)}>

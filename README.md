@@ -57,11 +57,11 @@ Commands are typed as `create`, `update`, `remove`, `undo`, or `redo`. Each has 
 
 The server is stateless: rooms load their command log from the database when the first client joins, then relay commands between participants. On reconnect, the client compares log lengths and replays the delta in either direction.
 
-### Authentication: PocketID OIDC
+### Authentication: Autentico OIDC
 
-Authentication is delegated to [PocketID](https://pocket-id.org/), a self-hosted OIDC Identity Provider. The client uses Authorization Code + PKCE flow via `oidc-client-ts`. PocketID issues access tokens; the server validates them directly against PocketID's JWKS endpoint (using `jose`) — no internal JWT issuance.
+Authentication is delegated to [Autentico](https://github.com/eugenioenko/autentico), a self-hosted OIDC Identity Provider. The client uses Authorization Code + PKCE flow via `oidc-client-ts`. Autentico issues access tokens; the server validates them directly against Autentico's JWKS endpoint (using `jose`) — no internal JWT issuance.
 
-On first login the server automatically creates a local user record from the OIDC claims (`sub`, `preferred_username`). Subsequent logins update the username if it changed in PocketID.
+On first login the server automatically creates a local user record from the OIDC claims (`sub`, `preferred_username`). Subsequent logins update the username if it changed in Autentico.
 
 Future: integrating [OpenTDF](https://opentdf.io/) for attribute-based access control (ABAC) — per-sketch permissions based on user attributes, roles, or organizational policies.
 
@@ -93,7 +93,7 @@ Conflict resolution is last-write-wins by command order. If user A deletes a sha
 | Frontend | React, Vite, TypeScript, Two.js (vector rendering), Zustand, Tailwind CSS |
 | Backend | Express 5, TypeScript, WebSocket (`ws`), JWT |
 | Database | SQLite via Prisma ORM |
-| Auth | PocketID OIDC (`oidc-client-ts` + `jose`) |
+| Auth | Autentico OIDC (`oidc-client-ts` + `jose`) |
 | Infra | Docker, Caddy, GitHub Actions → GHCR → VPS |
 
 ## Getting started
@@ -118,15 +118,15 @@ cp client/.env.example client/.env
 cp server/.env.example server/.env
 ```
 
-#### PocketID (local Identity Provider)
+#### Autentico (local Identity Provider)
 
 ```bash
-# Start PocketID — runs at http://localhost:1411
-docker compose -f docker-compose.dev.yml up -d
+# Start Autentico — runs at http://localhost:9999
+docker compose up -d
 ```
 
-1. Open `http://localhost:1411` and complete the first-run admin setup.
-2. In the PocketID admin UI, go to **OIDC Clients → Create**.
+1. Open `http://localhost:9999` and complete the first-run admin setup.
+2. In the Autentico admin UI, create an OIDC client:
    - Name: `Skedoodle`
    - Client ID: `skedoodle`
    - Redirect URIs: `http://localhost:5173/auth/callback`
@@ -151,7 +151,7 @@ cd server && pnpm run dev:http
 cd client && pnpm dev
 ```
 
-Open `http://localhost:5173`. You'll be redirected to your local PocketID instance to sign in.
+Open `http://localhost:5173`. You'll be redirected to your local Autentico instance to sign in.
 
 ## Project structure
 

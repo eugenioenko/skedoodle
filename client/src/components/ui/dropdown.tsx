@@ -192,7 +192,7 @@ export const DropdownItem = React.forwardRef<
       })}
     >
       <div>{icon}</div>
-      <div className="flex-grow">{label}</div>
+      <div className="flex-grow text-sm">{label}</div>
     </button>
   );
 });

@@ -4,26 +4,40 @@ import { prisma } from "../prisma";
 
 const OIDC_ISSUER_URL = process.env.OIDC_ISSUER_URL!;
 
-const JWKS = createRemoteJWKSet(
-  new URL(`${OIDC_ISSUER_URL}/.well-known/jwks.json`),
-);
+interface OidcConfig {
+  jwks_uri: string;
+  userinfo_endpoint: string;
+}
 
-let userinfoEndpoint: string | null = null;
+let oidcConfig: OidcConfig | null = null;
+let JWKS: ReturnType<typeof createRemoteJWKSet> | null = null;
 
-async function getUserinfoEndpoint(): Promise<string> {
-  if (userinfoEndpoint) return userinfoEndpoint;
+async function getOidcConfig(): Promise<OidcConfig> {
+  if (oidcConfig) return oidcConfig;
   const res = await fetch(
     `${OIDC_ISSUER_URL}/.well-known/openid-configuration`,
   );
-  const config = await res.json();
-  userinfoEndpoint = config.userinfo_endpoint as string;
-  return userinfoEndpoint;
+  oidcConfig = (await res.json()) as OidcConfig;
+  return oidcConfig;
+}
+
+async function getJWKS() {
+  if (JWKS) return JWKS;
+  const config = await getOidcConfig();
+  JWKS = createRemoteJWKSet(new URL(config.jwks_uri));
+  return JWKS;
+}
+
+async function getUserinfoEndpoint(): Promise<string> {
+  const config = await getOidcConfig();
+  return config.userinfo_endpoint;
 }
 
 export async function verifyOidcToken(
   token: string,
 ): Promise<{ userId: string; username: string }> {
-  const { payload } = await jwtVerify(token, JWKS, {
+  const jwksSet = await getJWKS();
+  const { payload } = await jwtVerify(token, jwksSet, {
     issuer: OIDC_ISSUER_URL,
   });
 
