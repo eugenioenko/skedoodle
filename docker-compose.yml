@@ -1,20 +1,14 @@
 services:
-  app:
-    container_name: skedoodle-app
-    image: ghcr.io/eugenioenko/skedoodle:latest
+  autentico:
+    image: ghcr.io/eugenioenko/autentico:latest
     restart: unless-stopped
-    networks:
-      - web
-    volumes:
-      - ./data:/app/data
+    ports:
+      - "9999:9999"
     environment:
-      - DATABASE_URL=file:/app/data/skedoodle.db
-      - HTTP_PORT=3013
-      - WS_PORT=3014
-      - CORS_ORIGIN=https://${SKEDOODLE_DOMAIN}
-      - OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
-      - OIDC_CLIENT_ID=${OIDC_CLIENT_ID}
-
-networks:
-  web:
-    external: true
+      AUTENTICO_APP_URL: http://localhost:9999
+      AUTENTICO_DB_FILE_PATH: /data/autentico.db
+      AUTENTICO_CSRF_SECRET_KEY: local-dev-change-me-at-least-32-chars
+      AUTENTICO_ACCESS_TOKEN_SECRET: local-dev-change-me-at-least-32-chars
+      AUTENTICO_REFRESH_TOKEN_SECRET: local-dev-change-me-at-least-32-chars
+    volumes:
+      - ./data/autentico:/data
