@@ -13,6 +13,18 @@ import {
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { pushUpdateCommand } from "../history.service";
+import {
+  showResizeHandles,
+  hideResizeHandles,
+  updateResizeHandleScales,
+  hitTestResizeHandle,
+  startResize,
+  doResize as doResizeDrag,
+  endResize,
+  isResizing,
+  storeHandleOriginsForMove,
+  moveHandlesByDelta,
+} from "./resize.handles";
 
 interface Outlines {
   highlight?: Rectangle;
@@ -66,6 +78,20 @@ export const usePointerStore = create<PointerState>()((set) => ({
   selectShapes: (shapes: Shape[]) =>
     set((state) => selectShapesDirect(state, shapes)),
 }));
+
+// Clean up handles when switching away from pointer tool
+let pointerCleanupInitialized = false;
+export function initPointerToolCleanup(): void {
+  if (pointerCleanupInitialized) return;
+  pointerCleanupInitialized = true;
+  useOptionsStore.subscribe((state, prevState) => {
+    if (prevState.selectedTool === "pointer" && state.selectedTool !== "pointer") {
+      const { clearSelected } = usePointerStore.getState();
+      clearSelected();
+      getDoodler().throttledTwoUpdate();
+    }
+  });
+}
 
 function highlightShape(
   state: PointerState,
@@ -130,6 +156,7 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
       return { ...state };
     } else {
       removeAllSelectionOutlines(outlines);
+      hideResizeHandles();
       return { ...state, selected: [] };
     }
   }
@@ -138,6 +165,8 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
   const isAlreadySelected = state.selected.find(
     (shape) => shape.id === highlighted?.id
   );
+  let selectionChanged = false;
+
   if (join && isAlreadySelected) {
     // Remove from selection
     selected = selected.filter((item) => item.id !== highlighted.id);
@@ -147,24 +176,36 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
       outlines.selected.delete(highlighted.id);
       outlines.outlineOrigins.delete(highlighted.id);
     }
+    selectionChanged = true;
   } else if (join && !isAlreadySelected) {
     // Add to selection
     selected.push(highlighted);
     const outline = createShapeOutline(highlighted);
     outlines.selected.set(highlighted.id, outline);
+    selectionChanged = true;
   } else if (!join && !isAlreadySelected) {
     // Replace selection
     removeAllSelectionOutlines(outlines);
     selected = [highlighted];
     const outline = createShapeOutline(highlighted);
     outlines.selected.set(highlighted.id, outline);
+    selectionChanged = true;
   }
+  // !join && isAlreadySelected → selection unchanged, skip handle rebuild
 
+  if (selectionChanged) {
+    if (selected.length > 0) {
+      showResizeHandles(selected);
+    } else {
+      hideResizeHandles();
+    }
+  }
   return { ...state, selected };
 }
 
 function clearSelected(state: PointerState): PointerState {
   removeAllSelectionOutlines(state.outlines);
+  hideResizeHandles();
   return { ...state, selected: [] };
 }
 
@@ -180,6 +221,7 @@ function selectShapesDirect(state: PointerState, shapes: Shape[]): PointerState 
     state.outlines.selected.set(shape.id, outline);
   }
 
+  showResizeHandles(shapes);
   return { ...state, selected: shapes };
 }
 
@@ -197,6 +239,8 @@ function startMoveSelection(): void {
     outlines.outlineOrigins.set(id, rect.translation.clone());
   }
 
+  storeHandleOriginsForMove();
+
   if (outlines.highlight) {
     outlines.highlight.remove();
     outlines.highlight = undefined;
@@ -205,8 +249,9 @@ function startMoveSelection(): void {
 }
 
 export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
+  initPointerToolCleanup();
   const doodler = getDoodler();
-  const { origin, addHighlightToSelection, clearSelected, outlines } =
+  const { origin, addHighlightToSelection, clearSelected, outlines, selected } =
     usePointerStore.getState();
   // pointer to measure distance fro movement within the surface
   const surfacePointer = eventToSurfacePosition(e);
@@ -214,6 +259,16 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   const clientPointer = eventToClientPosition(e);
 
   origin.set(surfacePointer.x, surfacePointer.y);
+
+  // Check resize handles first (priority over move)
+  if (selected.length > 0) {
+    const hitHandle = hitTestResizeHandle(surfacePointer);
+    if (hitHandle) {
+      startResize(hitHandle, selected, outlines.selected);
+      doodler.throttledTwoUpdate();
+      return;
+    }
+  }
 
   let isClickWithinHighlight = false;
   if (outlines.highlight && outlines.highlight.visible) {
@@ -257,6 +312,10 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
+  if (isResizing()) {
+    doResizeDrag(eventToSurfacePosition(e), e.shiftKey);
+    return;
+  }
   const { isMoving } = usePointerStore.getState();
   if (isMoving) {
     doMoveShape(e);
@@ -266,6 +325,21 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
+  if (isResizing()) {
+    endResize();
+    // Rebuild selection outlines from fresh bounding boxes after resize
+    const { outlines, selected } = usePointerStore.getState();
+    for (const rect of outlines.selected.values()) {
+      rect.remove();
+    }
+    outlines.selected.clear();
+    for (const shape of selected) {
+      const outline = createShapeOutline(shape);
+      outlines.selected.set(shape.id, outline);
+    }
+    getDoodler().throttledTwoUpdate();
+    return;
+  }
   const { isMoving, setIsMoving, selected, origins } =
     usePointerStore.getState();
   const { setToolOption } = useOptionsStore.getState();
@@ -337,6 +411,9 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
     }
   }
 
+  // Move resize handles
+  moveHandlesByDelta(dx, dy);
+
   doodler.throttledTwoUpdate();
 }
 
@@ -363,7 +440,9 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
       item.bottom
     );
 
-    if (!isShapeWithin || (shape as any).isHighlight) {
+    const { selected } = usePointerStore.getState();
+    const isSelected = selected.some((s) => s.id === shape.id);
+    if (!isShapeWithin || (shape as any).isHighlight || isSelected) {
       continue;
     }
 
@@ -391,17 +470,32 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
 }
 
 /**
- * Updates linewidth on all visible outlines. Called by zoom tools.
+ * Rebuilds outlines and handles for the current zoom level. Called by zoom tools.
  */
 export function updateOutlineScales(): void {
   const doodler = getDoodler();
-  const { outlines } = usePointerStore.getState();
+  const { outlines, selected } = usePointerStore.getState();
   const lw = 1.5 / doodler.zui.scale;
 
   if (outlines.highlight) {
     outlines.highlight.linewidth = lw;
   }
-  for (const rect of outlines.selected.values()) {
+
+  // Rebuild per-shape selection outlines from fresh bounding boxes
+  for (const [id, rect] of outlines.selected) {
+    const shape = selected.find((s) => s.id === id);
+    if (!shape) continue;
+    const item = (shape as any).getBoundingClientRect(false);
+    const pos = doodler.zui.clientToSurface({
+      x: item.left + item.width / 2,
+      y: item.top + item.height / 2,
+    });
+    rect.translation.x = pos.x;
+    rect.translation.y = pos.y;
+    rect.width = item.width / doodler.zui.scale;
+    rect.height = item.height / doodler.zui.scale;
     rect.linewidth = lw;
   }
+
+  updateResizeHandleScales(selected);
 }
