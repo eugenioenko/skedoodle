@@ -3,8 +3,6 @@ import { authService } from '@/services/auth.service';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
 
-const SIGNUP_URL = `${import.meta.env.VITE_OIDC_ISSUER_URL as string}/signup`;
-
 export function LoginPage() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore(s => s.token && s.user);
