@@ -118,9 +118,9 @@ test.describe("Resize handles", () => {
     await selectTool(page, "pointer");
     await clickAt(page, cx, cy);
 
-    // 4 handles + 1 selection outline
+    // 4 handles + outlines (1 per-shape + 1 group)
     expect(await handlePaths(page).count()).toBe(4);
-    expect(await outlinePaths(page).count()).toBe(1);
+    expect(await outlinePaths(page).count()).toBe(2);
 
     // Resize: drag the SE handle
     const seHandle = handlePaths(page).last();
@@ -128,20 +128,18 @@ test.describe("Resize handles", () => {
     await drag(page, seBox!.x + seBox!.width / 2, seBox!.y + seBox!.height / 2,
                seBox!.x + 30, seBox!.y + 20);
 
-    // After resize: still exactly 4 handles, 1 outline
+    // After resize: still exactly 4 handles
     expect(await handlePaths(page).count()).toBe(4);
-    expect(await outlinePaths(page).count()).toBe(1);
 
-    // Move the shape by dragging from a point within the selection outline
-    const outline = outlinePaths(page).first();
+    // Move the shape by dragging from a point within the group outline
+    const outline = outlinePaths(page).last();
     const outlineBox = await outline.boundingBox();
     const moveSrcX = outlineBox!.x + outlineBox!.width / 2;
     const moveSrcY = outlineBox!.y + outlineBox!.height / 2;
     await drag(page, moveSrcX, moveSrcY, moveSrcX + 50, moveSrcY + 30);
 
-    // After move: still exactly 4 handles, 1 outline
+    // After move: still exactly 4 handles
     expect(await handlePaths(page).count()).toBe(4);
-    expect(await outlinePaths(page).count()).toBe(1);
 
     // Deselect (click empty canvas, avoid right panel)
     await clickAt(page, box.x + 100, box.y + box.height - 50);

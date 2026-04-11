@@ -20,6 +20,7 @@ const ALL_HANDLES: HandleId[] = ["nw", "ne", "sw", "se"];
 
 const handles: Map<HandleId, Circle> = new Map();
 let rotateLine: Shape | null = null;
+let groupOutline: Shape | null = null;
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -72,6 +73,19 @@ export function showResizeHandles(shapes: Shape[]): void {
   const doodler = getDoodler();
   const scale = doodler.zui.scale;
 
+  // Group outline — the combined bbox rectangle that handles sit on
+  const groupRect = doodler.two.makeRectangle(
+    bbox.cx, bbox.cy,
+    bbox.width * OUTLINE_SCALE,
+    bbox.height * OUTLINE_SCALE
+  );
+  groupRect.noFill();
+  groupRect.stroke = ColorHighlight;
+  groupRect.linewidth = 1.5 / scale;
+  (groupRect as any).isHighlight = true;
+  doodler.canvas.add(groupRect);
+  groupOutline = groupRect;
+
   for (const id of ALL_HANDLES) {
     const pos = handlePosition(id, bbox);
     handles.set(id, createHandleCircle(pos.x, pos.y));
@@ -101,6 +115,10 @@ export function hideResizeHandles(): void {
     rotateLine.remove();
     rotateLine = null;
   }
+  if (groupOutline) {
+    groupOutline.remove();
+    groupOutline = null;
+  }
 }
 
 export function updateResizeHandleScales(shapes: Shape[]): void {
@@ -109,6 +127,13 @@ export function updateResizeHandleScales(shapes: Shape[]): void {
 }
 
 // ── Hit testing ────────────────────────────────────────────────────
+
+export function isPointInGroupOutline(clientPos: { x: number; y: number }): boolean {
+  if (!groupOutline) return false;
+  const box = (groupOutline as any).getBoundingClientRect(false);
+  return clientPos.x >= box.left && clientPos.x <= box.right &&
+         clientPos.y >= box.top && clientPos.y <= box.bottom;
+}
 
 export function hitTestResizeHandle(surfacePos: {
   x: number;
@@ -138,6 +163,7 @@ export function hitTestResizeHandle(surfacePos: {
 
 const handleMoveOrigins: Map<HandleId, Vector> = new Map();
 let rotateLineMoveOrigins: { v0: Vector; v1: Vector } | null = null;
+let groupOutlineMoveOrigin: Vector | null = null;
 
 export function storeHandleOriginsForMove(): void {
   handleMoveOrigins.clear();
@@ -150,6 +176,9 @@ export function storeHandleOriginsForMove(): void {
       v0: new Vector(line.vertices[0].x, line.vertices[0].y),
       v1: new Vector(line.vertices[1].x, line.vertices[1].y),
     };
+  }
+  if (groupOutline) {
+    groupOutlineMoveOrigin = groupOutline.translation.clone();
   }
 }
 
@@ -167,6 +196,10 @@ export function moveHandlesByDelta(dx: number, dy: number): void {
     line.vertices[0].y = rotateLineMoveOrigins.v0.y + dy;
     line.vertices[1].x = rotateLineMoveOrigins.v1.x + dx;
     line.vertices[1].y = rotateLineMoveOrigins.v1.y + dy;
+  }
+  if (groupOutline && groupOutlineMoveOrigin) {
+    groupOutline.translation.x = groupOutlineMoveOrigin.x + dx;
+    groupOutline.translation.y = groupOutlineMoveOrigin.y + dy;
   }
 }
 
@@ -202,5 +235,13 @@ export function repositionHandlesDuringResize(
     line.vertices[0].y = topCenterY;
     line.vertices[1].x = rotateHandle ? rotateHandle.translation.x : topCenterX;
     line.vertices[1].y = rotateHandle ? rotateHandle.translation.y : topCenterY - ROTATE_OFFSET / scale;
+  }
+
+  // Reposition group outline
+  if (groupOutline) {
+    groupOutline.translation.x = anchor.x + (startBBox.cx - anchor.x) * sfx;
+    groupOutline.translation.y = anchor.y + (startBBox.cy - anchor.y) * sfy;
+    (groupOutline as any).width = startBBox.width * OUTLINE_SCALE * sfx;
+    (groupOutline as any).height = startBBox.height * OUTLINE_SCALE * sfy;
   }
 }

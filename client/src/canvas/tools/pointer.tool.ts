@@ -6,6 +6,7 @@ import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { useCanvasStore, useOptionsStore } from "../canvas.store";
 import {
+  ColorHighlight,
   eventToClientPosition,
   eventToSurfacePosition,
   isPointInBoundingBox,
@@ -18,6 +19,7 @@ import {
   hideResizeHandles,
   updateResizeHandleScales,
   hitTestResizeHandle,
+  isPointInGroupOutline,
   storeHandleOriginsForMove,
   moveHandlesByDelta,
 } from "./resize.handles";
@@ -92,6 +94,7 @@ export function initPointerToolCleanup(): void {
   pointerCleanupInitialized = true;
   useOptionsStore.subscribe((state, prevState) => {
     if (prevState.selectedTool === "pointer" && state.selectedTool !== "pointer") {
+      cancelMarquee();
       const { clearSelected } = usePointerStore.getState();
       clearSelected();
       getDoodler().throttledTwoUpdate();
@@ -254,6 +257,98 @@ function startMoveSelection(): void {
   setOrigins(origins);
 }
 
+// ── Marquee selection ──────────────────────────────────────────────
+
+let marqueeRect: Rectangle | null = null;
+let marqueeOriginX = 0;
+let marqueeOriginY = 0;
+let isMarqueeActive = false;
+
+function startMarquee(surfacePos: { x: number; y: number }): void {
+  const doodler = getDoodler();
+  marqueeOriginX = surfacePos.x;
+  marqueeOriginY = surfacePos.y;
+  isMarqueeActive = true;
+
+  const rect = doodler.two.makeRectangle(surfacePos.x, surfacePos.y, 0, 0);
+  rect.noFill();
+  rect.stroke = ColorHighlight;
+  rect.linewidth = 1.5 / doodler.zui.scale;
+  rect.opacity = 0.6;
+  (rect as any).isHighlight = true;
+  doodler.canvas.add(rect);
+  marqueeRect = rect;
+}
+
+function updateMarquee(surfacePos: { x: number; y: number }): void {
+  if (!marqueeRect) return;
+  const w = surfacePos.x - marqueeOriginX;
+  const h = surfacePos.y - marqueeOriginY;
+  marqueeRect.width = Math.abs(w);
+  marqueeRect.height = Math.abs(h);
+  marqueeRect.translation.x = marqueeOriginX + w / 2;
+  marqueeRect.translation.y = marqueeOriginY + h / 2;
+  getDoodler().throttledTwoUpdate();
+}
+
+function endMarquee(shiftKey: boolean): void {
+  if (!marqueeRect) return;
+  const doodler = getDoodler();
+
+  // Compute marquee bounds in client space for hit testing
+  const minX = Math.min(marqueeOriginX, marqueeRect.translation.x + marqueeRect.width / 2);
+  const maxX = Math.max(marqueeOriginX, marqueeRect.translation.x + marqueeRect.width / 2);
+  const minY = Math.min(marqueeOriginY, marqueeRect.translation.y + marqueeRect.height / 2);
+  const maxY = Math.max(marqueeOriginY, marqueeRect.translation.y + marqueeRect.height / 2);
+
+  // Find all shapes whose bounding box overlaps the marquee
+  const { doodles } = useCanvasStore.getState();
+  const hits: Shape[] = [];
+  for (const doodle of doodles) {
+    const shape = doodle.shape;
+    if ((shape as any).isHighlight) continue;
+    if (!(shape as any).getBoundingClientRect) continue;
+
+    const item = (shape as any).getBoundingClientRect(false);
+    const topLeft = doodler.zui.clientToSurface({ x: item.left, y: item.top });
+    const bottomRight = doodler.zui.clientToSurface({ x: item.right, y: item.bottom });
+
+    // Check overlap (not containment — any intersection counts)
+    if (bottomRight.x >= minX && topLeft.x <= maxX &&
+        bottomRight.y >= minY && topLeft.y <= maxY) {
+      hits.push(shape);
+    }
+  }
+
+  // Remove marquee visual
+  marqueeRect.remove();
+  marqueeRect = null;
+  isMarqueeActive = false;
+
+  if (hits.length > 0) {
+    const { selectShapes } = usePointerStore.getState();
+    if (shiftKey) {
+      // Add to existing selection
+      const { selected } = usePointerStore.getState();
+      const existingIds = new Set(selected.map(s => s.id));
+      const combined = [...selected, ...hits.filter(h => !existingIds.has(h.id))];
+      selectShapes(combined);
+    } else {
+      selectShapes(hits);
+    }
+  }
+
+  doodler.throttledTwoUpdate();
+}
+
+function cancelMarquee(): void {
+  if (marqueeRect) {
+    marqueeRect.remove();
+    marqueeRect = null;
+  }
+  isMarqueeActive = false;
+}
+
 export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   initPointerToolCleanup();
   const doodler = getDoodler();
@@ -315,10 +410,19 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
     return;
   }
 
+  // Check if click is within the group outline (multi-select boundary)
+  if (selected.length > 0 && isPointInGroupOutline(clientPointer)) {
+    startMoveSelection();
+    doodler.throttledTwoUpdate();
+    return;
+  }
+
   if (!e.shiftKey) {
     clearSelected();
   }
 
+  // Start marquee selection drag
+  startMarquee(surfacePointer);
   doodler.throttledTwoUpdate();
 }
 
@@ -331,6 +435,10 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
     doResizeDrag(eventToSurfacePosition(e), e.shiftKey);
     return;
   }
+  if (isMarqueeActive) {
+    updateMarquee(eventToSurfacePosition(e));
+    return;
+  }
   const { isMoving } = usePointerStore.getState();
   if (isMoving) {
     doMoveShape(e);
@@ -339,7 +447,11 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   }
 }
 
-export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
+export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
+  if (isMarqueeActive) {
+    endMarquee(e.shiftKey);
+    return;
+  }
   if (isRotating()) {
     endRotate();
     // Rebuild selection outlines after rotation
