@@ -17,7 +17,7 @@ import {
 import { doSquareMove, doSquareStart, doSquareUp } from "./tools/square.tool";
 import { doEllipseStart, doEllipseMove, doEllipseUp } from "./tools/ellipse.tool";
 import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.tool";
-import { doTextStart } from "./tools/text.tool";
+import { doTextStart, doTextMove, doTextUp } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
 import { doNodeStart, doNodeMove, doNodeUp, clearHandles as clearNodeHandles, useNodeStore } from "./tools/node.tool";
@@ -31,11 +31,18 @@ let clipboard: SerializedDoodle[] = [];
 
 let enteredNodeFromPointer = false;
 
+const NODE_EDITABLE_TYPES = new Set(["brush", "bezier", "line", "arrow"]);
+
 function doDoubleClick(e: MouseEvent<HTMLDivElement>) {
   const { selectedTool, setSelectedTool } = useOptionsStore.getState();
   if (selectedTool !== "pointer") return;
 
-  // Switch to node tool and forward the event
+  // Only enter node mode for shapes with editable vertices
+  const { selected } = usePointerStore.getState();
+  if (selected.length !== 1) return;
+  const doodleType = (selected[0] as any).doodleType;
+  if (!NODE_EDITABLE_TYPES.has(doodleType)) return;
+
   enteredNodeFromPointer = true;
   setSelectedTool("node");
   doNodeStart(e);
@@ -170,6 +177,11 @@ function doMouseMove(e: MouseEvent<HTMLDivElement>) {
     return;
   }
 
+  if (selectedTool === "text") {
+    doTextMove(e);
+    return;
+  }
+
   if (activeTool === "square") {
     doSquareMove(e);
     return;
@@ -217,6 +229,12 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
 
   if (activeTool === "node") {
     doNodeUp();
+    setActiveTool(undefined);
+    return;
+  }
+
+  if (activeTool === "text") {
+    doTextUp(e);
     setActiveTool(undefined);
     return;
   }

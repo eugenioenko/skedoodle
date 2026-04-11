@@ -34,7 +34,8 @@ async function selectTool(page: Page, tool: "hand" | "pointer" | "brush" | "rect
       sidebarOnly.push(btn);
     }
   }
-  const toolIndex: Record<string, number> = { hand: 0, pointer: 1, brush: 2, rect: 3 };
+  // Sidebar order: hand, pointer(group), brush, bezier, rect(group), line(group), text, eraser, zoom
+  const toolIndex: Record<string, number> = { hand: 0, pointer: 1, brush: 2, rect: 4 };
   await sidebarOnly[toolIndex[tool]].click();
   await page.waitForTimeout(100);
 }

@@ -11,6 +11,9 @@ import {
   IconLine,
   IconLink,
   IconLinkOff,
+  IconAlignCenter,
+  IconAlignLeft,
+  IconAlignRight,
   IconSquare,
   IconVectorSpline,
   IconVectorTriangle,
@@ -308,10 +311,17 @@ const TextToolOptions = () => {
   const fontSize = useTextStore((state) => state.fontSize);
   const localFillColor = useTextStore((state) => state.fillColor);
   const fontFamily = useTextStore((state) => state.fontFamily);
-  const { setFillColor: setLocalFillColor, setFontSize, setFontFamily } =
+  const alignment = useTextStore((state) => state.alignment);
+  const { setFillColor: setLocalFillColor, setFontSize, setFontFamily, setAlignment } =
     useTextStore.getState();
 
   const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
+
+  const alignOptions = [
+    { value: "left" as const, icon: IconAlignLeft },
+    { value: "center" as const, icon: IconAlignCenter },
+    { value: "right" as const, icon: IconAlignRight },
+  ];
 
   return (
     <div className="flex flex-row gap-2 text-xs items-center">
@@ -338,6 +348,18 @@ const TextToolOptions = () => {
         <option value="monospace">Monospace</option>
         <option value="cursive">Cursive</option>
       </select>
+      <div className="flex flex-row pl-2">
+        {alignOptions.map(({ value, icon: Icon }) => (
+          <button
+            key={value}
+            type="button"
+            className={`p-1 rounded ${alignment === value ? "bg-primary" : "hover:bg-default-3"}`}
+            onClick={() => setAlignment(value)}
+          >
+            <Icon size={16} stroke={1.5} />
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
