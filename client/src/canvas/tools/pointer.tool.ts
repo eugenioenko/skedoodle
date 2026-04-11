@@ -22,6 +22,10 @@ import {
   doResize as doResizeDrag,
   endResize,
   isResizing,
+  startRotate,
+  doRotate as doRotateDrag,
+  endRotate,
+  isRotating,
   storeHandleOriginsForMove,
   moveHandlesByDelta,
 } from "./resize.handles";
@@ -260,9 +264,14 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
 
   origin.set(surfacePointer.x, surfacePointer.y);
 
-  // Check resize handles first (priority over move)
+  // Check resize/rotate handles first (priority over move)
   if (selected.length > 0) {
     const hitHandle = hitTestResizeHandle(surfacePointer);
+    if (hitHandle === "rotate") {
+      startRotate(selected, outlines.selected, surfacePointer);
+      doodler.throttledTwoUpdate();
+      return;
+    }
     if (hitHandle) {
       startResize(hitHandle, selected, outlines.selected);
       doodler.throttledTwoUpdate();
@@ -312,6 +321,10 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
+  if (isRotating()) {
+    doRotateDrag(eventToSurfacePosition(e), e.shiftKey);
+    return;
+  }
   if (isResizing()) {
     doResizeDrag(eventToSurfacePosition(e), e.shiftKey);
     return;
@@ -325,6 +338,21 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
 }
 
 export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
+  if (isRotating()) {
+    endRotate();
+    // Rebuild selection outlines after rotation
+    const { outlines, selected } = usePointerStore.getState();
+    for (const rect of outlines.selected.values()) {
+      rect.remove();
+    }
+    outlines.selected.clear();
+    for (const shape of selected) {
+      const outline = createShapeOutline(shape);
+      outlines.selected.set(shape.id, outline);
+    }
+    getDoodler().throttledTwoUpdate();
+    return;
+  }
   if (isResizing()) {
     endResize();
     // Rebuild selection outlines from fresh bounding boxes after resize

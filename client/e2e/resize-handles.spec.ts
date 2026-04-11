@@ -121,16 +121,22 @@ test.describe("Resize handles", () => {
     expect(await handlePaths(page).count()).toBe(4);
     expect(await outlinePaths(page).count()).toBe(1);
 
-    // Resize: drag the SE handle (bottom-right corner of the shape)
-    // Shape is 120x80 centered at (cx, cy), so SE corner is at (cx+60, cy+40)
-    await drag(page, cx + 60, cy + 40, cx + 90, cy + 60);
+    // Resize: drag the SE handle
+    const seHandle = handlePaths(page).last();
+    const seBox = await seHandle.boundingBox();
+    await drag(page, seBox!.x + seBox!.width / 2, seBox!.y + seBox!.height / 2,
+               seBox!.x + 30, seBox!.y + 20);
 
     // After resize: still exactly 4 handles, 1 outline
     expect(await handlePaths(page).count()).toBe(4);
     expect(await outlinePaths(page).count()).toBe(1);
 
-    // Move the shape
-    await drag(page, cx, cy, cx + 50, cy + 30);
+    // Move the shape by dragging from a point within the selection outline
+    const outline = outlinePaths(page).first();
+    const outlineBox = await outline.boundingBox();
+    const moveSrcX = outlineBox!.x + outlineBox!.width / 2;
+    const moveSrcY = outlineBox!.y + outlineBox!.height / 2;
+    await drag(page, moveSrcX, moveSrcY, moveSrcX + 50, moveSrcY + 30);
 
     // After move: still exactly 4 handles, 1 outline
     expect(await handlePaths(page).count()).toBe(4);
@@ -154,14 +160,21 @@ test.describe("Resize handles", () => {
     await selectTool(page, "pointer");
     await clickAt(page, cx, cy);
 
-    // Resize SE corner
-    await drag(page, cx + 60, cy + 40, cx + 90, cy + 60);
+    // Resize SE handle
+    const seHandle = handlePaths(page).last();
+    const seBox = await seHandle.boundingBox();
+    await drag(page, seBox!.x + seBox!.width / 2, seBox!.y + seBox!.height / 2,
+               seBox!.x + 30, seBox!.y + 20);
 
-    // Move
-    await drag(page, cx, cy, cx + 30, cy + 20);
+    // Move via outline center
+    const outline = outlinePaths(page).first();
+    const outlineBox = await outline.boundingBox();
+    const moveSrcX = outlineBox!.x + outlineBox!.width / 2;
+    const moveSrcY = outlineBox!.y + outlineBox!.height / 2;
+    await drag(page, moveSrcX, moveSrcY, moveSrcX + 30, moveSrcY + 20);
 
     // Hover over shape at new position
-    await page.mouse.move(cx + 30, cy + 20);
+    await page.mouse.move(moveSrcX + 30, moveSrcY + 20);
     await page.waitForTimeout(300);
 
     // Still exactly 4 handles (no orphans from resize/move)
