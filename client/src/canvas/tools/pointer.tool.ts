@@ -18,6 +18,10 @@ import {
   hideResizeHandles,
   updateResizeHandleScales,
   hitTestResizeHandle,
+  storeHandleOriginsForMove,
+  moveHandlesByDelta,
+} from "./resize.handles";
+import {
   startResize,
   doResize as doResizeDrag,
   endResize,
@@ -26,9 +30,7 @@ import {
   doRotate as doRotateDrag,
   endRotate,
   isRotating,
-  storeHandleOriginsForMove,
-  moveHandlesByDelta,
-} from "./resize.handles";
+} from "./resize.tool";
 
 interface Outlines {
   highlight?: Rectangle;

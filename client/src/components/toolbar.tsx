@@ -3,7 +3,6 @@ import {
   IconArrowNarrowRight,
   IconBrush,
   IconCircle,
-  IconEaseInOutControlPoints,
   IconEraser,
   IconHandStop,
   IconLetterT,
@@ -13,6 +12,7 @@ import {
   IconVector,
   IconZoom,
 } from "@tabler/icons-react";
+import { IconPen } from "./icons/icon-pen";
 import { WithTooltip } from "./ui/tooltip";
 import {
   autoUpdate,
@@ -49,12 +49,16 @@ export const Toolbar = () => {
             { value: "node", icon: <IconVector stroke={1} />, tooltip: "Node tool [N]" },
           ]}
         />
-        <ToolGroup
-          tools={[
-            { value: "brush", icon: <IconBrush stroke={1} />, tooltip: "Brush tool [B]" },
-            { value: "bezier", icon: <IconEaseInOutControlPoints stroke={1} />, tooltip: "Pen tool [C]" },
-          ]}
-        />
+        <WithTooltip tooltip="Brush tool [B]">
+          <ToggleButton value="brush">
+            <IconBrush stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
+        <WithTooltip tooltip="Pen tool [C]">
+          <ToggleButton value="bezier">
+            <IconPen stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
         <ToolGroup
           tools={[
             { value: "square", icon: <IconSquare stroke={1} />, tooltip: "Rectangle tool [R]" },
