@@ -74,16 +74,16 @@ let rotateDragState: RotateDragState | null = null;
 
 /**
  * Creates a scale Vector compatible with the shape's internal Vector class.
- * Shapes created via `two.make*()` use the bundled Two.Vector,
- * while shapes created via `new Path()` use the source-imported Vector.
- * Using the wrong one fails the `instanceof Vector` check in Two.js's _update.
+ * Vite bundles Two.js with its own Vector class. Shapes created via `two.make*()`
+ * use that bundled Vector, while shapes created via `new Path()`/`new Text()`
+ * use the source-imported Vector. The wrong one fails `instanceof` in Two.js's _update.
  */
-const worldSpaceTypes = new Set(["line", "arrow", "bezier"]);
+const BUNDLED_VECTOR_TYPES = new Set(["brush", "rect", "ellipse", "circle"]);
 function makeScaleVector(shape: Shape, x: number, y: number): Vector {
-  if (worldSpaceTypes.has((shape as any).doodleType)) {
-    return new Vector(x, y);
+  if (BUNDLED_VECTOR_TYPES.has((shape as any).doodleType)) {
+    return new Two.Vector(x, y) as unknown as Vector;
   }
-  return new Two.Vector(x, y) as unknown as Vector;
+  return new Vector(x, y);
 }
 
 function distanceSq(ax: number, ay: number, bx: number, by: number): number {
