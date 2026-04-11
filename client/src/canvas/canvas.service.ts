@@ -20,7 +20,7 @@ import { doLineStart, doLineMove, doLineUp, useLineStore } from "./tools/line.to
 import { doTextStart } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
-import { doNodeStart, doNodeMove, doNodeUp, clearHandles as clearNodeHandles } from "./tools/node.tool";
+import { doNodeStart, doNodeMove, doNodeUp, clearHandles as clearNodeHandles, useNodeStore } from "./tools/node.tool";
 import { undo, redo, exitTimeTravelMode, pushCreateCommand, pushRemoveCommand } from "./history.service";
 import { useCommandLogStore } from "./history.store";
 import { doCursorUpdate } from "./tools/cursor.tool";
@@ -28,6 +28,18 @@ import { SerializedDoodle, serializeDoodle, unserializeDoodle } from "./doodle.u
 import { usePointerStore } from "./tools/pointer.tool";
 
 let clipboard: SerializedDoodle[] = [];
+
+let enteredNodeFromPointer = false;
+
+function doDoubleClick(e: MouseEvent<HTMLDivElement>) {
+  const { selectedTool, setSelectedTool } = useOptionsStore.getState();
+  if (selectedTool !== "pointer") return;
+
+  // Switch to node tool and forward the event
+  enteredNodeFromPointer = true;
+  setSelectedTool("node");
+  doNodeStart(e);
+}
 
 function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   if (useCommandLogStore.getState().isTimeTraveling) return;
@@ -44,6 +56,9 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
   }
 
   setActiveTool(selectedTool || "hand");
+  if (selectedTool !== "node") {
+    enteredNodeFromPointer = false;
+  }
 
   if (selectedTool === "hand") {
     doDragStart(e);
@@ -57,6 +72,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "node") {
     doNodeStart(e);
+    // If entered via double-click from pointer, return to pointer when clicking empty space
+    if (enteredNodeFromPointer && !useNodeStore.getState().editingShape) {
+      enteredNodeFromPointer = false;
+      setSelectedTool("pointer");
+    }
     return;
   }
 
@@ -456,6 +476,7 @@ export const handlers = {
   doMouseUp,
   doMouseOut,
   doMouseOver,
+  doDoubleClick,
   doTouchStart,
   doTouchMove,
   doTouchEnd,

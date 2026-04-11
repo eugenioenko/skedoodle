@@ -48,6 +48,7 @@ export const Canvas = ({ sketchId, onReady, isLocal = false }: CanvasProps) => {
       data-active={activeTool}
       data-option={toolOption}
       onMouseDown={(e) => handlers.doMouseDown(e)}
+      onDoubleClick={(e) => handlers.doDoubleClick(e)}
       onMouseMove={(e) => handlers.doMouseMove(e)}
       onMouseUp={(e) => handlers.doMouseUp(e)}
       onMouseOut={(e) => handlers.doMouseOut(e)}
