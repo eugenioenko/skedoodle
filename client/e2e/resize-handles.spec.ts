@@ -118,9 +118,9 @@ test.describe("Resize handles", () => {
     await selectTool(page, "pointer");
     await clickAt(page, cx, cy);
 
-    // 4 handles + outlines (1 per-shape + 1 group)
+    // 4 handles + 1 group outline
     expect(await handlePaths(page).count()).toBe(4);
-    expect(await outlinePaths(page).count()).toBe(2);
+    expect(await outlinePaths(page).count()).toBe(1);
 
     // Resize: drag the SE handle
     const seHandle = handlePaths(page).last();
