@@ -108,6 +108,7 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
   return (
     <button
       type="button"
+      data-testid={`tool-${value}`}
       className={`p-1 rounded  ${isActive ? "bg-primary" : "hover:bg-default-3"
         }`}
       onClick={() => setTool(value as Tool)}
@@ -149,6 +150,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
     <div ref={refs.setReference} {...getReferenceProps()}>
       <button
         type="button"
+        data-testid={`tool-${activePick.value}`}
         className={`p-1 rounded relative ${isGroupActive ? "bg-primary" : "hover:bg-default-3"}`}
         onClick={() => setTool(activePick.value)}
       >
@@ -177,6 +179,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
               <button
                 key={tool.value}
                 type="button"
+                data-testid={`tool-${tool.value}`}
                 className={`flex items-center gap-2 px-2 py-1 rounded text-left ${
                   current === tool.value ? "bg-primary" : "hover:bg-default-3"
                 }`}

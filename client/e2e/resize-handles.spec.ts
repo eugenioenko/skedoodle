@@ -1,78 +1,19 @@
-import { test, expect, Page } from "@playwright/test";
-
-// ── Helpers ────────────────────────────────────────────────────────
-
-const CANVAS = ".canvas-container";
-const svgRoot = (page: Page) => page.locator(`${CANVAS} svg`);
-
-/**
- * Two.js renders circles as <path> elements with bezier curves.
- * Resize handles have fill="#ffffff" and stroke="#0ea5cf".
- */
-const handlePaths = (page: Page) =>
-  svgRoot(page).locator('path[fill="#ffffff"][stroke="#0ea5cf"]');
-
-/**
- * Selection/highlight outlines have stroke="#0ea5cf" and fill="none".
- */
-const outlinePaths = (page: Page) =>
-  svgRoot(page).locator('path[fill="none"][stroke="#0ea5cf"]');
-
-async function canvasBBox(page: Page) {
-  const box = await page.locator(CANVAS).boundingBox();
-  if (!box) throw new Error("Canvas not found");
-  return box;
-}
-
-async function selectTool(page: Page, tool: "hand" | "pointer" | "brush" | "rect") {
-  const sidebarButtons = page.locator('button[class*="p-1 rounded"]');
-  const allBtns = await sidebarButtons.all();
-  const sidebarOnly: typeof allBtns = [];
-  for (const btn of allBtns) {
-    const box = await btn.boundingBox();
-    if (box && box.x < 60) {
-      sidebarOnly.push(btn);
-    }
-  }
-  // Sidebar order: hand, pointer(group), brush, bezier, rect(group), line(group), text, eraser, zoom
-  const toolIndex: Record<string, number> = { hand: 0, pointer: 1, brush: 2, rect: 4 };
-  await sidebarOnly[toolIndex[tool]].click();
-  await page.waitForTimeout(100);
-}
-
-async function drawRect(page: Page, x: number, y: number, w: number, h: number) {
-  await selectTool(page, "rect");
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  await page.mouse.move(x + w, y + h, { steps: 5 });
-  await page.mouse.up();
-  await page.waitForTimeout(150);
-}
-
-async function clickAt(page: Page, x: number, y: number) {
-  // Hover first to ensure highlight/hit-testing state is set
-  await page.mouse.move(x, y);
-  await page.waitForTimeout(100);
-  await page.mouse.click(x, y);
-  await page.waitForTimeout(200);
-}
-
-async function drag(page: Page, fromX: number, fromY: number, toX: number, toY: number) {
-  await page.mouse.move(fromX, fromY);
-  await page.mouse.down();
-  await page.mouse.move(toX, toY, { steps: 10 });
-  await page.mouse.up();
-  await page.waitForTimeout(200);
-}
+import { test, expect } from "@playwright/test";
+import {
+  setupCanvas,
+  canvasBBox,
+  handlePaths,
+  outlinePaths,
+  selectTool,
+  drawRect,
+  clickAt,
+  drag,
+} from "./helpers";
 
 // ── Tests ──────────────────────────────────────────────────────────
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/local");
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await svgRoot(page).waitFor({ state: "attached", timeout: 5000 });
-  await page.waitForTimeout(500);
+  await setupCanvas(page);
 });
 
 test.describe("Resize handles", () => {
