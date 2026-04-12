@@ -6,38 +6,53 @@ import { Vector } from "two.js/src/vector";
 import { create } from "zustand";
 import { useCanvasStore, useOptionsStore } from "../canvas.store";
 import {
+  ColorHighlight,
   eventToClientPosition,
   eventToSurfacePosition,
-  isPointInBoundingBox,
   isPointInRect,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { pushUpdateCommand } from "../history.service";
+import {
+  showResizeHandles,
+  hideResizeHandles,
+  updateResizeHandleScales,
+  hitTestResizeHandle,
+  isPointInGroupOutline,
+  storeHandleOriginsForMove,
+  moveHandlesByDelta,
+} from "./resize.handles";
+import {
+  startResize,
+  doResize as doResizeDrag,
+  endResize,
+  isResizing,
+  startRotate,
+  doRotate as doRotateDrag,
+  endRotate,
+  isRotating,
+} from "./resize.tool";
 
 interface Outlines {
-  highlight?: Rectangle;
-  selected: Map<string, Rectangle>;
-  origin: Vector;
-  outlineOrigins: Map<string, Vector>;
+  selectedStrokes: Map<string, SavedStroke>;
 }
 
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+interface SavedStroke {
+  stroke: string;
+  linewidth: number;
 }
 
 export interface PointerState {
   origin: Vector;
   highlighted?: Shape;
+  highlightedOriginalStroke?: SavedStroke;
   selected: Shape[];
   isMoving: boolean;
   outlines: Outlines;
   origins: Vector[];
   clearSelected: () => void;
   addHighlightToSelection: (join: boolean) => void;
-  setHighlight: (shape: Shape, border: Rect) => void;
+  setHighlight: (shape: Shape) => void;
   setOrigins: (origins: Vector[]) => void;
   clearHighlight: () => void;
   setIsMoving: (isMoving: boolean) => void;
@@ -51,14 +66,12 @@ export const usePointerStore = create<PointerState>()((set) => ({
   highlighted: undefined,
   isMoving: false,
   outlines: {
-    origin: new Vector(),
-    selected: new Map(),
-    outlineOrigins: new Map(),
+    selectedStrokes: new Map(),
   },
   setIsMoving: (isMoving) => set((state) => ({ ...state, isMoving })),
   setOrigins: (origins) => set((state) => ({ ...state, origins })),
-  setHighlight: (shape, border) =>
-    set((state) => highlightShape(state, shape, border)),
+  setHighlight: (shape) =>
+    set((state) => highlightShape(state, shape)),
   clearHighlight: () => set((state) => clearHighlight(state)),
   clearSelected: () => set((state) => clearSelected(state)),
   addHighlightToSelection: (join: boolean) =>
@@ -67,58 +80,84 @@ export const usePointerStore = create<PointerState>()((set) => ({
     set((state) => selectShapesDirect(state, shapes)),
 }));
 
+// Clean up handles when switching away from pointer tool
+let pointerCleanupInitialized = false;
+export function initPointerToolCleanup(): void {
+  if (pointerCleanupInitialized) return;
+  pointerCleanupInitialized = true;
+  useOptionsStore.subscribe((state, prevState) => {
+    if (prevState.selectedTool === "pointer" && state.selectedTool !== "pointer") {
+      cancelMarquee();
+      const { clearSelected } = usePointerStore.getState();
+      clearSelected();
+      getDoodler().throttledTwoUpdate();
+    }
+  });
+}
+
 function highlightShape(
   state: PointerState,
-  shape: Shape,
-  border: Rect
+  shape: Shape
 ): PointerState {
-  const outlines = state.outlines;
-  state.highlighted = shape;
-  if (!outlines.highlight) {
-    outlines.highlight = makeBorder(0, 0, 0, 0);
+  // Restore previous highlight if any
+  if (state.highlighted && state.highlightedOriginalStroke) {
+    const prev = state.highlighted as any;
+    prev.stroke = state.highlightedOriginalStroke.stroke;
+    prev.linewidth = state.highlightedOriginalStroke.linewidth;
   }
-  outlines.highlight.translation.x = border.x;
-  outlines.highlight.translation.y = border.y;
-  outlines.highlight.width = border.width;
-  outlines.highlight.height = border.height;
-  outlines.highlight.visible = true;
+
+  // Save original stroke and apply highlight
+  const s = shape as any;
+  const originalStroke: SavedStroke = {
+    stroke: (s.stroke as string) || "none",
+    linewidth: s.linewidth || 0,
+  };
+  s.stroke = ColorHighlight;
+  s.linewidth = Math.max(originalStroke.linewidth, 2);
+
+  state.highlighted = shape;
+  state.highlightedOriginalStroke = originalStroke;
 
   return state;
 }
 
 function clearHighlight(state: PointerState): PointerState {
-  const outlines = state.outlines;
-  state.highlighted = undefined;
-  if (outlines.highlight) {
-    outlines.highlight.remove();
-    outlines.highlight = undefined;
+  // Restore original stroke
+  if (state.highlighted && state.highlightedOriginalStroke) {
+    const s = state.highlighted as any;
+    s.stroke = state.highlightedOriginalStroke.stroke;
+    s.linewidth = state.highlightedOriginalStroke.linewidth;
   }
+  state.highlighted = undefined;
+  state.highlightedOriginalStroke = undefined;
   return state;
 }
 
-function createShapeOutline(shape: Shape): Rectangle {
-  const doodler = getDoodler();
-  const item = (shape as any).getBoundingClientRect(false);
-  const pos = doodler.zui.clientToSurface({
-    x: item.left + item.width / 2,
-    y: item.top + item.height / 2,
+function applySelectionStroke(shape: Shape, outlines: Outlines): void {
+  const s = shape as any;
+  outlines.selectedStrokes.set(shape.id, {
+    stroke: (s.stroke as string) || "none",
+    linewidth: s.linewidth || 0,
   });
-  const border = makeBorder(
-    pos.x,
-    pos.y,
-    item.width / doodler.zui.scale,
-    item.height / doodler.zui.scale
-  );
-  border.visible = true;
-  return border;
+  s.stroke = ColorHighlight;
+  s.linewidth = Math.max(s.linewidth || 0, 2);
 }
 
-function removeAllSelectionOutlines(outlines: Outlines): void {
-  for (const rect of outlines.selected.values()) {
-    rect.remove();
+function restoreSelectionStroke(shape: Shape, outlines: Outlines): void {
+  const saved = outlines.selectedStrokes.get(shape.id);
+  if (saved) {
+    const s = shape as any;
+    s.stroke = saved.stroke;
+    s.linewidth = saved.linewidth;
+    outlines.selectedStrokes.delete(shape.id);
   }
-  outlines.selected.clear();
-  outlines.outlineOrigins.clear();
+}
+
+
+function removeAllSelectionHighlights(outlines: Outlines, selected: Shape[]): void {
+  for (const shape of selected) {
+    restoreSelectionStroke(shape, outlines);
+  }
 }
 
 function addToSelection(state: PointerState, join: boolean): PointerState {
@@ -129,7 +168,8 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
     if (join) {
       return { ...state };
     } else {
-      removeAllSelectionOutlines(outlines);
+      removeAllSelectionHighlights(outlines, state.selected);
+      hideResizeHandles();
       return { ...state, selected: [] };
     }
   }
@@ -138,75 +178,171 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
   const isAlreadySelected = state.selected.find(
     (shape) => shape.id === highlighted?.id
   );
+  let selectionChanged = false;
+
   if (join && isAlreadySelected) {
     // Remove from selection
     selected = selected.filter((item) => item.id !== highlighted.id);
-    const outline = outlines.selected.get(highlighted.id);
-    if (outline) {
-      outline.remove();
-      outlines.selected.delete(highlighted.id);
-      outlines.outlineOrigins.delete(highlighted.id);
-    }
+    restoreSelectionStroke(highlighted, outlines);
+    selectionChanged = true;
   } else if (join && !isAlreadySelected) {
     // Add to selection
     selected.push(highlighted);
-    const outline = createShapeOutline(highlighted);
-    outlines.selected.set(highlighted.id, outline);
+    applySelectionStroke(highlighted, outlines);
+    selectionChanged = true;
   } else if (!join && !isAlreadySelected) {
     // Replace selection
-    removeAllSelectionOutlines(outlines);
+    removeAllSelectionHighlights(outlines, state.selected);
     selected = [highlighted];
-    const outline = createShapeOutline(highlighted);
-    outlines.selected.set(highlighted.id, outline);
+    applySelectionStroke(highlighted, outlines);
+    selectionChanged = true;
   }
+  // !join && isAlreadySelected → selection unchanged, skip handle rebuild
 
+  if (selectionChanged) {
+    if (selected.length > 0) {
+      showResizeHandles(selected);
+    } else {
+      hideResizeHandles();
+    }
+  }
   return { ...state, selected };
 }
 
 function clearSelected(state: PointerState): PointerState {
-  removeAllSelectionOutlines(state.outlines);
+  removeAllSelectionHighlights(state.outlines, state.selected);
+  hideResizeHandles();
   return { ...state, selected: [] };
 }
 
 function selectShapesDirect(state: PointerState, shapes: Shape[]): PointerState {
-  removeAllSelectionOutlines(state.outlines);
+  removeAllSelectionHighlights(state.outlines, state.selected);
 
   if (shapes.length === 0) {
     return { ...state, selected: [] };
   }
 
   for (const shape of shapes) {
-    const outline = createShapeOutline(shape);
-    state.outlines.selected.set(shape.id, outline);
+    applySelectionStroke(shape, state.outlines);
   }
 
+  showResizeHandles(shapes);
   return { ...state, selected: shapes };
 }
 
 function startMoveSelection(): void {
   const { setToolOption } = useOptionsStore.getState();
-  const { setIsMoving, setOrigins, outlines } = usePointerStore.getState();
+  const { setIsMoving, setOrigins } = usePointerStore.getState();
   const selected = usePointerStore.getState().selected;
   setIsMoving(true);
   setToolOption("moving");
   const origins = selected.map((shape) => shape.translation.clone());
 
-  // Store per-outline origins for movement
-  outlines.outlineOrigins.clear();
-  for (const [id, rect] of outlines.selected) {
-    outlines.outlineOrigins.set(id, rect.translation.clone());
-  }
+  storeHandleOriginsForMove();
 
-  if (outlines.highlight) {
-    outlines.highlight.remove();
-    outlines.highlight = undefined;
-  }
+  // Clear hover highlight before moving
+  const { clearHighlight } = usePointerStore.getState();
+  clearHighlight();
+
   setOrigins(origins);
 }
 
-export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
+// ── Marquee selection ──────────────────────────────────────────────
+
+let marqueeRect: Rectangle | null = null;
+let marqueeOriginX = 0;
+let marqueeOriginY = 0;
+let isMarqueeActive = false;
+
+function startMarquee(surfacePos: { x: number; y: number }): void {
   const doodler = getDoodler();
-  const { origin, addHighlightToSelection, clearSelected, outlines } =
+  marqueeOriginX = surfacePos.x;
+  marqueeOriginY = surfacePos.y;
+  isMarqueeActive = true;
+
+  const rect = doodler.two.makeRectangle(surfacePos.x, surfacePos.y, 0, 0);
+  rect.noFill();
+  rect.stroke = ColorHighlight;
+  rect.linewidth = 1.5 / doodler.zui.scale;
+  rect.opacity = 0.6;
+  (rect as any).isHighlight = true;
+  doodler.canvas.add(rect);
+  marqueeRect = rect;
+}
+
+function updateMarquee(surfacePos: { x: number; y: number }): void {
+  if (!marqueeRect) return;
+  const w = surfacePos.x - marqueeOriginX;
+  const h = surfacePos.y - marqueeOriginY;
+  marqueeRect.width = Math.abs(w);
+  marqueeRect.height = Math.abs(h);
+  marqueeRect.translation.x = marqueeOriginX + w / 2;
+  marqueeRect.translation.y = marqueeOriginY + h / 2;
+  getDoodler().throttledTwoUpdate();
+}
+
+function endMarquee(shiftKey: boolean): void {
+  if (!marqueeRect) return;
+  const doodler = getDoodler();
+
+  // Compute marquee bounds in client space for hit testing
+  const minX = Math.min(marqueeOriginX, marqueeRect.translation.x + marqueeRect.width / 2);
+  const maxX = Math.max(marqueeOriginX, marqueeRect.translation.x + marqueeRect.width / 2);
+  const minY = Math.min(marqueeOriginY, marqueeRect.translation.y + marqueeRect.height / 2);
+  const maxY = Math.max(marqueeOriginY, marqueeRect.translation.y + marqueeRect.height / 2);
+
+  // Find all shapes whose bounding box overlaps the marquee
+  const { doodles } = useCanvasStore.getState();
+  const hits: Shape[] = [];
+  for (const doodle of doodles) {
+    const shape = doodle.shape;
+    if ((shape as any).isHighlight) continue;
+    if (!(shape as any).getBoundingClientRect) continue;
+
+    const item = (shape as any).getBoundingClientRect(false);
+    const topLeft = doodler.zui.clientToSurface({ x: item.left, y: item.top });
+    const bottomRight = doodler.zui.clientToSurface({ x: item.right, y: item.bottom });
+
+    // Check overlap (not containment — any intersection counts)
+    if (bottomRight.x >= minX && topLeft.x <= maxX &&
+        bottomRight.y >= minY && topLeft.y <= maxY) {
+      hits.push(shape);
+    }
+  }
+
+  // Remove marquee visual
+  marqueeRect.remove();
+  marqueeRect = null;
+  isMarqueeActive = false;
+
+  if (hits.length > 0) {
+    const { selectShapes } = usePointerStore.getState();
+    if (shiftKey) {
+      // Add to existing selection
+      const { selected } = usePointerStore.getState();
+      const existingIds = new Set(selected.map(s => s.id));
+      const combined = [...selected, ...hits.filter(h => !existingIds.has(h.id))];
+      selectShapes(combined);
+    } else {
+      selectShapes(hits);
+    }
+  }
+
+  doodler.throttledTwoUpdate();
+}
+
+function cancelMarquee(): void {
+  if (marqueeRect) {
+    marqueeRect.remove();
+    marqueeRect = null;
+  }
+  isMarqueeActive = false;
+}
+
+export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
+  initPointerToolCleanup();
+  const doodler = getDoodler();
+  const { origin, addHighlightToSelection, clearSelected, selected } =
     usePointerStore.getState();
   // pointer to measure distance fro movement within the surface
   const surfacePointer = eventToSurfacePosition(e);
@@ -215,10 +351,29 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
 
   origin.set(surfacePointer.x, surfacePointer.y);
 
+  // Check resize/rotate handles first (priority over move)
+  if (selected.length > 0) {
+    const hitHandle = hitTestResizeHandle(surfacePointer);
+    if (hitHandle === "rotate") {
+      startRotate(selected, new Map(), surfacePointer);
+      doodler.throttledTwoUpdate();
+      return;
+    }
+    if (hitHandle) {
+      startResize(hitHandle, selected, new Map());
+      doodler.throttledTwoUpdate();
+      return;
+    }
+  }
+
+  const { highlighted } = usePointerStore.getState();
   let isClickWithinHighlight = false;
-  if (outlines.highlight && outlines.highlight.visible) {
-    const box = outlines.highlight.getBoundingClientRect();
-    isClickWithinHighlight = isPointInBoundingBox(clientPointer, box);
+  if (highlighted) {
+    const box = (highlighted as any).getBoundingClientRect(false);
+    isClickWithinHighlight = isPointInRect(
+      clientPointer.x, clientPointer.y,
+      box.left, box.top, box.right, box.bottom
+    );
   }
 
   if (isClickWithinHighlight) {
@@ -231,15 +386,14 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
     }
   }
 
-  // Check if click is within any of the per-shape selection outlines
+  // Check if click is within any selected shape
   let isClickWithinSelected = false;
-  for (const rect of outlines.selected.values()) {
-    if (rect.visible) {
-      const box = rect.getBoundingClientRect();
-      if (isPointInBoundingBox(clientPointer, box)) {
-        isClickWithinSelected = true;
-        break;
-      }
+  for (const shape of selected) {
+    if (!(shape as any).getBoundingClientRect) continue;
+    const item = (shape as any).getBoundingClientRect(false);
+    if (isPointInRect(clientPointer.x, clientPointer.y, item.left, item.top, item.right, item.bottom)) {
+      isClickWithinSelected = true;
+      break;
     }
   }
 
@@ -249,14 +403,35 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
     return;
   }
 
+  // Check if click is within the group outline (multi-select boundary)
+  if (selected.length > 0 && isPointInGroupOutline(clientPointer)) {
+    startMoveSelection();
+    doodler.throttledTwoUpdate();
+    return;
+  }
+
   if (!e.shiftKey) {
     clearSelected();
   }
 
+  // Start marquee selection drag
+  startMarquee(surfacePointer);
   doodler.throttledTwoUpdate();
 }
 
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
+  if (isRotating()) {
+    doRotateDrag(eventToSurfacePosition(e), e.shiftKey);
+    return;
+  }
+  if (isResizing()) {
+    doResizeDrag(eventToSurfacePosition(e), e.shiftKey);
+    return;
+  }
+  if (isMarqueeActive) {
+    updateMarquee(eventToSurfacePosition(e));
+    return;
+  }
   const { isMoving } = usePointerStore.getState();
   if (isMoving) {
     doMoveShape(e);
@@ -265,7 +440,21 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   }
 }
 
-export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
+export function doPointerEnd(e: MouseEvent<HTMLDivElement>) {
+  if (isMarqueeActive) {
+    endMarquee(e.shiftKey);
+    return;
+  }
+  if (isRotating()) {
+    endRotate();
+    getDoodler().throttledTwoUpdate();
+    return;
+  }
+  if (isResizing()) {
+    endResize();
+    getDoodler().throttledTwoUpdate();
+    return;
+  }
   const { isMoving, setIsMoving, selected, origins } =
     usePointerStore.getState();
   const { setToolOption } = useOptionsStore.getState();
@@ -294,26 +483,10 @@ export function doPointerEnd(_: MouseEvent<HTMLDivElement>) {
   doodler.throttledTwoUpdate();
 }
 
-function makeBorder(
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): Rectangle {
-  const doodler = getDoodler();
-  const rect = doodler.two.makeRectangle(x, y, width, height);
-  rect.stroke = "#0ea5cf";
-  rect.noFill();
-  rect.linewidth = 1.5 / doodler.zui.scale;
-  rect.scale = 1.01;
-  (rect as any).isHighlight = true;
-  doodler.canvas.add(rect);
-  return rect;
-}
 
 function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
   const doodler = getDoodler();
-  const { outlines, origins, origin, selected } = usePointerStore.getState();
+  const { origins, origin, selected } = usePointerStore.getState();
   const pointer = eventToSurfacePosition(e);
   if (selected.length !== origins.length) {
     return;
@@ -328,14 +501,8 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
     shape.translation.y = origin.y + dy;
   }
 
-  // Move each per-shape outline
-  for (const [id, rect] of outlines.selected) {
-    const outlineOrigin = outlines.outlineOrigins.get(id);
-    if (outlineOrigin) {
-      rect.translation.x = outlineOrigin.x + dx;
-      rect.translation.y = outlineOrigin.y + dy;
-    }
-  }
+  // Move resize handles
+  moveHandlesByDelta(dx, dy);
 
   doodler.throttledTwoUpdate();
 }
@@ -363,7 +530,9 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
       item.bottom
     );
 
-    if (!isShapeWithin || (shape as any).isHighlight) {
+    const { selected } = usePointerStore.getState();
+    const isSelected = selected.some((s) => s.id === shape.id);
+    if (!isShapeWithin || (shape as any).isHighlight || isSelected) {
       continue;
     }
 
@@ -371,18 +540,7 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
       return;
     }
 
-    const pos = doodler.zui.clientToSurface({
-      x: item.left + item.width / 2,
-      y: item.top + item.height / 2,
-    });
-
-    const border = {
-      x: pos.x,
-      y: pos.y,
-      width: item.width / doodler.zui.scale,
-      height: item.height / doodler.zui.scale,
-    };
-    setHighlight(shape, border);
+    setHighlight(shape);
     doodler.throttledTwoUpdate();
     return;
   }
@@ -391,17 +549,10 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
 }
 
 /**
- * Updates linewidth on all visible outlines. Called by zoom tools.
+ * Rebuilds outlines and handles for the current zoom level. Called by zoom tools.
  */
 export function updateOutlineScales(): void {
-  const doodler = getDoodler();
-  const { outlines } = usePointerStore.getState();
-  const lw = 1.5 / doodler.zui.scale;
+  const { selected } = usePointerStore.getState();
 
-  if (outlines.highlight) {
-    outlines.highlight.linewidth = lw;
-  }
-  for (const rect of outlines.selected.values()) {
-    rect.linewidth = lw;
-  }
+  updateResizeHandleScales(selected);
 }

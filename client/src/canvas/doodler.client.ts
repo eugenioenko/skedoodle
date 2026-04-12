@@ -94,6 +94,7 @@ export class Doodler {
 
     // override id to make it globally unique, preventing conflicts when merging command logs from multiple users
     doodle.shape.id = ulid();
+    (doodle.shape as any).doodleType = doodle.type;
     const { doodles, setDoodles } = useCanvasStore.getState();
     const newDoodles = [...doodles, doodle];
     setDoodles(newDoodles);
