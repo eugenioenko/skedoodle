@@ -192,6 +192,9 @@ export const SketchesPage = () => {
             My Sketches
           </NavTab>
         )}
+        <NavTab active={false} onClick={() => navigate("/local")}>
+          Local Sketches
+        </NavTab>
       </Navbar>
       <div className="flex-grow overflow-y-auto p-8 bg-gradient-to-br from-default-0 to-default-1">
         <div className="max-w-7xl mx-auto">

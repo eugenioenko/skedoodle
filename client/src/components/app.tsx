@@ -71,7 +71,7 @@ const UserAvatar = () => {
   );
 };
 
-export const App = ({ isLocal = false }) => {
+export const App = ({ isLocal = false, isLocalPersisted = false }: { isLocal?: boolean; isLocalPersisted?: boolean }) => {
   useWindowWheelPrevent();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -91,7 +91,7 @@ export const App = ({ isLocal = false }) => {
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <WithTooltip tooltip="Home">
-            <Button onClick={() => navigate("/sketches")}>
+            <Button onClick={() => navigate(isLocalPersisted ? "/local" : "/sketches")}>
               <IconHome size={20} stroke={1} />
             </Button>
           </WithTooltip>
@@ -117,7 +117,7 @@ export const App = ({ isLocal = false }) => {
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <div className="relative flex-grow flex">
-          <Canvas sketchId={id || "local"} onReady={onReady} isLocal={isLocal} />
+          <Canvas sketchId={id || "local"} onReady={onReady} isLocal={isLocal} isLocalPersisted={isLocalPersisted} />
         </div>
         <Panel />
       </div>

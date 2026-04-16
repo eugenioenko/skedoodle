@@ -6,15 +6,17 @@ import { colord } from "colord";
 import { useRemoteCursors } from "@/components/cursors";
 import { getDoodler } from "./doodler.client";
 import { useSync } from "@/sync/sync.hook";
+import { useLocalPersistence } from "@/hooks/use-local-persistence";
 
 
 interface CanvasProps {
   sketchId: string;
   onReady?: () => void;
   isLocal?: boolean;
+  isLocalPersisted?: boolean;
 }
 
-export const Canvas = ({ sketchId, onReady, isLocal = false }: CanvasProps) => {
+export const Canvas = ({ sketchId, onReady, isLocal = false, isLocalPersisted = false }: CanvasProps) => {
   const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -24,19 +26,24 @@ export const Canvas = ({ sketchId, onReady, isLocal = false }: CanvasProps) => {
   const bgColor = colord(canvasColor).toHex();
 
   const onTwoReady = useCallback(async () => {
-    if (isLocal) {
-      console.log("[Canvas] Canvas ready, local mode.");
+    if (isLocalPersisted) {
+      console.log("[Canvas] Canvas ready, loading local sketch...");
+      getDoodler().isLocalPersisted = true;
+      await getDoodler().loadLocalDoodles(sketchId);
+    } else if (isLocal) {
+      console.log("[Canvas] Canvas ready, sandbox mode.");
     } else {
       console.log("[Canvas] Canvas ready, loading doodles...");
       await getDoodler().loadDoodles();
     }
     onReady?.();
     setIsReady(true);
-  }, [onReady, isLocal]);
+  }, [onReady, isLocal, isLocalPersisted, sketchId]);
 
   useInitTwoCanvas(containerRef, sketchId, onTwoReady);
   useRemoteCursors(isReady);
   useSync(sketchId, isReady, isLocal);
+  useLocalPersistence(sketchId, isReady, isLocalPersisted);
 
   return (
     <div

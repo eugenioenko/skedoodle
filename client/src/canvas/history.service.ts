@@ -134,6 +134,17 @@ function scheduleSave(): void {
   */
 }
 
+export function applyLocalCommands(commands: Command[]): void {
+  for (const cmd of commands) {
+    try {
+      executeForward(cmd);
+    } catch {
+      // skip failed commands
+    }
+  }
+  getDoodler().throttledTwoUpdate();
+}
+
 export function applyRemoteCommand(cmd: Command): void {
   const { commandLog, appendCommand } = useCommandLogStore.getState();
 
