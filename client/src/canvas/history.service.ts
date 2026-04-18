@@ -12,6 +12,7 @@ import {
   storageClient,
   SketchMeta,
 } from "@/services/storage.client";
+import { makeScaleVector } from "./canvas.utils";
 import { syncService } from "@/sync/sync.client";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
@@ -67,6 +68,10 @@ function setShapeField(shape: Shape, field: string, value: any): void {
         v.controls.right.y = data[i].ry;
       }
     }
+    return;
+  }
+  if (field === "scale" && value != null && typeof value === "object" && "x" in value) {
+    (shape as any).scale = makeScaleVector(shape, value.x, value.y);
     return;
   }
   const props = field.split(".");

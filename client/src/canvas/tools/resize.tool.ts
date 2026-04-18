@@ -18,6 +18,13 @@ import {
   repositionHandlesDuringResize,
 } from "./resize.handles";
 
+function getPlainScale(shape: Shape): ScaleXY {
+  const s = shape.scale;
+  const x = typeof s === "number" ? s : (s as any).x ?? 1;
+  const y = typeof s === "number" ? s : (s as any).y ?? 1;
+  return { x, y };
+}
+
 // ── Types ──────────────────────────────────────────────────────────
 
 interface ResizeDragState {
@@ -87,10 +94,7 @@ export function startResize(
   const startScales = new Map<string, ScaleXY>();
   const startTranslations = new Map<string, Vector>();
   for (const shape of shapes) {
-    const s = shape.scale;
-    const sx = typeof s === "number" ? s : (s as any).x ?? 1;
-    const sy = typeof s === "number" ? s : (s as any).y ?? 1;
-    startScales.set(shape.id, { x: sx, y: sy });
+    startScales.set(shape.id, getPlainScale(shape));
     startTranslations.set(shape.id, shape.translation.clone());
   }
 
@@ -196,20 +200,15 @@ export function endResize(): void {
     const origTrans = startTranslations.get(shape.id);
     if (!origScale || !origTrans) continue;
 
-    const oldScale =
-      origScale.x === origScale.y
-        ? origScale.x
-        : makeScaleVector(shape, origScale.x, origScale.y);
-
     pushUpdateCommand(
       shape.id,
       {
-        scale: shape.scale,
+        scale: getPlainScale(shape),
         "translation.x": shape.translation.x,
         "translation.y": shape.translation.y,
       },
       {
-        scale: oldScale,
+        scale: origScale,
         "translation.x": origTrans.x,
         "translation.y": origTrans.y,
       }
