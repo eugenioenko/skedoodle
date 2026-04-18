@@ -102,10 +102,10 @@ export const SketchesPage = () => {
     setLocalSketches(metas);
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
-    loadLocalSketches();
+    loadLocalSketches(); // eslint-disable-line react-hooks/set-state-in-effect
     if (user) loadCloudSketches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleNewCloudSketch() {
