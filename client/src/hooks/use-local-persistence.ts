@@ -5,7 +5,7 @@ import { colord } from "colord";
 import { useOptionsStore } from "@/canvas/canvas.store";
 
 export function useLocalPersistence(sketchId: string, isReady: boolean, isLocalPersisted: boolean) {
-  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     if (!isLocalPersisted || !isReady) return;
