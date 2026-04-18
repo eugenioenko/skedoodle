@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { App } from "./components/app.tsx";
 import { SketchesPage } from "./components/page-sketches.tsx";
-import { LocalSketchesPage } from "./components/page-local-sketches.tsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import "rc-slider/assets/index.css";
@@ -17,7 +16,6 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/auth/callback" element={<CallbackPage />} />
       <Route path="/auth/logout" element={<LogoutPage />} />
       <Route path="/sandbox" element={<App mode="sandbox" />} />
-      <Route path="/local" element={<LocalSketchesPage />} />
       <Route path="/local/:id" element={<App mode="local" />} />
       <Route path="/" element={<SketchesPage />} />
       <Route path="/sketches" element={<SketchesPage />} />

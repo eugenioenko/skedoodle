@@ -86,7 +86,7 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <WithTooltip tooltip="Home">
-            <Button onClick={() => navigate(mode === "local" ? "/local" : "/sketches")}>
+            <Button onClick={() => navigate("/")}>
               <IconHome size={20} stroke={1} />
             </Button>
           </WithTooltip>
