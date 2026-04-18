@@ -174,6 +174,11 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
     }
   }
 
+  // The click commits the hover into a selection action: end the hover state
+  // and restore the original stroke so applySelectionStroke captures the true
+  // baseline rather than the hover-highlight color.
+  clearHighlight(state);
+
   let selected = [...state.selected];
   const isAlreadySelected = state.selected.find(
     (shape) => shape.id === highlighted?.id
