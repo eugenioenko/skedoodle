@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node dist/http-server.js",
     "build": "tsc",
-    "dev:http": "tsx watch src/http-server.ts",
+    "postinstall": "prisma generate",
+    "dev": "tsx watch src/http-server.ts",
     "prisma:reset": "prisma migrate reset",
     "prisma:deploy": "prisma migrate deploy"
   },
