@@ -1,22 +1,15 @@
 import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/canvas.hook";
-import { useCallback, useRef, useState } from "react";
-import { useOptionsStore, SketchMode } from "./canvas.store";
+import { useRef } from "react";
+import { useOptionsStore } from "./canvas.store";
 import { colord } from "colord";
-import { useRemoteCursors } from "@/components/cursors";
-import { getDoodler } from "./doodler.client";
-import { useSync } from "@/sync/sync.hook";
-import { useLocalPersistence } from "@/hooks/use-local-persistence";
-
 
 interface CanvasProps {
   sketchId: string;
   onReady?: () => void;
-  mode?: SketchMode;
 }
 
-export const Canvas = ({ sketchId, onReady, mode = "online" }: CanvasProps) => {
-  const [isReady, setIsReady] = useState(false);
+export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
   const activeTool = useOptionsStore((state) => state.activeTool);
@@ -24,25 +17,7 @@ export const Canvas = ({ sketchId, onReady, mode = "online" }: CanvasProps) => {
   const canvasColor = useOptionsStore((state) => state.canvasColor);
   const bgColor = colord(canvasColor).toHex();
 
-  const onTwoReady = useCallback(async () => {
-    if (mode === "local") {
-      console.log("[Canvas] Canvas ready, loading local sketch...");
-      getDoodler().mode = mode;
-      await getDoodler().loadLocalDoodles(sketchId);
-    } else if (mode === "sandbox") {
-      console.log("[Canvas] Canvas ready, sandbox mode.");
-    } else {
-      console.log("[Canvas] Canvas ready, loading doodles...");
-      await getDoodler().loadDoodles();
-    }
-    onReady?.();
-    setIsReady(true);
-  }, [onReady, mode, sketchId]);
-
-  useInitTwoCanvas(containerRef, sketchId, onTwoReady);
-  useRemoteCursors(isReady);
-  useSync(sketchId, isReady, mode !== "online");
-  useLocalPersistence(sketchId, isReady, mode === "local");
+  useInitTwoCanvas(containerRef, sketchId, onReady);
 
   return (
     <div

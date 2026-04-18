@@ -1,5 +1,4 @@
 import { Toolbar } from "./toolbar";
-import { Canvas } from "../canvas/canvas.comp";
 import { StatusBar } from "./status-bar";
 import { Panel } from "./panel";
 import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
@@ -17,6 +16,9 @@ import { useOptionsStore, SketchMode } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
+import { SketchOnline } from "@/canvas/sketches/sketch-online";
+import { SketchLocal } from "@/canvas/sketches/sketch-local";
+import { SketchSandbox } from "@/canvas/sketches/sketch-sandbox";
 
 const UserAvatar = () => {
   const user = useAuthStore((state) => state.user);
@@ -83,6 +85,8 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
     setTimeout(() => setIsLoading(false), loadDelay);
   }, [setIsLoading, loadDelay]);
 
+  const sketchId = id || "local";
+
   return (
     <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
       <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4 gap-2">
@@ -117,7 +121,9 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <div className="relative flex-grow flex">
-          <Canvas sketchId={id || "local"} onReady={onReady} mode={mode} />
+          {mode === "online" && <SketchOnline sketchId={sketchId} onReady={onReady} />}
+          {mode === "local" && <SketchLocal sketchId={sketchId} onReady={onReady} />}
+          {mode === "sandbox" && <SketchSandbox onReady={onReady} />}
         </div>
         <Panel />
       </div>
