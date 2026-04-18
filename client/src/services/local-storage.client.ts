@@ -16,7 +16,11 @@ const DB_VERSION = 2;
 const META_STORE = 'sketch-meta';
 const COMMANDS_STORE = 'sketch-commands';
 
+let dbInstance: IDBDatabase | null = null;
+
 function openDB(): Promise<IDBDatabase> {
+  if (dbInstance) return Promise.resolve(dbInstance);
+
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = (event) => {
@@ -36,7 +40,11 @@ function openDB(): Promise<IDBDatabase> {
         store.createIndex('sketchId', 'sketchId', { unique: false });
       }
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      dbInstance = request.result;
+      dbInstance.onclose = () => { dbInstance = null; };
+      resolve(dbInstance);
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -114,18 +122,23 @@ async function appendCommand(sketchId: string, command: Command): Promise<void> 
 
 async function deleteCommands(sketchId: string): Promise<void> {
   const db = await openDB();
+  // Collect all keys for this sketchId, then delete in a single transaction
+  const keys = await new Promise<IDBValidKey[]>((resolve, reject) => {
+    const tx = db.transaction(COMMANDS_STORE, 'readonly');
+    const index = tx.objectStore(COMMANDS_STORE).index('sketchId');
+    const request = index.getAllKeys(sketchId);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  if (keys.length === 0) return;
+
   return new Promise((resolve, reject) => {
     const tx = db.transaction(COMMANDS_STORE, 'readwrite');
     const store = tx.objectStore(COMMANDS_STORE);
-    const index = store.index('sketchId');
-    const request = index.openCursor(sketchId);
-    request.onsuccess = () => {
-      const cursor = request.result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      }
-    };
+    for (const key of keys) {
+      store.delete(key);
+    }
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });

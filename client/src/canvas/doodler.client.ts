@@ -12,6 +12,7 @@ import {
   Doodle,
 } from "./doodle.utils";
 import { useCommandLogStore } from "./history.store";
+import { applyLocalCommands } from "./history.service";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
 import { colord } from "colord";
@@ -176,8 +177,7 @@ export class Doodler {
     if (commands.length > 0) {
       const { setCommandLog } = useCommandLogStore.getState();
       setCommandLog(commands);
-      const mod = await import("./history.service");
-      mod.applyLocalCommands(commands);
+      applyLocalCommands(commands);
     }
 
     this.throttledTwoUpdate();
@@ -203,16 +203,3 @@ export function getDoodler(): Doodler {
   }
   return doodlerInstance as Doodler;
 }
-
-
-/*
- // TODO: update here to handle errors on loading local storage
-    doodlerInstance.loadDoodles().finally(() => {
-        onReady?.();
-        syncService.connect(sketchId);
-    });
-
-
-syncService.disconnect();
-useCommandLogStore.getState().clearSession();
-*/
