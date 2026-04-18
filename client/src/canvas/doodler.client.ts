@@ -6,11 +6,13 @@ import {
   storageClient,
   SketchMeta,
 } from "@/services/storage.client";
+import { localStorageClient } from "@/services/local-storage.client";
 import { useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   Doodle,
 } from "./doodle.utils";
 import { useCommandLogStore } from "./history.store";
+import { applyLocalCommands } from "./history.service";
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
 import { colord } from "colord";
@@ -70,17 +72,33 @@ export class Doodler {
   private _lastFrequency?: number;
   private _saveViewportTimer?: ReturnType<typeof setTimeout>;
 
+  mode: "online" | "local" | "sandbox" = "online";
+
   saveViewport(): void {
     clearTimeout(this._saveViewportTimer);
-    this._saveViewportTimer = setTimeout(() => {
+    this._saveViewportTimer = setTimeout(async () => {
       const sm = this.zui.surfaceMatrix.elements;
       const color = colord(useOptionsStore.getState().canvasColor).toHex();
-      syncService.sendMeta({
-        color,
-        positionX: sm[2],
-        positionY: sm[5],
-        zoom: this.zui.scale,
-      });
+
+      if (this.mode === "local") {
+        const meta = await localStorageClient.getMeta(this.sketchId);
+        if (meta) {
+          await localStorageClient.setMeta({
+            ...meta,
+            color,
+            positionX: sm[2],
+            positionY: sm[5],
+            zoom: this.zui.scale,
+          });
+        }
+      } else {
+        syncService.sendMeta({
+          color,
+          positionX: sm[2],
+          positionY: sm[5],
+          zoom: this.zui.scale,
+        });
+      }
     }, 1000);
   }
 
@@ -130,32 +148,45 @@ export class Doodler {
     await storageClient.setSketchMeta(this.sketchId, meta);
   }
 
-  async loadDoodles(): Promise<void> {
-    if (!this.sketchId) {
-      return;
-    }
-
-    const meta = await storageClient.getSketchMeta(this.sketchId);
-    if (meta?.color) {
+  private restoreViewport(meta: { color?: string; zoom?: number; positionX?: number; positionY?: number } | null): void {
+    if (!meta) return;
+    if (meta.color) {
       useOptionsStore.getState().setCanvasColor(colord(meta.color).toRgb());
     }
-
-    // Restore viewport position and zoom
-    if (meta?.zoom && meta.zoom !== 1) {
+    if (meta.zoom && meta.zoom !== 1) {
       const ratio = meta.zoom - 1;
       const cx = this.two.width / 2;
       const cy = this.two.height / 2;
       this.zui.zoomBy(ratio, cx, cy);
       useZoomStore.getState().setZoom(Math.floor(meta.zoom * 100));
     }
-    if (meta?.positionX != null && meta?.positionY != null) {
+    if (meta.positionX != null && meta.positionY != null) {
       this.zui.translateSurface(meta.positionX, meta.positionY);
     }
-    if (meta?.zoom || meta?.positionX != null) {
+    if (meta.zoom || meta.positionX != null) {
       const sm = this.zui.surfaceMatrix.elements;
       updateGrid(this.zui.scale, sm[2], sm[5]);
     }
+  }
 
+  async loadLocalDoodles(sketchId: string): Promise<void> {
+    const meta = await localStorageClient.getMeta(sketchId);
+    this.restoreViewport(meta);
+
+    const commands = await localStorageClient.getCommands(sketchId);
+    if (commands.length > 0) {
+      const { setCommandLog } = useCommandLogStore.getState();
+      setCommandLog(commands);
+      applyLocalCommands(commands);
+    }
+
+    this.throttledTwoUpdate();
+  }
+
+  async loadDoodles(): Promise<void> {
+    if (!this.sketchId) return;
+    const meta = await storageClient.getSketchMeta(this.sketchId);
+    this.restoreViewport(meta);
     this.throttledTwoUpdate();
   }
 }
@@ -172,16 +203,3 @@ export function getDoodler(): Doodler {
   }
   return doodlerInstance as Doodler;
 }
-
-
-/*
- // TODO: update here to handle errors on loading local storage
-    doodlerInstance.loadDoodles().finally(() => {
-        onReady?.();
-        syncService.connect(sketchId);
-    });
-
-
-syncService.disconnect();
-useCommandLogStore.getState().clearSession();
-*/

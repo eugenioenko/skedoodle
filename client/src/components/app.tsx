@@ -1,5 +1,4 @@
 import { Toolbar } from "./toolbar";
-import { Canvas } from "../canvas/canvas.comp";
 import { StatusBar } from "./status-bar";
 import { Panel } from "./panel";
 import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
@@ -13,26 +12,20 @@ import { exitTimeTravelMode } from "@/canvas/history.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
 import { IconChevronDown, IconHome, IconLayoutSidebarRight, IconLogout, IconPhoto } from "@tabler/icons-react";
-import { useOptionsStore } from "@/canvas/canvas.store";
+import { useOptionsStore, SketchMode } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
+import { SketchOnline } from "@/canvas/sketches/sketch-online";
+import { SketchLocal } from "@/canvas/sketches/sketch-local";
+import { SketchSandbox } from "@/canvas/sketches/sketch-sandbox";
 
 const UserAvatar = () => {
   const user = useAuthStore((state) => state.user);
   const navigate = useNavigate();
 
   if (!user) {
-    return (
-      <button
-        type="button"
-        onClick={() => navigate("/login")}
-        className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-default-3"
-      >
-        <div className="w-7 h-7 rounded-full bg-default-3 border border-default-4 flex-shrink-0" />
-        <IconChevronDown size={12} stroke={2} />
-      </button>
-    );
+    return null;
   }
 
   const initials = user.username.slice(0, 2).toUpperCase();
@@ -71,7 +64,7 @@ const UserAvatar = () => {
   );
 };
 
-export const App = ({ isLocal = false }) => {
+export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
   useWindowWheelPrevent();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -83,6 +76,8 @@ export const App = ({ isLocal = false }) => {
     setTimeout(() => setIsLoading(false), loadDelay);
   }, [setIsLoading, loadDelay]);
 
+  const sketchId = id || "local";
+
   return (
     <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
       <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4 gap-2">
@@ -91,7 +86,7 @@ export const App = ({ isLocal = false }) => {
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <WithTooltip tooltip="Home">
-            <Button onClick={() => navigate("/sketches")}>
+            <Button onClick={() => navigate("/")}>
               <IconHome size={20} stroke={1} />
             </Button>
           </WithTooltip>
@@ -117,7 +112,9 @@ export const App = ({ isLocal = false }) => {
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <div className="relative flex-grow flex">
-          <Canvas sketchId={id || "local"} onReady={onReady} isLocal={isLocal} />
+          {mode === "online" && <SketchOnline sketchId={sketchId} onReady={onReady} />}
+          {mode === "local" && <SketchLocal sketchId={sketchId} onReady={onReady} />}
+          {mode === "sandbox" && <SketchSandbox onReady={onReady} />}
         </div>
         <Panel />
       </div>

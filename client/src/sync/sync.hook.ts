@@ -1,12 +1,8 @@
 import { useEffect } from "react";
 import { syncService } from "./sync.client";
 
-export function useSync(sketchId: string, isReady: boolean, isLocal = false) {
+export function useSync(sketchId: string, isReady: boolean) {
   useEffect(() => {
-    if (isLocal) {
-      console.log("[Sync] Local mode: Not connecting to sync service.");
-      return;
-    }
     if (!isReady) return;
     console.log(`[Sync] Connecting ${sketchId}`);
     syncService.connect(sketchId);
@@ -14,5 +10,5 @@ export function useSync(sketchId: string, isReady: boolean, isLocal = false) {
       syncService.disconnect();
       console.log(`[Sync] Disconnected ${sketchId}`);
     };
-  }, [sketchId, isReady, isLocal]);
+  }, [sketchId, isReady]);
 }

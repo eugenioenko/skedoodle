@@ -62,10 +62,10 @@ export const NavTab = ({
 }) => (
   <button
     onClick={onClick}
-    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+    className={`px-3 py-1 text-sm transition-colors ${
       active
-        ? "bg-default-3 text-text-primary"
-        : "text-text-secondary hover:text-text-primary hover:bg-default-3/50"
+        ? "text-text-primary font-medium"
+        : "text-text-secondary hover:text-text-primary"
     }`}
   >
     {children}

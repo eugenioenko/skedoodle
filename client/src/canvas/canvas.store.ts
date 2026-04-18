@@ -14,6 +14,8 @@ export const DEFAULT_PALETTE: string[][] = [
   ["#fca5a5", "#fdba74", "#fde68a", "#bbf7d0", "#a7f3d0", "#99f6e4", "#bae6fd", "#bfdbfe", "#ddd6fe", "#f5d0fe", "#fbcfe8", "#fecdd3"],
 ];
 
+export type SketchMode = "online" | "local" | "sandbox";
+
 export type Tool =
   | "hand"
   | "pointer"
