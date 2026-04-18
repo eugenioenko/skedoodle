@@ -9,6 +9,7 @@ import { IconPlus, IconEdit, IconClock, IconTrash, IconPencil, IconDeviceFloppy,
 import { ulid } from "ulid";
 import { useAuthStore } from "@/stores/auth.store";
 import { Navbar, NavTab } from "./navbar";
+import { ConfirmDialog } from "./ui/confirm-dialog";
 import { formatDate, formatTime, getRelativeTime } from "@/utils/date";
 
 type Tab = "local" | "cloud";
@@ -78,6 +79,7 @@ export const SketchesPage = () => {
   const [cloudSketches, setCloudSketches] = useState<SketchMeta[]>([]);
   const [localSketches, setLocalSketches] = useState<LocalSketchMeta[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const { user } = useAuthStore();
 
   async function loadCloudSketches() {
@@ -152,19 +154,21 @@ export const SketchesPage = () => {
     }
   }
 
-  async function handleDeleteCloud(id: string) {
-    if (!user) return;
+  async function confirmDelete() {
+    if (!deleteTarget) return;
     try {
-      await storageClient.deleteSketch(id);
-      loadCloudSketches();
+      if (activeTab === "cloud") {
+        if (!user) return;
+        await storageClient.deleteSketch(deleteTarget.id);
+        loadCloudSketches();
+      } else {
+        await localStorageClient.deleteSketch(deleteTarget.id);
+        loadLocalSketches();
+      }
     } catch (error) {
       console.error("Failed to delete sketch:", error);
     }
-  }
-
-  async function handleDeleteLocal(id: string) {
-    await localStorageClient.deleteSketch(id);
-    loadLocalSketches();
+    setDeleteTarget(null);
   }
 
   return (
@@ -187,7 +191,7 @@ export const SketchesPage = () => {
               editingId={editingId}
               onNew={handleNewLocalSketch}
               onRename={handleRenameLocal}
-              onDelete={handleDeleteLocal}
+              onDelete={(id, name) => setDeleteTarget({ id, name })}
               onStartEdit={setEditingId}
               onCancelEdit={() => setEditingId(null)}
               navigate={navigate}
@@ -198,7 +202,7 @@ export const SketchesPage = () => {
               editingId={editingId}
               onNew={handleNewCloudSketch}
               onRename={handleRenameCloud}
-              onDelete={handleDeleteCloud}
+              onDelete={(id, name) => setDeleteTarget({ id, name })}
               onStartEdit={setEditingId}
               onCancelEdit={() => setEditingId(null)}
               navigate={navigate}
@@ -206,6 +210,15 @@ export const SketchesPage = () => {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete sketch?"
+        description={`"${deleteTarget?.name}" will be permanently deleted. This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </main>
   );
 };
@@ -215,7 +228,7 @@ interface LocalTabProps {
   editingId: string | null;
   onNew: () => void;
   onRename: (id: string, name: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, name: string) => void;
   onStartEdit: (id: string) => void;
   onCancelEdit: () => void;
   navigate: (path: string) => void;
@@ -265,7 +278,7 @@ const LocalTab = ({ sketches, editingId, onNew, onRename, onDelete, onStartEdit,
           editingId={editingId}
           onOpen={() => navigate(`/local/${meta.id}`)}
           onRename={(name) => onRename(meta.id, name)}
-          onDelete={() => onDelete(meta.id)}
+          onDelete={() => onDelete(meta.id, meta.name)}
           onStartEdit={() => onStartEdit(meta.id)}
           onCancelEdit={onCancelEdit}
         />
@@ -279,7 +292,7 @@ interface CloudTabProps {
   editingId: string | null;
   onNew: () => void;
   onRename: (id: string, name: string) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, name: string) => void;
   onStartEdit: (id: string) => void;
   onCancelEdit: () => void;
   navigate: (path: string) => void;
@@ -327,7 +340,7 @@ const CloudTab = ({ sketches, editingId, onNew, onRename, onDelete, onStartEdit,
           editingId={editingId}
           onOpen={() => navigate(`/sketch/${meta.id}`)}
           onRename={(name) => onRename(meta.id, name)}
-          onDelete={() => onDelete(meta.id)}
+          onDelete={() => onDelete(meta.id, meta.name)}
           onStartEdit={() => onStartEdit(meta.id)}
           onCancelEdit={onCancelEdit}
         />
