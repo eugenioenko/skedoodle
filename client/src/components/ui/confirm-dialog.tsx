@@ -59,7 +59,7 @@ export const ConfirmDialog = ({
         >
           <h3 className="text-lg font-semibold mb-2 text-text-primary">{title}</h3>
           {description && (
-            <p className="text-sm text-text-secondary mb-6">{description}</p>
+            <p className="text-sm text-text-primary mb-6">{description}</p>
           )}
           <div className="flex justify-end gap-3">
             <button
