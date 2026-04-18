@@ -25,16 +25,7 @@ const UserAvatar = () => {
   const navigate = useNavigate();
 
   if (!user) {
-    return (
-      <button
-        type="button"
-        onClick={() => navigate("/login")}
-        className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-default-3"
-      >
-        <div className="w-7 h-7 rounded-full bg-default-3 border border-default-4 flex-shrink-0" />
-        <IconChevronDown size={12} stroke={2} />
-      </button>
-    );
+    return null;
   }
 
   const initials = user.username.slice(0, 2).toUpperCase();
