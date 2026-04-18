@@ -16,6 +16,7 @@ import { useOptionsStore, SketchMode } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
+import { MainMenu } from "./main-menu";
 import { SketchOnline } from "@/canvas/sketches/sketch-online";
 import { SketchLocal } from "@/canvas/sketches/sketch-local";
 import { SketchSandbox } from "@/canvas/sketches/sketch-sandbox";
@@ -80,11 +81,12 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
 
   return (
     <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
-      <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center px-4 gap-2">
-        <div className="flex-grow min-w-0">
+      <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center">
+        <MainMenu />
+        <div className="flex-grow min-w-0 px-4">
           <ToolOptions />
         </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0 pr-4">
           <WithTooltip tooltip="Home">
             <Button onClick={() => navigate("/")}>
               <IconHome size={20} stroke={1} />

@@ -145,7 +145,7 @@ export const MenuComponent = React.forwardRef<
                 // eslint-disable-next-line react-hooks/refs
                 ref={refs.setFloating}
                 className="card flex flex-col border border-white/10 rounded overflow-hidden"
-                style={floatingStyles}
+                style={{ ...floatingStyles, zIndex: 9999 }}
                 {...getFloatingProps()}
               >
                 {children}

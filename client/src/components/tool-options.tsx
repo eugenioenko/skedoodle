@@ -31,6 +31,7 @@ import { WithTooltip } from "./ui/tooltip";
 import { ToolHint } from "./ui/tool-hint";
 import { useSyncedColor } from "@/hooks/use-synced-color";
 import { RgbaColor } from "colord";
+import { ToolbarDivider } from "./ui/toolbar-divider";
 
 export const ToolOptions = () => {
   let selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -149,7 +150,7 @@ const BrushToolOptions = () => {
       <SyncColorsButton strokeColor={localStrokeColor} />
       <ColorInput value={strokeColor} onChange={(value) => setStrokeColor(value)} />
 
-      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+      <ToolbarDivider />
 
       {/* Stroke width */}
       <WithTooltip tooltip="Stroke width">
@@ -163,7 +164,7 @@ const BrushToolOptions = () => {
         />
       </WithTooltip>
 
-      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+      <ToolbarDivider />
 
       {/* Stabilizer */}
       <WithTooltip tooltip={showStabilizerDot ? "Hide stabilizer dot" : "Show stabilizer dot"}>
@@ -182,7 +183,7 @@ const BrushToolOptions = () => {
         />
       </WithTooltip>
 
-      <div className="w-px self-stretch bg-white/10 mx-0.5" />
+      <ToolbarDivider />
 
       {/* Simplification */}
       <WithTooltip tooltip={liveSimplification ? "Disable live simplification" : "Enable live simplification — applies smoothing during drawing for a consistent preview"}>
