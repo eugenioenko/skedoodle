@@ -52,12 +52,12 @@ export const ConfirmDialog = ({
         className="fixed inset-0 z-[10000] flex items-center justify-center"
         onClick={onCancel}
       >
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
         <div
           className="relative bg-default-2 border border-default-3 rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-lg font-semibold mb-2">{title}</h3>
+          <h3 className="text-lg font-semibold mb-2 text-text-primary">{title}</h3>
           {description && (
             <p className="text-sm text-text-secondary mb-6">{description}</p>
           )}
