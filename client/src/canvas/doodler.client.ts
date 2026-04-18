@@ -71,7 +71,7 @@ export class Doodler {
   private _lastFrequency?: number;
   private _saveViewportTimer?: ReturnType<typeof setTimeout>;
 
-  isLocalPersisted = false;
+  mode: "online" | "local" | "sandbox" = "online";
 
   saveViewport(): void {
     clearTimeout(this._saveViewportTimer);
@@ -79,7 +79,7 @@ export class Doodler {
       const sm = this.zui.surfaceMatrix.elements;
       const color = colord(useOptionsStore.getState().canvasColor).toHex();
 
-      if (this.isLocalPersisted) {
+      if (this.mode === "local") {
         const meta = await localStorageClient.getMeta(this.sketchId);
         if (meta) {
           await localStorageClient.setMeta({

@@ -16,13 +16,13 @@ createRoot(document.getElementById("root")!).render(
       <Route path="/login" element={<LoginPage />} />
       <Route path="/auth/callback" element={<CallbackPage />} />
       <Route path="/auth/logout" element={<LogoutPage />} />
-      <Route path="/sandbox" element={<App isLocal={true} />} />
+      <Route path="/sandbox" element={<App mode="sandbox" />} />
       <Route path="/local" element={<LocalSketchesPage />} />
-      <Route path="/local/:id" element={<App isLocal={true} isLocalPersisted={true} />} />
+      <Route path="/local/:id" element={<App mode="local" />} />
       <Route path="/" element={<SketchesPage />} />
       <Route path="/sketches" element={<SketchesPage />} />
       <Route element={<AuthGuard />}>
-        <Route path="/sketch/:id" element={<App />} />
+        <Route path="/sketch/:id" element={<App mode="online" />} />
       </Route>
     </Routes>
   </BrowserRouter>

@@ -13,7 +13,7 @@ import { exitTimeTravelMode } from "@/canvas/history.service";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
 import { IconChevronDown, IconHome, IconLayoutSidebarRight, IconLogout, IconPhoto } from "@tabler/icons-react";
-import { useOptionsStore } from "@/canvas/canvas.store";
+import { useOptionsStore, SketchMode } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
@@ -71,7 +71,7 @@ const UserAvatar = () => {
   );
 };
 
-export const App = ({ isLocal = false, isLocalPersisted = false }: { isLocal?: boolean; isLocalPersisted?: boolean }) => {
+export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
   useWindowWheelPrevent();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -91,7 +91,7 @@ export const App = ({ isLocal = false, isLocalPersisted = false }: { isLocal?: b
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <WithTooltip tooltip="Home">
-            <Button onClick={() => navigate(isLocalPersisted ? "/local" : "/sketches")}>
+            <Button onClick={() => navigate(mode === "local" ? "/local" : "/sketches")}>
               <IconHome size={20} stroke={1} />
             </Button>
           </WithTooltip>
@@ -117,7 +117,7 @@ export const App = ({ isLocal = false, isLocalPersisted = false }: { isLocal?: b
       <div className="flex-grow flex relative overflow-hidden">
         <Toolbar />
         <div className="relative flex-grow flex">
-          <Canvas sketchId={id || "local"} onReady={onReady} isLocal={isLocal} isLocalPersisted={isLocalPersisted} />
+          <Canvas sketchId={id || "local"} onReady={onReady} mode={mode} />
         </div>
         <Panel />
       </div>

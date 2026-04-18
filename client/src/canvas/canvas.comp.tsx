@@ -1,7 +1,7 @@
 import { handlers } from "@/canvas/canvas.service";
 import { useInitTwoCanvas } from "@/canvas/canvas.hook";
 import { useCallback, useRef, useState } from "react";
-import { useOptionsStore } from "./canvas.store";
+import { useOptionsStore, SketchMode } from "./canvas.store";
 import { colord } from "colord";
 import { useRemoteCursors } from "@/components/cursors";
 import { getDoodler } from "./doodler.client";
@@ -12,11 +12,10 @@ import { useLocalPersistence } from "@/hooks/use-local-persistence";
 interface CanvasProps {
   sketchId: string;
   onReady?: () => void;
-  isLocal?: boolean;
-  isLocalPersisted?: boolean;
+  mode?: SketchMode;
 }
 
-export const Canvas = ({ sketchId, onReady, isLocal = false, isLocalPersisted = false }: CanvasProps) => {
+export const Canvas = ({ sketchId, onReady, mode = "online" }: CanvasProps) => {
   const [isReady, setIsReady] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const selectedTool = useOptionsStore((state) => state.selectedTool);
@@ -26,11 +25,11 @@ export const Canvas = ({ sketchId, onReady, isLocal = false, isLocalPersisted = 
   const bgColor = colord(canvasColor).toHex();
 
   const onTwoReady = useCallback(async () => {
-    if (isLocalPersisted) {
+    if (mode === "local") {
       console.log("[Canvas] Canvas ready, loading local sketch...");
-      getDoodler().isLocalPersisted = true;
+      getDoodler().mode = mode;
       await getDoodler().loadLocalDoodles(sketchId);
-    } else if (isLocal) {
+    } else if (mode === "sandbox") {
       console.log("[Canvas] Canvas ready, sandbox mode.");
     } else {
       console.log("[Canvas] Canvas ready, loading doodles...");
@@ -38,12 +37,12 @@ export const Canvas = ({ sketchId, onReady, isLocal = false, isLocalPersisted = 
     }
     onReady?.();
     setIsReady(true);
-  }, [onReady, isLocal, isLocalPersisted, sketchId]);
+  }, [onReady, mode, sketchId]);
 
   useInitTwoCanvas(containerRef, sketchId, onTwoReady);
   useRemoteCursors(isReady);
-  useSync(sketchId, isReady, isLocal);
-  useLocalPersistence(sketchId, isReady, isLocalPersisted);
+  useSync(sketchId, isReady, mode !== "online");
+  useLocalPersistence(sketchId, isReady, mode === "local");
 
   return (
     <div
