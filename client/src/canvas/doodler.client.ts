@@ -147,25 +147,30 @@ export class Doodler {
     await storageClient.setSketchMeta(this.sketchId, meta);
   }
 
-  async loadLocalDoodles(sketchId: string): Promise<void> {
-    const meta = await localStorageClient.getMeta(sketchId);
-    if (meta?.color) {
+  private restoreViewport(meta: { color?: string; zoom?: number; positionX?: number; positionY?: number } | null): void {
+    if (!meta) return;
+    if (meta.color) {
       useOptionsStore.getState().setCanvasColor(colord(meta.color).toRgb());
     }
-    if (meta?.zoom && meta.zoom !== 1) {
+    if (meta.zoom && meta.zoom !== 1) {
       const ratio = meta.zoom - 1;
       const cx = this.two.width / 2;
       const cy = this.two.height / 2;
       this.zui.zoomBy(ratio, cx, cy);
       useZoomStore.getState().setZoom(Math.floor(meta.zoom * 100));
     }
-    if (meta?.positionX != null && meta?.positionY != null) {
+    if (meta.positionX != null && meta.positionY != null) {
       this.zui.translateSurface(meta.positionX, meta.positionY);
     }
-    if (meta?.zoom || meta?.positionX != null) {
+    if (meta.zoom || meta.positionX != null) {
       const sm = this.zui.surfaceMatrix.elements;
       updateGrid(this.zui.scale, sm[2], sm[5]);
     }
+  }
+
+  async loadLocalDoodles(sketchId: string): Promise<void> {
+    const meta = await localStorageClient.getMeta(sketchId);
+    this.restoreViewport(meta);
 
     const commands = await localStorageClient.getCommands(sketchId);
     if (commands.length > 0) {
@@ -179,31 +184,9 @@ export class Doodler {
   }
 
   async loadDoodles(): Promise<void> {
-    if (!this.sketchId) {
-      return;
-    }
-
+    if (!this.sketchId) return;
     const meta = await storageClient.getSketchMeta(this.sketchId);
-    if (meta?.color) {
-      useOptionsStore.getState().setCanvasColor(colord(meta.color).toRgb());
-    }
-
-    // Restore viewport position and zoom
-    if (meta?.zoom && meta.zoom !== 1) {
-      const ratio = meta.zoom - 1;
-      const cx = this.two.width / 2;
-      const cy = this.two.height / 2;
-      this.zui.zoomBy(ratio, cx, cy);
-      useZoomStore.getState().setZoom(Math.floor(meta.zoom * 100));
-    }
-    if (meta?.positionX != null && meta?.positionY != null) {
-      this.zui.translateSurface(meta.positionX, meta.positionY);
-    }
-    if (meta?.zoom || meta?.positionX != null) {
-      const sm = this.zui.surfaceMatrix.elements;
-      updateGrid(this.zui.scale, sm[2], sm[5]);
-    }
-
+    this.restoreViewport(meta);
     this.throttledTwoUpdate();
   }
 }
