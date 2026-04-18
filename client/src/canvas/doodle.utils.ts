@@ -17,25 +17,25 @@ export interface Doodle {
 type SerializedPoint = [number, number];
 export interface SerializedDoodle {
   id: string;
-  t: DoodleType; // type
-  x: number; // translation.x position
-  y: number; // translation.y
-  w: number; // width
-  h: number; // height
-  r: number; // radius
-  sc: string; // stroke color
-  fc: string; // fill color
-  lw: number; // linewidth
-  v: SerializedPoint[]; // vertices
+  type: DoodleType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  radius: number;
+  stroke: string;
+  fill: string;
+  linewidth: number;
+  vertices: SerializedPoint[];
   // text-specific fields
-  txt?: string; // text value
-  ff?: string; // font family
-  fs?: number; // font size
-  fa?: string; // font alignment
-  fw?: number | string; // font weight
+  text?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  fontAlignment?: string;
+  fontWeight?: number | string;
   // bezier-specific fields
-  bv?: [number, number, number, number, number, number, string][]; // [x, y, lx, ly, rx, ry, command]
-  cl?: boolean; // closed path
+  bezierVertices?: [number, number, number, number, number, number, string][];
+  closed?: boolean;
 }
 
 /**
@@ -54,30 +54,29 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
 
   const serialized: SerializedDoodle = {
     id,
-    t: type,
+    type,
     x: translation.x,
     y: translation.y,
-    w: width,
-    h: height,
-    r: radius,
-    sc: (stroke as string) || "none",
-    fc: (fill as string) || "none",
-    lw: linewidth || 1,
-    v: (vertices || []).map((v: Point) => [v.x, v.y]),
+    width,
+    height,
+    radius,
+    stroke: (stroke as string) || "none",
+    fill: (fill as string) || "none",
+    linewidth: linewidth || 1,
+    vertices: (vertices || []).map((v: Point) => [v.x, v.y]),
   };
 
   if (type === "text") {
     const text = shape as Text;
-    serialized.txt = text.value;
-    serialized.ff = text.family;
-    serialized.fs = text.size;
-    serialized.fa = text.alignment;
-    serialized.fw = text.weight;
+    serialized.text = text.value;
+    serialized.fontFamily = text.family;
+    serialized.fontSize = text.size;
+    serialized.fontAlignment = text.alignment;
+    serialized.fontWeight = text.weight;
   }
 
   if (type === "bezier") {
-    // Controls are relative offsets from anchor position
-    serialized.bv = (vertices || []).map((v: any) => [
+    serialized.bezierVertices = (vertices || []).map((v: any) => [
       v.x,
       v.y,
       v.controls?.left?.x ?? 0,
@@ -86,7 +85,7 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
       v.controls?.right?.y ?? 0,
       v.command || "C",
     ]);
-    serialized.cl = (shape as Path).closed;
+    serialized.closed = (shape as Path).closed;
   }
 
   return serialized;
@@ -96,87 +95,87 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
  * Unserializes a SerializedDoodle back into a Doodle.
  */
 export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
-  const { t: type, x, y, sc, fc, lw, v, w, h, r, id } = serialized;
+  const { type, x, y, stroke, fill, linewidth, vertices, width, height, radius, id } = serialized;
 
   if (type === "brush") {
-    const vertices = v.map(
+    const anchors = vertices.map(
       (vv: SerializedPoint) => new Two.Anchor(vv[0], vv[1])
     );
-    const shape = new Path(vertices, false, true);
+    const shape = new Path(anchors, false, true);
     shape.id = id;
     shape.cap = "round";
     shape.closed = false;
-    shape.noFill().stroke = sc;
-    shape.linewidth = lw;
+    shape.noFill().stroke = stroke;
+    shape.linewidth = linewidth;
     shape.translation.x = x;
     shape.translation.y = y;
 
     return { type, shape };
   } else if (type === "line" || type === "arrow") {
-    const vertices = v.map(
+    const anchors = vertices.map(
       (vv: SerializedPoint) => new Two.Anchor(vv[0], vv[1])
     );
-    const shape = new Path(vertices, false, false);
+    const shape = new Path(anchors, false, false);
     shape.id = id;
     shape.cap = "round";
     shape.closed = false;
-    shape.noFill().stroke = sc;
-    shape.linewidth = lw;
+    shape.noFill().stroke = stroke;
+    shape.linewidth = linewidth;
     shape.translation.x = x;
     shape.translation.y = y;
 
     return { type, shape };
   } else if (type === "rect") {
-    const shape = new RoundedRectangle(x, y, w, h);
-    shape.radius = r;
+    const shape = new RoundedRectangle(x, y, width, height);
+    shape.radius = radius;
     shape.id = id;
-    shape.stroke = sc;
-    shape.fill = fc;
-    shape.linewidth = lw;
-    return { shape: shape, type: "rect" };
+    shape.stroke = stroke;
+    shape.fill = fill;
+    shape.linewidth = linewidth;
+    return { shape, type: "rect" };
   } else if (type === "ellipse") {
-    const ellipse = new Ellipse(x, y, w / 2, h / 2);
-    ellipse.id = id;
-    ellipse.stroke = sc;
-    ellipse.fill = fc;
-    ellipse.linewidth = lw;
-    return { shape: ellipse, type: "ellipse" };
-  } else if (type === "text") {
-    const shape = new Text(serialized.txt || "", x, y);
+    const shape = new Ellipse(x, y, width / 2, height / 2);
     shape.id = id;
-    shape.fill = fc;
-    shape.stroke = sc;
-    shape.linewidth = lw;
-    shape.family = serialized.ff || "sans-serif";
-    shape.size = serialized.fs || 24;
-    shape.alignment = (serialized.fa || "left") as "left" | "center" | "right";
-    shape.weight = serialized.fw || 400;
+    shape.stroke = stroke;
+    shape.fill = fill;
+    shape.linewidth = linewidth;
+    return { shape, type: "ellipse" };
+  } else if (type === "text") {
+    const shape = new Text(serialized.text || "", x, y);
+    shape.id = id;
+    shape.fill = fill;
+    shape.stroke = stroke;
+    shape.linewidth = linewidth;
+    shape.family = serialized.fontFamily || "sans-serif";
+    shape.size = serialized.fontSize || 24;
+    shape.alignment = (serialized.fontAlignment || "left") as "left" | "center" | "right";
+    shape.weight = serialized.fontWeight || 400;
     return { shape, type: "text" };
   } else if (type === "bezier") {
-    const vertices = (serialized.bv || []).map(
+    const anchors = (serialized.bezierVertices || []).map(
       (bv) =>
         new Two.Anchor(
-          bv[0], bv[1], // position
-          bv[2], bv[3], // left control
-          bv[4], bv[5], // right control
-          bv[6] as never      // command
+          bv[0], bv[1],
+          bv[2], bv[3],
+          bv[4], bv[5],
+          bv[6] as never
         )
     );
-    const shape = new Path(vertices, false, false, true);
+    const shape = new Path(anchors, false, false, true);
     shape.id = id;
     shape.cap = "round";
     shape.join = "round";
-    shape.closed = !!serialized.cl;
-    shape.noFill().stroke = sc;
-    shape.linewidth = lw;
+    shape.closed = !!serialized.closed;
+    shape.noFill().stroke = stroke;
+    shape.linewidth = linewidth;
     shape.translation.x = x;
     shape.translation.y = y;
 
     return { type, shape };
   } else if (type === "circle") {
-    const shape = new Circle(x, y, r);
+    const shape = new Circle(x, y, radius);
     shape.id = id;
-    shape.fill = fc;
+    shape.fill = fill;
     shape.noStroke();
     return { shape, type: "circle" };
   } else {
