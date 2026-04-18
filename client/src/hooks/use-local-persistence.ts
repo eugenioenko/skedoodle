@@ -1,38 +1,30 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useCommandLogStore } from "@/canvas/history.store";
 import { localStorageClient } from "@/services/local-storage.client";
-import { colord } from "colord";
-import { useOptionsStore } from "@/canvas/canvas.store";
 
 export function useLocalPersistence(sketchId: string, isReady: boolean, isLocalPersisted: boolean) {
-  const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
   useEffect(() => {
     if (!isLocalPersisted || !isReady) return;
 
-    const unsub = useCommandLogStore.subscribe((state, prev) => {
+    let lastLength = useCommandLogStore.getState().commandLog.length;
+
+    const unsub = useCommandLogStore.subscribe(async (state, prev) => {
       if (state.commandLog === prev.commandLog) return;
 
-      clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(async () => {
-        const { commandLog } = useCommandLogStore.getState();
-        await localStorageClient.setCommands(sketchId, commandLog);
+      const commands = state.commandLog;
+      for (let i = lastLength; i < commands.length; i++) {
+        await localStorageClient.appendCommand(sketchId, commands[i]);
+      }
+      lastLength = commands.length;
 
-        const existing = await localStorageClient.getMeta(sketchId);
-        if (existing) {
-          const color = colord(useOptionsStore.getState().canvasColor).toHex();
-          await localStorageClient.setMeta({
-            ...existing,
-            updatedAt: Date.now(),
-            color,
-          });
-        }
-      }, 1000);
+      const existing = await localStorageClient.getMeta(sketchId);
+      if (existing) {
+        await localStorageClient.setMeta({ ...existing, updatedAt: Date.now() });
+      }
     });
 
     return () => {
       unsub();
-      clearTimeout(saveTimer.current);
     };
   }, [sketchId, isReady, isLocalPersisted]);
 }
