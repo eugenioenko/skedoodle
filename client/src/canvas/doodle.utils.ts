@@ -16,6 +16,7 @@ export interface Doodle {
 
 type SerializedPoint = [number, number];
 export interface SerializedDoodle {
+  v: number;
   id: string;
   type: DoodleType;
   x: number;
@@ -53,6 +54,7 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
   const radius = (shape as any).radius || 0;
 
   const serialized: SerializedDoodle = {
+    v: 1,
     id,
     type,
     x: translation.x,
