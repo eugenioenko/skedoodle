@@ -39,4 +39,8 @@ export const figmaDriver: AppDriver = {
     // Editor keeps painting for a while after canvas mounts; let it settle.
     await page.waitForTimeout(5000);
   },
+  async selectBrush(page: Page) {
+    // Figma: Shift+P = Pencil (freehand). Plain P is Pen (vector).
+    await page.keyboard.press("Shift+P");
+  },
 };

@@ -11,4 +11,6 @@ export interface AppDriver {
   goto(page: Page): Promise<void>;
   /** Optional human-readable reason to skip this driver (missing env, etc). */
   skipReason?(): string | null;
+  /** Put the app into freehand-brush mode. Omit if the default tool is brush. */
+  selectBrush?(page: Page): Promise<void>;
 }

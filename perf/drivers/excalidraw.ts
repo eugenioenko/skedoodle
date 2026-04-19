@@ -11,4 +11,8 @@ export const excalidrawDriver: AppDriver = {
       state: "attached",
     });
   },
+  async selectBrush(page: Page) {
+    // Excalidraw: `p` = free draw / pen.
+    await page.keyboard.press("p");
+  },
 };

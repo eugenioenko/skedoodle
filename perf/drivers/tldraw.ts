@@ -12,4 +12,7 @@ export const tldrawDriver: AppDriver = {
       state: "attached",
     });
   },
+  async selectBrush(page: Page) {
+    await page.keyboard.press("d");
+  },
 };

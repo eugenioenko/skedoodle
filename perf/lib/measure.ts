@@ -83,7 +83,10 @@ export interface ScenarioResult {
   app: string;
   scenario: string;
   durationMs: number;
+  /** Mean CPU% over the full window. */
   cpuPct: number;
+  /** Max CPU% over any single sampling interval (noisier, finer-grained). */
+  peakCpuPct: number;
   scriptPct: number;
   layoutPct: number;
   recalcStylePct: number;
@@ -106,11 +109,26 @@ export function summarize(
   const durationMs = last.t - first.t;
   const pct = (key: keyof MetricSample) =>
     (((last[key] as number) - (first[key] as number)) / durationMs) * 100;
+
+  // Per-interval peak: max of (ΔtaskDuration / Δt) over adjacent samples.
+  // Noisy at short intervals; useful for spotting worst-case frame cost.
+  let peakCpuPct = 0;
+  for (let i = 1; i < samples.length; i++) {
+    const prev = samples[i - 1];
+    const curr = samples[i];
+    const dt = curr.t - prev.t;
+    if (dt <= 0) continue;
+    const intervalPct =
+      ((curr.taskDurationMs - prev.taskDurationMs) / dt) * 100;
+    if (intervalPct > peakCpuPct) peakCpuPct = intervalPct;
+  }
+
   return {
     app,
     scenario,
     durationMs,
     cpuPct: pct("taskDurationMs"),
+    peakCpuPct,
     scriptPct: pct("scriptDurationMs"),
     layoutPct: pct("layoutDurationMs"),
     recalcStylePct: pct("recalcStyleDurationMs"),
