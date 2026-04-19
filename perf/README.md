@@ -25,7 +25,7 @@ Figma is the only app under test that requires login. Capture the session once:
 pnpm --filter skedoodle-perf auth:figma
 ```
 
-This opens a Chromium window. Log in (with MFA if applicable), wait until your file dashboard renders, then return to the terminal and press Enter. The session is saved to `~/.config/skedoodle-perf/figma.storage.json` (override with `SKEDOODLE_PERF_FIGMA_STORAGE`).
+This opens a Chromium window. Log in (with MFA if applicable). The script automatically captures the session once Figma redirects you to a `/files/*` dashboard page — no Enter keypress needed. The session is saved to `~/.config/skedoodle-perf/figma.storage.json` (override with `SKEDOODLE_PERF_FIGMA_STORAGE`).
 
 The storage file lives outside the repo. **Never commit session cookies.** Sessions expire — re-run this command when Figma scenarios start failing.
 
