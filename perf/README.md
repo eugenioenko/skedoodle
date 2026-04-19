@@ -38,7 +38,39 @@ The storage file lives outside the repo. **Never commit session cookies.** Sessi
 
 ## Running scenarios
 
-Not yet implemented (Phases 2–6).
+Single runs (useful for iterating on a driver):
+
+```bash
+# Idle, 4 apps, 30s each
+FIGMA_FILE_URL='<your blank figma file>' pnpm --filter skedoodle-perf exec playwright test scenarios/idle.spec.ts
+
+# Draw, 4 apps, spiral-15s.json
+FIGMA_FILE_URL='<your blank figma file>' pnpm --filter skedoodle-perf exec playwright test scenarios/draw.spec.ts
+
+# Skedoodle renderer variants (reference, not article)
+pnpm --filter skedoodle-perf exec playwright test scenarios/skedoodle-renderers.spec.ts
+```
+
+Full baseline (N runs × 4 apps × 2 scenarios, aggregated):
+
+```bash
+FIGMA_FILE_URL='<your blank figma file>' pnpm --filter skedoodle-perf baseline
+```
+
+- `PERF_RUNS` (default 5) — runs per cell
+- `PERF_IDLE_SECONDS` (default 30) — idle window length
+- Omit `FIGMA_FILE_URL` to skip Figma tests gracefully
+
+Aggregating without re-running (reads the most recent N per cell from
+`results/raw/`):
+
+```bash
+pnpm --filter skedoodle-perf aggregate --runs 5
+```
+
+Writes `results/summary-<timestamp>.json` plus a terminal table.
+Summaries are gitignored; when one is publishable, copy it to
+`results/baseline.json` to commit.
 
 ## Disclaimer
 

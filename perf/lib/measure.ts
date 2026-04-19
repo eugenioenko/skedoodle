@@ -19,6 +19,16 @@ export interface MetricsSampler {
   stop(): Promise<MetricSample[]>;
 }
 
+export interface SamplerOptions {
+  /**
+   * When true (default), force full GC before the first and last sample
+   * via CDP HeapProfiler.collectGarbage. Makes heap deltas reflect
+   * retained memory rather than allocations-minus-collected-yet.
+   * GC happens outside sampling windows so it doesn't bias CPU%.
+   */
+  endpointGc?: boolean;
+}
+
 type CdpMetric = { name: string; value: number };
 
 // CDP's Performance.metrics reports *Duration values in seconds. We store ms
@@ -26,9 +36,15 @@ type CdpMetric = { name: string; value: number };
 export async function startMetricsSampler(
   page: Page,
   intervalMs: number,
+  options: SamplerOptions = {},
 ): Promise<MetricsSampler> {
+  const { endpointGc = true } = options;
   const client = await page.context().newCDPSession(page);
   await client.send("Performance.enable");
+  if (endpointGc) {
+    await client.send("HeapProfiler.enable");
+    await client.send("HeapProfiler.collectGarbage");
+  }
 
   const samples: MetricSample[] = [];
   const startedAt = Date.now();
@@ -69,6 +85,9 @@ export async function startMetricsSampler(
       stopped = true;
       clearTimeout(timer);
       try {
+        if (endpointGc) {
+          await client.send("HeapProfiler.collectGarbage");
+        }
         await takeSample();
         await client.detach();
       } catch {

@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "auth:figma": "tsx auth/capture-figma.ts",
-    "test": "playwright test"
+    "test": "playwright test",
+    "baseline": "bash scripts/run-all.sh",
+    "aggregate": "tsx scripts/aggregate.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",

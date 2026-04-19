@@ -13,4 +13,10 @@ export interface AppDriver {
   skipReason?(): string | null;
   /** Put the app into freehand-brush mode. Omit if the default tool is brush. */
   selectBrush?(page: Page): Promise<void>;
+  /**
+   * Optional post-measurement cleanup, called before the context closes.
+   * Use this to undo persistent changes so state doesn't accumulate
+   * across runs (e.g., Figma autosaves drawn content).
+   */
+  cleanup?(page: Page): Promise<void>;
 }

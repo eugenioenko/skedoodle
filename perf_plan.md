@@ -158,9 +158,23 @@ perf/
 | 3 | Measurement primitives | 1d | CDP-based `measureIdleCpu`, `measureActiveCpu`, `sampleMetrics` with outlier rejection |
 | 4 | Trace fixtures + replayers | 0.5d | `stroke-15s.json`, `panzoom-10s.json`; `simulateStrokeTrace` works across drivers |
 | 5 | Run + aggregate | 0.5d | `scripts/run-all.sh` runs full matrix, `aggregate.ts` produces median/min/max JSON |
-| 6 | Reporting | 0.5d | `report.ts` → markdown table; optional simple chart |
+| 6 | (Optional) Memory scenario | 0.5d | `scenarios/memory.spec.ts` — 5-min light-use loop per app with forced GC between samples, emits heap trend over time |
+| 7 | Reporting | 0.5d | `report.ts` → markdown table; optional simple chart |
 
-Total: ~4–5 days focused work.
+Total: ~4–5 days focused work (~5d with Phase 6).
+
+### Phase 6 details (if we pick it up)
+
+Long-session heap-trend measurement. The idle/draw scenarios already
+emit `heapDeltaMb`, but over 15–30s that's dominated by scenario-
+specific allocation, not leak signal. Phase 6 adds a dedicated scenario:
+
+- 5-min window per app (~24 min total across 4 apps)
+- Loop: draw a small stroke, idle ~10s, force GC via CDP
+  `HeapProfiler.collectGarbage`, sample `JSHeapUsedSize`
+- Reports retained-heap trend (bytes/min) — can't distinguish real leak
+  from unbounded cache growth, but either is worth flagging
+- Hands-off: kick off and wait for the notification
 
 ## Risks & mitigations
 

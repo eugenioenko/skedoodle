@@ -43,4 +43,14 @@ export const figmaDriver: AppDriver = {
     // Figma: Shift+P = Pencil (freehand). Plain P is Pen (vector).
     await page.keyboard.press("Shift+P");
   },
+  async cleanup(page: Page) {
+    // Figma autosaves everything we draw. Without this the file
+    // accumulates spirals run after run, making each subsequent load
+    // and draw measurably slower. Deselect, select-all, delete.
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Control+A");
+    await page.keyboard.press("Delete");
+    // Let the autosave of the delete flush before we close.
+    await page.waitForTimeout(2000);
+  },
 };

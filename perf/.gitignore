@@ -1,4 +1,5 @@
 node_modules/
 results/raw/
+results/summary-*.json
 test-results/
 playwright-report/
