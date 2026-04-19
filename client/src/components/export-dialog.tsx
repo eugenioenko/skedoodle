@@ -34,15 +34,22 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
   const [filename, setFilename] = useState(defaultFilename);
   const [background, setBackground] = useState(canvasColor);
   const [filenameTouched, setFilenameTouched] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [onlySelected, setOnlySelected] = useState(false);
 
-  // On open: reset background to current canvas color, deselect, refresh filename
+  // On open: capture the current selection (so we can offer to export only it),
+  // then reset background, refresh filename, and clear the selection so its
+  // chrome doesn't leak into the export.
   useEffect(() => {
     if (!open) return;
+    const { selected, clearSelected } = usePointerStore.getState();
+    const ids = new Set(selected.map((s) => s.id));
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedIds(ids);
+    setOnlySelected(false);
     setBackground(canvasColor);
     setFilename(buildExportFilename(sketchName, exportFormat));
     setFilenameTouched(false);
-    const { selected, clearSelected } = usePointerStore.getState();
     if (selected.length > 0) {
       clearSelected();
       getDoodler().throttledTwoUpdate();
@@ -59,8 +66,12 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
 
   const handleExport = () => {
     const { doodles } = useCanvasStore.getState();
+    const filtered =
+      onlySelected && selectedIds.size > 0
+        ? doodles.filter((d) => selectedIds.has(d.shape.id))
+        : doodles;
     const opts = {
-      doodles,
+      doodles: filtered,
       padding: exportPadding,
       background,
       transparent: exportTransparent,
@@ -114,6 +125,24 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
               SVG
             </RadioPill>
           </div>
+        </Field>
+
+        <Field label="Scope">
+          <label
+            className={`flex items-center gap-2 select-none ${
+              selectedIds.size === 0
+                ? "text-text-secondary opacity-50 cursor-not-allowed"
+                : "text-text-primary cursor-pointer"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={onlySelected && selectedIds.size > 0}
+              disabled={selectedIds.size === 0}
+              onChange={(e) => setOnlySelected(e.target.checked)}
+            />
+            Export only selected ({selectedIds.size})
+          </label>
         </Field>
 
         <Field label="Filename">
