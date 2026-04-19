@@ -3,6 +3,7 @@ import {
   IconArrowNarrowRight,
   IconBrush,
   IconCircle,
+  IconColorPicker,
   IconEraser,
   IconHandStop,
   IconTextSize,
@@ -32,6 +33,20 @@ interface ToolDef {
   value: Tool;
   icon: React.ReactElement;
   tooltip: string;
+}
+
+// Select a tool. For one-shot tools like the eyedropper, remember the previous
+// tool in restoreTool so the canvas service can swap back after the next click.
+// For all other selections, clear restoreTool so a stale value can't trigger
+// an unexpected revert later.
+function selectTool(next: Tool, current?: Tool): void {
+  const { setSelectedTool, setRestoreTool } = useOptionsStore.getState();
+  if (next === "eyedropper" && current && current !== "eyedropper") {
+    setRestoreTool(current);
+  } else {
+    setRestoreTool(undefined);
+  }
+  setSelectedTool(next);
 }
 
 export const Toolbar = () => {
@@ -81,6 +96,11 @@ export const Toolbar = () => {
             <IconEraser stroke={1} />
           </ToggleButton>
         </WithTooltip>
+        <WithTooltip tooltip="Eyedropper tool [I]">
+          <ToggleButton value="eyedropper">
+            <IconColorPicker stroke={1} />
+          </ToggleButton>
+        </WithTooltip>
         <WithTooltip tooltip="Zoom tool [Z]">
           <ToggleButton value="zoom">
             <IconZoom stroke={1} />
@@ -97,12 +117,7 @@ interface ToggleButtonProps {
 }
 
 const ToggleButton = ({ value, children }: ToggleButtonProps) => {
-  let current = useOptionsStore((state) => state.selectedTool);
-  const restoreTool = useOptionsStore((state) => state.restoreTool);
-  if (restoreTool) {
-    current = restoreTool;
-  }
-  const setTool = useOptionsStore((state) => state.setSelectedTool);
+  const current = useOptionsStore((state) => state.selectedTool);
   const isActive = current === value;
 
   return (
@@ -110,7 +125,7 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
       type="button"
       className={`p-1 rounded  ${isActive ? "bg-primary" : "hover:bg-default-3"
         }`}
-      onClick={() => setTool(value as Tool)}
+      onClick={() => selectTool(value as Tool, current)}
     >
       {children}
     </button>
@@ -118,16 +133,15 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
 };
 
 const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
-  let current = useOptionsStore((state) => state.selectedTool);
-  const restoreTool = useOptionsStore((state) => state.restoreTool);
-  if (restoreTool) {
-    current = restoreTool;
-  }
-  const setTool = useOptionsStore((state) => state.setSelectedTool);
+  const current = useOptionsStore((state) => state.selectedTool);
   const [isOpen, setIsOpen] = React.useState(false);
 
   const activePick = tools.find((t) => t.value === current) ?? tools[0];
   const isGroupActive = tools.some((t) => t.value === current);
+  const handlePick = (next: Tool) => {
+    selectTool(next, current);
+    setIsOpen(false);
+  };
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -150,7 +164,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
       <button
         type="button"
         className={`p-1 rounded relative ${isGroupActive ? "bg-primary" : "hover:bg-default-3"}`}
-        onClick={() => setTool(activePick.value)}
+        onClick={() => handlePick(activePick.value)}
       >
         {activePick.icon}
         <span
@@ -180,10 +194,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
                 className={`flex items-center gap-2 px-2 py-1 rounded text-left ${
                   current === tool.value ? "bg-primary" : "hover:bg-default-3"
                 }`}
-                onClick={() => {
-                  setTool(tool.value);
-                  setIsOpen(false);
-                }}
+                onClick={() => handlePick(tool.value)}
               >
                 {tool.icon}
                 <span className="text-xs text-text-primary whitespace-nowrap">{tool.tooltip}</span>

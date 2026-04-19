@@ -8,6 +8,7 @@ import { getDoodler } from "./doodler.client";
 import { doBrushMove, doBrushStart, doBrushUp } from "./tools/brush.tool";
 import { doDragMove, doDragStart, doDragTranslate } from "./tools/drag.tool";
 import { doDeleteShape } from "./tools/eraser.tool";
+import { doEyedropperPick } from "./tools/eyedropper.tool";
 import {
   doPointerEnd,
   doPointerMove,
@@ -89,6 +90,11 @@ function doMouseDown(e: MouseEvent<HTMLDivElement>) {
 
   if (selectedTool === "eraser") {
     doDeleteShape(e);
+    return;
+  }
+
+  if (selectedTool === "eyedropper") {
+    doEyedropperPick(e);
     return;
   }
 
@@ -217,7 +223,7 @@ function doMouseUp(e: MouseEvent<HTMLDivElement>) {
     setRestoreTool(undefined);
   }
 
-  if (activeTool === "hand" || activeTool === "eraser") {
+  if (activeTool === "hand" || activeTool === "eraser" || activeTool === "eyedropper") {
     setActiveTool(undefined);
   }
 
