@@ -1,14 +1,16 @@
 import {
-  IconFileTypePng,
-  IconFileTypeSvg,
+  IconDownload,
   IconMenu2,
   IconUpload,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
 import { ToolbarDivider } from "./ui/toolbar-divider";
 import { useToastStore } from "./ui/toasts";
+import { ExportDialog } from "./export-dialog";
 
 export const MainMenu = () => {
+  const [exportOpen, setExportOpen] = useState(false);
   const notImplemented = () => useToastStore.getState().addToast("Coming soon");
 
   return (
@@ -24,14 +26,9 @@ export const MainMenu = () => {
           }
         >
           <DropdownItem
-            label="Export as SVG"
-            icon={<IconFileTypeSvg size={16} stroke={1} />}
-            onClick={notImplemented}
-          />
-          <DropdownItem
-            label="Export as PNG"
-            icon={<IconFileTypePng size={16} stroke={1} />}
-            onClick={notImplemented}
+            label="Export…"
+            icon={<IconDownload size={16} stroke={1} />}
+            onClick={() => setExportOpen(true)}
           />
           <DropdownItem
             label="Import"
@@ -41,6 +38,7 @@ export const MainMenu = () => {
         </Dropdown>
       </div>
       <ToolbarDivider />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </>
   );
 };

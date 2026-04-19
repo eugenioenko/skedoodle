@@ -1,7 +1,9 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Canvas } from "../canvas.comp";
 import { getDoodler } from "../doodler.client";
 import { useLocalPersistence } from "@/hooks/use-local-persistence";
+import { localStorageClient } from "@/services/local-storage.client";
+import { useSketchMetaStore } from "../sketch-meta.store";
 
 interface SketchLocalProps {
   sketchId: string;
@@ -18,6 +20,18 @@ export const SketchLocal = ({ sketchId, onReady }: SketchLocalProps) => {
     onReady?.();
     setIsReady(true);
   }, [onReady, sketchId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    localStorageClient.getMeta(sketchId).then((meta) => {
+      if (cancelled) return;
+      useSketchMetaStore.getState().setName(meta?.name);
+    });
+    return () => {
+      cancelled = true;
+      useSketchMetaStore.getState().setName(undefined);
+    };
+  }, [sketchId]);
 
   useLocalPersistence(sketchId, isReady, true);
 
