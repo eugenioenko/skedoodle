@@ -24,11 +24,21 @@ function sampleShape(shape: any): SampledColors {
   return result;
 }
 
-function applyToTool(tool: Tool, sampled: SampledColors): void {
+// For tools with a single color slot, prefer the source's fill (the visible
+// area the user is most likely aiming at) and fall back to stroke when the
+// source has no fill. Alt inverts: take stroke even when fill exists.
+function pickSingleSlot(sampled: SampledColors, altKey: boolean): RgbaColor | undefined {
+  if (altKey && sampled.stroke) return sampled.stroke;
+  return sampled.fill ?? sampled.stroke;
+}
+
+function applyToTool(tool: Tool, sampled: SampledColors, altKey: boolean): void {
   switch (tool) {
-    case "brush":
-      if (sampled.stroke) useBrushStore.getState().setStrokeColor(sampled.stroke);
+    case "brush": {
+      const color = pickSingleSlot(sampled, altKey);
+      if (color) useBrushStore.getState().setStrokeColor(color);
       break;
+    }
     case "square":
     case "ellipse":
       if (sampled.stroke) useSquareStore.getState().setStrokeColor(sampled.stroke);
@@ -39,12 +49,16 @@ function applyToTool(tool: Tool, sampled: SampledColors): void {
       if (sampled.fill) useBezierStore.getState().setFillColor(sampled.fill);
       break;
     case "line":
-    case "arrow":
-      if (sampled.stroke) useLineStore.getState().setStrokeColor(sampled.stroke);
+    case "arrow": {
+      const color = pickSingleSlot(sampled, altKey);
+      if (color) useLineStore.getState().setStrokeColor(color);
       break;
-    case "text":
-      if (sampled.fill) useTextStore.getState().setFillColor(sampled.fill);
+    }
+    case "text": {
+      const color = pickSingleSlot(sampled, altKey);
+      if (color) useTextStore.getState().setFillColor(color);
       break;
+    }
   }
 }
 
@@ -75,7 +89,7 @@ export function doEyedropperPick(e: MouseEvent<HTMLDivElement>): void {
       if (sampled.stroke) setGlobalStrokeColor(sampled.stroke);
       if (sampled.fill) setGlobalFillColor(sampled.fill);
     } else if (restoreTool) {
-      applyToTool(restoreTool, sampled);
+      applyToTool(restoreTool, sampled, e.altKey);
     }
     return;
   }

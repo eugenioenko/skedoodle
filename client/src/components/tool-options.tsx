@@ -68,7 +68,7 @@ export const ToolOptions = () => {
   }
 
   if (selectedTool === "eyedropper") {
-    return <ToolHint hint="Click a shape to copy its color into the active tool." />;
+    return <ToolHint hint="Click a shape to copy its color. Hold Alt to sample the stroke instead of the fill." />;
   }
 
   if (selectedTool === "pointer") {
