@@ -1,0 +1,16 @@
+{
+  "name": "skedoodle-perf",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "auth:figma": "tsx auth/capture-figma.ts",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.59.1",
+    "@types/node": "^25.2.3",
+    "tsx": "^4.19.2",
+    "typescript": "~5.7.2"
+  }
+}
