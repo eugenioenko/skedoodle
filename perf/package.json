@@ -7,7 +7,8 @@
     "auth:figma": "tsx auth/capture-figma.ts",
     "test": "playwright test",
     "baseline": "bash scripts/run-all.sh",
-    "aggregate": "tsx scripts/aggregate.ts"
+    "aggregate": "tsx scripts/aggregate.ts",
+    "chart": "tsx scripts/chart.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",

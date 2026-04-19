@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 290" width="720" height="290" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+<text x="110" y="26" font-size="17" font-weight="600" fill="#0f172a">Idle CPU on a blank canvas</text>
+<text x="110" y="46" font-size="12" fill="#64748b">30s window — page-attributed CDP Performance.metrics</text>
+<line x1="214" y1="62" x2="214" y2="238" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,3" opacity="0.5" />
+<line x1="318" y1="62" x2="318" y2="238" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,3" opacity="0.5" />
+<line x1="422" y1="62" x2="422" y2="238" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,3" opacity="0.5" />
+<line x1="526" y1="62" x2="526" y2="238" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,3" opacity="0.5" />
+<line x1="630" y1="62" x2="630" y2="238" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2,3" opacity="0.5" />
+<text x="100" y="88" font-size="13" text-anchor="end" fill="#0f172a">skedoodle</text>
+<rect x="110" y="70" width="8.866715532751385" height="28" fill="#2563eb" rx="3" />
+<line x1="118.65667544064239" y1="84" x2="121.93799647101908" y2="84" stroke="#334155" stroke-width="1.5" />
+<line x1="118.65667544064239" y1="80" x2="118.65667544064239" y2="88" stroke="#334155" stroke-width="1.5" />
+<line x1="121.93799647101908" y1="80" x2="121.93799647101908" y2="88" stroke="#334155" stroke-width="1.5" />
+<text x="129.93799647101906" y="88" font-size="13" font-weight="600" fill="#0f172a">0.09%</text>
+<text x="100" y="132" font-size="13" text-anchor="end" fill="#0f172a">excalidraw</text>
+<rect x="110" y="114" width="123.15946297098316" height="28" fill="#94a3b8" rx="3" />
+<line x1="226.34058033780855" y1="128" x2="239.253727763342" y2="128" stroke="#334155" stroke-width="1.5" />
+<line x1="226.34058033780855" y1="124" x2="226.34058033780855" y2="132" stroke="#334155" stroke-width="1.5" />
+<line x1="239.253727763342" y1="124" x2="239.253727763342" y2="132" stroke="#334155" stroke-width="1.5" />
+<text x="247.253727763342" y="132" font-size="13" font-weight="600" fill="#0f172a">1.18%</text>
+<text x="100" y="176" font-size="13" text-anchor="end" fill="#0f172a">tldraw</text>
+<rect x="110" y="158" width="158.68087657363617" height="28" fill="#94a3b8" rx="3" />
+<line x1="266.84753055583303" y1="172" x2="278.4793072439634" y2="172" stroke="#334155" stroke-width="1.5" />
+<line x1="266.84753055583303" y1="168" x2="266.84753055583303" y2="176" stroke="#334155" stroke-width="1.5" />
+<line x1="278.4793072439634" y1="168" x2="278.4793072439634" y2="176" stroke="#334155" stroke-width="1.5" />
+<text x="286.4793072439634" y="176" font-size="13" font-weight="600" fill="#0f172a">1.53%</text>
+<text x="100" y="220" font-size="13" text-anchor="end" fill="#0f172a">figma</text>
+<rect x="110" y="202" width="363.31585293143434" height="28" fill="#94a3b8" rx="3" />
+<line x1="461.793970714901" y1="216" x2="544.763884472708" y2="216" stroke="#334155" stroke-width="1.5" />
+<line x1="461.793970714901" y1="212" x2="461.793970714901" y2="220" stroke="#334155" stroke-width="1.5" />
+<line x1="544.763884472708" y1="212" x2="544.763884472708" y2="220" stroke="#334155" stroke-width="1.5" />
+<text x="552.763884472708" y="220" font-size="13" font-weight="600" fill="#0f172a">3.49%</text>
+<line x1="110" y1="244" x2="630" y2="244" stroke="#cbd5e1" />
+<line x1="110" y1="244" x2="110" y2="248" stroke="#cbd5e1" />
+<text x="110" y="262" font-size="11" fill="#64748b" text-anchor="middle">0%</text>
+<line x1="214" y1="244" x2="214" y2="248" stroke="#cbd5e1" />
+<text x="214" y="262" font-size="11" fill="#64748b" text-anchor="middle">1%</text>
+<line x1="318" y1="244" x2="318" y2="248" stroke="#cbd5e1" />
+<text x="318" y="262" font-size="11" fill="#64748b" text-anchor="middle">2%</text>
+<line x1="422" y1="244" x2="422" y2="248" stroke="#cbd5e1" />
+<text x="422" y="262" font-size="11" fill="#64748b" text-anchor="middle">3%</text>
+<line x1="526" y1="244" x2="526" y2="248" stroke="#cbd5e1" />
+<text x="526" y="262" font-size="11" fill="#64748b" text-anchor="middle">4%</text>
+<line x1="630" y1="244" x2="630" y2="248" stroke="#cbd5e1" />
+<text x="630" y="262" font-size="11" fill="#64748b" text-anchor="middle">5%</text>
+<text x="110" y="280" font-size="10" fill="#94a3b8">median of 5 runs, whiskers = min–max</text>
+</svg>
