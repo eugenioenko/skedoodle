@@ -37,9 +37,11 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [onlySelected, setOnlySelected] = useState(false);
 
-  // On open: capture the current selection (so we can offer to export only it),
-  // then reset background, refresh filename, and clear the selection so its
-  // chrome doesn't leak into the export.
+  // On open: capture the current selection's IDs (so we can offer to export
+  // only it AND restore it on close), then reset background, refresh filename,
+  // and clear the selection. Clearing is necessary because the selected stroke
+  // is mutated on the shape itself — leaving it would bake the highlight color
+  // into the export.
   useEffect(() => {
     if (!open) return;
     const { selected, clearSelected } = usePointerStore.getState();
@@ -56,6 +58,22 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Restore the selection that was cleared on open, so the dialog doesn't
+  // silently destroy the user's selection state.
+  const handleClose = () => {
+    if (selectedIds.size > 0) {
+      const { doodles } = useCanvasStore.getState();
+      const shapesToRestore = doodles
+        .filter((d) => selectedIds.has(d.shape.id))
+        .map((d) => d.shape);
+      if (shapesToRestore.length > 0) {
+        usePointerStore.getState().selectShapes(shapesToRestore);
+        getDoodler().throttledTwoUpdate();
+      }
+    }
+    onClose();
+  };
 
   // If user hasn't touched the filename, keep it in sync with format changes
   useEffect(() => {
@@ -82,19 +100,19 @@ export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
     } else {
       exportPNG({ ...opts, scale: exportPngScale });
     }
-    onClose();
+    handleClose();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       title="Export sketch"
       footer={
         <>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:bg-default-3 transition-colors"
           >
             Cancel
