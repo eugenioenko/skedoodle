@@ -1,6 +1,7 @@
 import Two from "two.js";
 import { colord, RgbaColor } from "colord";
 import { Doodle } from "./doodle.utils";
+import { useToastStore } from "@/components/ui/toasts";
 
 export interface ExportBounds {
   x: number;
@@ -59,17 +60,25 @@ export function getExportBounds(
 
 export function exportSVG(opts: ExportOptions): void {
   const bounds = getExportBounds(opts.doodles, opts.padding) ?? FALLBACK_BOUNDS;
+  const w = Math.ceil(bounds.width);
+  const h = Math.ceil(bounds.height);
 
   const two = new Two({
     type: Two.Types.svg,
-    width: Math.ceil(bounds.width),
-    height: Math.ceil(bounds.height),
+    width: w,
+    height: h,
   });
 
   buildScene(two, opts.doodles, bounds, opts, 1);
   two.update();
 
   const svgEl = two.renderer.domElement as SVGElement;
+  // Add a viewBox so the SVG scales to its viewer instead of rendering at the
+  // intrinsic surface size (which can be huge — anything from a wide canvas
+  // would otherwise overflow the viewer).
+  svgEl.setAttribute("viewBox", `0 0 ${w} ${h}`);
+  svgEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
   const svgString = new XMLSerializer().serializeToString(svgEl);
   const blob = new Blob([svgString], { type: "image/svg+xml" });
   downloadBlob(blob, opts.filename);
@@ -78,24 +87,43 @@ export function exportSVG(opts: ExportOptions): void {
 export function exportPNG(opts: ExportPngOptions): void {
   const bounds = getExportBounds(opts.doodles, opts.padding) ?? FALLBACK_BOUNDS;
 
-  let scale = opts.scale;
+  // Compute the effective scale: clamp so neither dimension exceeds the cap.
+  // Allow fractional downscale when even 1× would overflow.
   const longestSide = Math.max(bounds.width, bounds.height);
-  if (longestSide * scale > PNG_MAX_DIMENSION) {
-    scale = Math.max(1, Math.floor(PNG_MAX_DIMENSION / longestSide)) as 1 | 2 | 3;
+  const fit = longestSide * opts.scale > PNG_MAX_DIMENSION
+    ? PNG_MAX_DIMENSION / (longestSide * opts.scale)
+    : 1;
+  const effectiveScale = opts.scale * fit;
+
+  if (fit < 1) {
+    useToastStore
+      .getState()
+      .addToast(
+        `Sketch is large — exporting at ${effectiveScale.toFixed(2)}× to fit within ${PNG_MAX_DIMENSION}px`
+      );
   }
+
+  const w = Math.max(1, Math.ceil(bounds.width * effectiveScale));
+  const h = Math.max(1, Math.ceil(bounds.height * effectiveScale));
 
   const two = new Two({
     type: Two.Types.canvas,
-    width: Math.ceil(bounds.width * scale),
-    height: Math.ceil(bounds.height * scale),
+    width: w,
+    height: h,
   });
 
-  buildScene(two, opts.doodles, bounds, opts, scale);
+  buildScene(two, opts.doodles, bounds, opts, effectiveScale);
   two.update();
 
   const canvasEl = two.renderer.domElement as HTMLCanvasElement;
   canvasEl.toBlob((blob) => {
-    if (blob) downloadBlob(blob, opts.filename);
+    if (blob) {
+      downloadBlob(blob, opts.filename);
+    } else {
+      useToastStore
+        .getState()
+        .addToast("PNG export failed — try a smaller scale or use SVG");
+    }
   }, "image/png");
 }
 
