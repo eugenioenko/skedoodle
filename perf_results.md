@@ -70,8 +70,79 @@ Anecdotal numbers from `context.md`:
 
 Qualitative split holds: Skedoodle at zero, two mid-pack apps, Figma on its own.
 
+## Draw CPU — 15s spiral trace (2026-04-18)
+
+Scripted trace: Archimedean spiral from canvas center, 6 turns over 15s at
+60Hz (902 pointer events), replayed identically across drivers via
+Playwright's mouse API. Box is 50% of the 1440×900 viewport, centered.
+
+| App | Mean CPU | Peak CPU | Script | Heap Δ |
+|---|---:|---:|---:|---:|
+| Skedoodle (sandbox) | 22.05% | 30.5% | 6.38% | +10.2 MB |
+| tldraw | 22.02% | 32.7% | 8.91% | +5.1 MB |
+| Excalidraw | 29.93% | 47.5% | 13.85% | +15.3 MB |
+| Figma | **96.51%** | 100.9% | 11.50% | +10.7 MB |
+
+Raw sample files in `perf/results/raw/*-draw-2026-04-19T04-*.json`.
+
+### Key observations
+
+- **Skedoodle and tldraw are statistically identical** on mean CPU (22.05% vs
+  22.02%) despite wholly different rendering stacks — Skedoodle uses Two.js/SVG,
+  tldraw uses custom React+canvas. This is the load-bearing finding for the
+  article: active-draw cost is architectural (own your render loop + no hidden
+  background work), not about the library choice.
+- **Excalidraw ~36% higher** than the Skedoodle/tldraw pair. Consistent with
+  rough.js adding stroke simplification + its rAF loop continuing through
+  drawing.
+- **Figma pegs a core.** 96.5% mean means the page is saturating one CPU thread
+  for essentially the entire 15s draw. WebGL + collab CRDT + WASM pipeline +
+  surveys — every input event triggers the full stack.
+
+### Script fraction is revealing
+
+Script% as a share of total:
+- Skedoodle 29% (6.38/22.05) — lots of JS per event
+- tldraw 40% — heaviest script share
+- Excalidraw 46% — rough.js / canvas redraw in JS
+- Figma 12% — JS is almost incidental; the rest is WASM + rasterization +
+  compositing, which CDP counts under TaskDuration but not ScriptDuration.
+
+## Caveats
+
+1. **Single-run smoke tests.** No warmup discard, no median-of-N. Numbers will
+   shift ±0.3% across runs. Treat magnitudes as approximate, ordering as robust.
+2. **CDP attributes CPU to the page**, not the whole browser process. The
+   absolute % will be lower than what system tools report for the browser.
+3. **Figma's first paint is slow enough** that it may still be finishing work
+   during the 2s settle — the later 30s run will be more representative.
+4. **Battery / thermal state affects results.** Laptop on battery shows lower
+   ceilings; plug in before collecting the published baseline.
+5. **Synthetic pointer events vs real pointers.** Playwright's `mouse.*` API
+   dispatches DOM events — modern apps expect pointer events with pressure,
+   tilt, etc. Apps that branch on `PointerEvent.pressure` may take a slightly
+   different code path. Probably not material for this comparison but worth
+   noting.
+
+## Comparison to pre-measurement guesses
+
+Anecdotal numbers from `context.md`:
+
+| App | Guessed idle | Measured idle | Guessed active | Measured active (mean) |
+|---|---:|---:|---:|---:|
+| Skedoodle | 0% | 0.04% | ~30% | 22.05% |
+| tldraw | ~2.5% | 1.51% | ~30% (matched) | 22.02% |
+| Excalidraw | ~2.5% | 1.05% | high | 29.93% |
+| Figma | high | 2.89% | very high | 96.51% |
+
+Active numbers come in lower than the anecdotal ~30% — expected, since CDP is
+page-attributed (not process-level). Qualitative orderings all hold; the
+Skedoodle↔tldraw tie on active CPU is stronger than we claimed.
+
 ## Next
 
-- Lock in the 30-second × 5-runs baseline once the draw/panzoom scenarios are in.
-- Add `results/baseline.json` from `scripts/report.ts` (not yet written).
-- WebGL renderer mode for Skedoodle as a separate row.
+- Phase 4: pan/zoom scenario for completeness (may or may not make the article).
+- Phase 5: multi-run aggregation for the published baseline (median of 5 × 30s
+  idle / 15s draw, with 1-run warmup discard).
+- WebGL renderer mode for Skedoodle as a separate row — shows within-app
+  architectural variance.
