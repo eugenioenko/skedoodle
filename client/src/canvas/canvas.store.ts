@@ -27,6 +27,7 @@ export type Tool =
   | "arrow"
   | "text"
   | "eraser"
+  | "eyedropper"
   | "zoom"
   | "bezier";
 

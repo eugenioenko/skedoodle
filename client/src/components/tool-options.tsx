@@ -33,11 +33,7 @@ import { useSyncedColor } from "@/hooks/use-synced-color";
 import { RgbaColor } from "colord";
 
 export const ToolOptions = () => {
-  let selectedTool = useOptionsStore((state) => state.selectedTool);
-  const restoreTool = useOptionsStore((state) => state.restoreTool);
-  if (restoreTool) {
-    selectedTool = restoreTool;
-  }
+  const selectedTool = useOptionsStore((state) => state.selectedTool);
 
   if (selectedTool === "brush") {
     return <BrushToolOptions />;
@@ -69,6 +65,10 @@ export const ToolOptions = () => {
 
   if (selectedTool === "eraser") {
     return <ToolHint hint="Click a shape to erase it." />;
+  }
+
+  if (selectedTool === "eyedropper") {
+    return <ToolHint hint="Click a shape to copy its color into the active tool." />;
   }
 
   if (selectedTool === "pointer") {
