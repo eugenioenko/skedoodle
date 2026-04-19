@@ -20,9 +20,9 @@ export const MainMenu = () => {
           hover={false}
           placement="bottom-start"
           trigger={
-            <div className="p-1 rounded hover:bg-default-3 cursor-pointer select-none">
+            <button type="button" className="p-1 rounded hover:bg-default-3" aria-label="Open main menu">
               <IconMenu2 size={20} stroke={1} />
-            </div>
+            </button>
           }
         >
           <DropdownItem

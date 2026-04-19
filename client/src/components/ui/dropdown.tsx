@@ -122,10 +122,15 @@ export const MenuComponent = React.forwardRef<
 
   // eslint-disable-next-line react-hooks/refs
   const mergedRefs = useMergeRefs([refs.setReference, item.ref, forwardedRef]);
+  // Use the consumer's element directly (asChild-style) so we don't nest
+  // a <button> inside their <button>. Consumers should pass a real <button>
+  // for keyboard/AT support; we only fall back to wrapping the label in one
+  // when no trigger is provided.
+  const triggerElement = trigger ?? <button type="button">{label}</button>;
   return (
     <FloatingNode id={nodeId}>
       {cloneElement(
-        <button>{trigger || label}</button>,
+        triggerElement,
         getReferenceProps({
           ref: mergedRefs,
         })
