@@ -67,6 +67,52 @@ being promoted. For workloads where Canvas/WebGL would win (10k+
 animated shapes, particle systems), we'd need a different renderer
 architecture anyway — not just the Two.js sibling backends.
 
+## Manual-draw validation vs scripted spiral (2026-04-18)
+
+Sanity check on the scripted trace. Each app opened headed with the
+pencil/brush pre-selected, then sampled for 10s while I drew fast
+free-form doodles via mouse.
+
+Spec: `perf/scenarios/manual-draw.spec.ts`. Single run per app — not
+baseline-grade, but enough to check that the scripted numbers are in
+the right ballpark.
+
+| App | Manual mean | Scripted mean | Manual peak | Scripted peak |
+|---|---:|---:|---:|---:|
+| Skedoodle | 15.12% | 23.04% | 25.1% | 36.8% |
+| tldraw | 17.63% | 23.27% | 30.4% | 33.3% |
+| Excalidraw | 19.06% | 31.27% | 33.2% | 58.0% |
+| Figma | 70.24% | 96.51% | 97.6% | 100.6% |
+
+### What this tells us
+
+- **Scripted runs harder than human input on every app.** The synthetic
+  trace fires one pointer event every 16 ms with no gaps; real drawing
+  has micro-pauses at every direction change. So published baseline
+  numbers are a **worst-case sustained load**, not a "here's what a
+  user feels" number. That's fine for the article's thesis (comparing
+  apps under identical stress), but readers should be told.
+- **Orderings match the scripted baseline**: Skedoodle < tldraw <
+  Excalidraw ≪ Figma on both mean and peak. The qualitative story
+  doesn't depend on scripted vs manual.
+- **Excalidraw is the most event-rate-sensitive** — a 12 pp mean CPU
+  drop from scripted to manual. Likely rough.js's per-pointer-event
+  work scaling with event frequency.
+- **Figma's script% behaves strangely under manual input** (56% of
+  wall clock vs 11% on scripted). Possible explanations: pencil's
+  real-time smoothing is cheaper on the very regular scripted trace
+  than on irregular human timing, or scripted events land on a faster
+  Figma code path. Didn't chase further.
+- **Skedoodle ↔ tldraw tie still holds** but is noisier on a single
+  manual run (15.12 vs 17.63) than on 5-run scripted (23.04 vs 23.27).
+  The scripted numbers are the right citation for the article.
+
+### Caveat on this comparison
+
+Single run per app, no replay control, no warmup. Variance is
+high — don't read decimals. The takeaway is *order of magnitude* +
+*qualitative order*, both of which match the scripted baseline.
+
 ## When we might test other things here
 
 - Brush stabilizer on vs off (stabilizer cost in active draw)
