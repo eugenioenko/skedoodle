@@ -97,10 +97,14 @@ export const Panel = () => {
               <Dropdown
                 placement="bottom"
                 trigger={
-                  <div className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums">
+                  <button
+                    type="button"
+                    aria-label="Zoom level"
+                    className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums"
+                  >
                     {zoom}%
                     <IconChevronDown size={12} stroke={2} />
-                  </div>
+                  </button>
                 }
               >
                 {ZOOM_LEVELS.map((level) => (

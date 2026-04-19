@@ -43,12 +43,16 @@ const UserAvatar = () => {
       hover={false}
       placement="bottom-end"
       trigger={
-        <div className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-default-3 select-none">
+        <button
+          type="button"
+          aria-label="Account menu"
+          className="flex items-center gap-1 px-1.5 py-1 rounded hover:bg-default-3 select-none"
+        >
           <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-xs font-medium">
             {initials}
           </div>
           <IconChevronDown size={12} stroke={2} />
-        </div>
+        </button>
       }
     >
       <DropdownItem

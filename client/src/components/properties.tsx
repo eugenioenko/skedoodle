@@ -264,7 +264,7 @@ export const SettingsTab = () => {
             useToastStore.getState().addToast("Reload page to apply renderer change");
           }}
         >
-          <option value="svg">SVG</option>
+          <option value="svg">SVG (Recommended)</option>
           <option value="canvas">Canvas</option>
           <option value="webgl">WebGL</option>
         </select>

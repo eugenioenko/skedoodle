@@ -1,14 +1,16 @@
 import {
-  IconFileTypePng,
-  IconFileTypeSvg,
+  IconDownload,
   IconMenu2,
   IconUpload,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { Dropdown, DropdownItem } from "./ui/dropdown";
 import { ToolbarDivider } from "./ui/toolbar-divider";
 import { useToastStore } from "./ui/toasts";
+import { ExportDialog } from "./export-dialog";
 
 export const MainMenu = () => {
+  const [exportOpen, setExportOpen] = useState(false);
   const notImplemented = () => useToastStore.getState().addToast("Coming soon");
 
   return (
@@ -18,20 +20,15 @@ export const MainMenu = () => {
           hover={false}
           placement="bottom-start"
           trigger={
-            <button type="button" className="p-1 rounded hover:bg-default-3">
+            <button type="button" className="p-1 rounded hover:bg-default-3" aria-label="Open main menu">
               <IconMenu2 size={20} stroke={1} />
             </button>
           }
         >
           <DropdownItem
-            label="Export as SVG"
-            icon={<IconFileTypeSvg size={16} stroke={1} />}
-            onClick={notImplemented}
-          />
-          <DropdownItem
-            label="Export as PNG"
-            icon={<IconFileTypePng size={16} stroke={1} />}
-            onClick={notImplemented}
+            label="Export…"
+            icon={<IconDownload size={16} stroke={1} />}
+            onClick={() => setExportOpen(true)}
           />
           <DropdownItem
             label="Import"
@@ -41,6 +38,7 @@ export const MainMenu = () => {
         </Dropdown>
       </div>
       <ToolbarDivider />
+      <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
     </>
   );
 };

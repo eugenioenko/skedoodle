@@ -1,0 +1,266 @@
+import { useEffect, useMemo, useState } from "react";
+import { useCanvasStore, useOptionsStore } from "@/canvas/canvas.store";
+import { useSketchMetaStore } from "@/canvas/sketch-meta.store";
+import { usePointerStore } from "@/canvas/tools/pointer.tool";
+import {
+  buildExportFilename,
+  exportPNG,
+  exportSVG,
+} from "@/canvas/export.service";
+import { getDoodler } from "@/canvas/doodler.client";
+import { Dialog } from "./ui/dialog";
+import { ColorInput } from "./ui/color-input";
+
+interface ExportDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const SCALE_OPTIONS = [1, 2, 3] as const;
+
+export const ExportDialog = ({ open, onClose }: ExportDialogProps) => {
+  const exportFormat = useOptionsStore((s) => s.exportFormat);
+  const exportTransparent = useOptionsStore((s) => s.exportTransparent);
+  const exportPadding = useOptionsStore((s) => s.exportPadding);
+  const exportPngScale = useOptionsStore((s) => s.exportPngScale);
+  const canvasColor = useOptionsStore((s) => s.canvasColor);
+  const sketchName = useSketchMetaStore((s) => s.name);
+
+  const defaultFilename = useMemo(
+    () => buildExportFilename(sketchName, exportFormat),
+    [sketchName, exportFormat]
+  );
+
+  const [filename, setFilename] = useState(defaultFilename);
+  const [background, setBackground] = useState(canvasColor);
+  const [filenameTouched, setFilenameTouched] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [onlySelected, setOnlySelected] = useState(false);
+
+  // On open: capture the current selection's IDs (so we can offer to export
+  // only it AND restore it on close), then reset background, refresh filename,
+  // and clear the selection. Clearing is necessary because the selected stroke
+  // is mutated on the shape itself — leaving it would bake the highlight color
+  // into the export.
+  useEffect(() => {
+    if (!open) return;
+    const { selected, clearSelected } = usePointerStore.getState();
+    const ids = new Set(selected.map((s) => s.id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedIds(ids);
+    setOnlySelected(false);
+    setBackground(canvasColor);
+    setFilename(buildExportFilename(sketchName, exportFormat));
+    setFilenameTouched(false);
+    if (selected.length > 0) {
+      clearSelected();
+      getDoodler().throttledTwoUpdate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Restore the selection that was cleared on open, so the dialog doesn't
+  // silently destroy the user's selection state.
+  const handleClose = () => {
+    if (selectedIds.size > 0) {
+      const { doodles } = useCanvasStore.getState();
+      const shapesToRestore = doodles
+        .filter((d) => selectedIds.has(d.shape.id))
+        .map((d) => d.shape);
+      if (shapesToRestore.length > 0) {
+        usePointerStore.getState().selectShapes(shapesToRestore);
+        getDoodler().throttledTwoUpdate();
+      }
+    }
+    onClose();
+  };
+
+  // If user hasn't touched the filename, keep it in sync with format changes
+  useEffect(() => {
+    if (filenameTouched) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFilename(buildExportFilename(sketchName, exportFormat));
+  }, [exportFormat, sketchName, filenameTouched]);
+
+  const handleExport = () => {
+    const { doodles } = useCanvasStore.getState();
+    const filtered =
+      onlySelected && selectedIds.size > 0
+        ? doodles.filter((d) => selectedIds.has(d.shape.id))
+        : doodles;
+    const opts = {
+      doodles: filtered,
+      padding: exportPadding,
+      background,
+      transparent: exportTransparent,
+      filename,
+    };
+    if (exportFormat === "svg") {
+      exportSVG(opts);
+    } else {
+      exportPNG({ ...opts, scale: exportPngScale });
+    }
+    handleClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      title="Export sketch"
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-text-secondary hover:bg-default-3 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleExport}
+            className="px-4 py-2 rounded-lg text-sm font-medium bg-primary hover:opacity-90 text-text-primary transition-colors"
+          >
+            Export
+          </button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4 text-sm">
+        <Field label="Format">
+          <div className="flex gap-2">
+            <RadioPill
+              isSelected={exportFormat === "png"}
+              onClick={() => useOptionsStore.getState().setExportFormat("png")}
+            >
+              PNG
+            </RadioPill>
+            <RadioPill
+              isSelected={exportFormat === "svg"}
+              onClick={() => useOptionsStore.getState().setExportFormat("svg")}
+            >
+              SVG
+            </RadioPill>
+          </div>
+        </Field>
+
+        <Field label="Scope">
+          <label
+            className={`flex items-center gap-2 select-none ${
+              selectedIds.size === 0
+                ? "text-text-secondary opacity-50 cursor-not-allowed"
+                : "text-text-primary cursor-pointer"
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={onlySelected && selectedIds.size > 0}
+              disabled={selectedIds.size === 0}
+              onChange={(e) => setOnlySelected(e.target.checked)}
+            />
+            Export only selected ({selectedIds.size})
+          </label>
+        </Field>
+
+        <Field label="Filename">
+          <input
+            type="text"
+            value={filename}
+            onChange={(e) => {
+              setFilename(e.target.value);
+              setFilenameTouched(true);
+            }}
+            className="w-full px-3 py-2 bg-default-3 border border-default-1 rounded text-sm text-text-primary focus:outline-none focus:border-highlight"
+          />
+        </Field>
+
+        <Field label="Padding (px)">
+          <input
+            type="number"
+            min={0}
+            value={exportPadding}
+            onChange={(e) => {
+              const v = Math.max(0, Number(e.target.value) || 0);
+              useOptionsStore.getState().setExportPadding(v);
+            }}
+            className="w-24 px-3 py-2 bg-default-3 border border-default-1 rounded text-sm text-text-primary focus:outline-none focus:border-highlight"
+          />
+        </Field>
+
+        <Field label="Background">
+          <div className="flex items-center gap-3">
+            <ColorInput
+              value={background}
+              onChange={setBackground}
+              disabled={exportTransparent}
+            />
+            <label className="flex items-center gap-2 text-text-primary cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={exportTransparent}
+                onChange={(e) =>
+                  useOptionsStore.getState().setExportTransparent(e.target.checked)
+                }
+              />
+              Transparent
+            </label>
+          </div>
+        </Field>
+
+        {exportFormat === "png" && (
+          <Field label="Resolution">
+            <div className="flex gap-2">
+              {SCALE_OPTIONS.map((scale) => (
+                <RadioPill
+                  key={scale}
+                  isSelected={exportPngScale === scale}
+                  onClick={() =>
+                    useOptionsStore.getState().setExportPngScale(scale)
+                  }
+                >
+                  {scale}×
+                </RadioPill>
+              ))}
+            </div>
+          </Field>
+        )}
+      </div>
+    </Dialog>
+  );
+};
+
+const Field = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-xs text-text-secondary">{label}</label>
+    {children}
+  </div>
+);
+
+const RadioPill = ({
+  isSelected,
+  onClick,
+  children,
+}: {
+  isSelected: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`px-3 py-1.5 rounded text-sm transition-colors ${
+      isSelected
+        ? "bg-primary text-text-primary"
+        : "bg-default-3 text-text-secondary hover:text-text-primary"
+    }`}
+  >
+    {children}
+  </button>
+);

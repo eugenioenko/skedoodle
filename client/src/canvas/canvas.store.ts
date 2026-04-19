@@ -72,6 +72,10 @@ export interface OptionsState {
   globalStrokeColor: RgbaColor;
   globalFillColor: RgbaColor;
   colorPalette: string[][];
+  exportFormat: "svg" | "png";
+  exportTransparent: boolean;
+  exportPadding: number;
+  exportPngScale: 1 | 2 | 3;
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -90,6 +94,10 @@ export interface OptionsState {
   setGlobalStrokeColor: (globalStrokeColor: RgbaColor) => void;
   setGlobalFillColor: (globalFillColor: RgbaColor) => void;
   setColorPalette: (colorPalette: string[][]) => void;
+  setExportFormat: (exportFormat: "svg" | "png") => void;
+  setExportTransparent: (exportTransparent: boolean) => void;
+  setExportPadding: (exportPadding: number) => void;
+  setExportPngScale: (exportPngScale: 1 | 2 | 3) => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -113,6 +121,10 @@ export const useOptionsStore = create<OptionsState>()(
       syncColors: false,
       globalStrokeColor: { r: 33, g: 33, b: 33, a: 1 },
       globalFillColor: { r: 255, g: 255, b: 255, a: 1 },
+      exportFormat: "png",
+      exportTransparent: false,
+      exportPadding: 16,
+      exportPngScale: 2,
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
@@ -132,7 +144,23 @@ export const useOptionsStore = create<OptionsState>()(
       setGlobalStrokeColor: (globalStrokeColor) => set(() => ({ globalStrokeColor })),
       setGlobalFillColor: (globalFillColor) => set(() => ({ globalFillColor })),
       setColorPalette: (colorPalette) => set(() => ({ colorPalette })),
+      setExportFormat: (exportFormat) => set(() => ({ exportFormat })),
+      setExportTransparent: (exportTransparent) => set(() => ({ exportTransparent })),
+      setExportPadding: (exportPadding) => set(() => ({ exportPadding })),
+      setExportPngScale: (exportPngScale) => set(() => ({ exportPngScale })),
     }),
-    { name: "options", version: 4 }
+    {
+      name: "options",
+      version: 5,
+      migrate: (persisted: any, version: number) => {
+        if (version < 5) {
+          persisted.exportFormat = persisted.exportFormat ?? "png";
+          persisted.exportTransparent = persisted.exportTransparent ?? false;
+          persisted.exportPadding = persisted.exportPadding ?? 16;
+          persisted.exportPngScale = persisted.exportPngScale ?? 2;
+        }
+        return persisted;
+      },
+    }
   )
 );
