@@ -436,10 +436,29 @@ const HANDLE_CURSOR_OPTION: Record<string, string> = {
 function updateHandleHoverCursor(e: MouseEvent<HTMLDivElement>): void {
   const { selected } = usePointerStore.getState();
   const { toolOption, setToolOption } = useOptionsStore.getState();
-  const desired =
-    selected.length > 0
-      ? HANDLE_CURSOR_OPTION[hitTestResizeHandle(eventToSurfacePosition(e)) ?? ""] ?? ""
-      : "";
+
+  let desired = "";
+  if (selected.length > 0) {
+    const handle = hitTestResizeHandle(eventToSurfacePosition(e));
+    if (handle) {
+      desired = HANDLE_CURSOR_OPTION[handle] ?? "";
+    } else {
+      const clientPointer = eventToClientPosition(e);
+      let overSelection = isPointInGroupOutline(clientPointer);
+      if (!overSelection) {
+        for (const shape of selected) {
+          if (!(shape as any).getBoundingClientRect) continue;
+          const box = (shape as any).getBoundingClientRect(false);
+          if (isPointInRect(clientPointer.x, clientPointer.y, box.left, box.top, box.right, box.bottom)) {
+            overSelection = true;
+            break;
+          }
+        }
+      }
+      if (overSelection) desired = "grab";
+    }
+  }
+
   if (desired !== toolOption) setToolOption(desired);
 }
 

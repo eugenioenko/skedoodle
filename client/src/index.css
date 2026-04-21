@@ -75,6 +75,10 @@ body {
   cursor: grabbing;
 }
 
+.canvas-container[data-selected="pointer"][data-option="grab"] {
+  cursor: grab;
+}
+
 .canvas-container[data-selected="pointer"][data-option="handle-nwse"] {
   cursor: nwse-resize;
 }
