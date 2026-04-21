@@ -9,7 +9,7 @@ import {
   IconZoomIn,
 } from "@tabler/icons-react";
 import { PropertiesTab, HistoryTab, SettingsTab } from "./properties";
-import { Button } from "./ui/button";
+import { Button, ButtonGroup } from "./ui/button";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { WithTooltip } from "./ui/tooltip";
 import { undo, redo } from "@/canvas/history.service";
@@ -70,7 +70,7 @@ export const Panel = () => {
 
         {/* Footer: undo/redo + zoom */}
         <div className="flex items-center justify-between px-4 py-2 border-t border-default-1 flex-shrink-0">
-          <div className="flex items-center border border-default-4 rounded">
+          <ButtonGroup>
             <WithTooltip tooltip="Undo (Ctrl+Z)">
               <Button onClick={undo} disabled={undoCount === 0 || isTimeTraveling}>
                 <IconArrowBackUp size={20} stroke={1} />
@@ -81,47 +81,47 @@ export const Panel = () => {
                 <IconArrowForwardUp size={20} stroke={1} />
               </Button>
             </WithTooltip>
-          </div>
-          <div className="flex items-center border border-default-4 rounded">
-              <WithTooltip tooltip="Reset zoom & position">
-                <Button onClick={() => doZoomReset()}>
-                  <IconFocus2 size={18} stroke={1} />
-                </Button>
-              </WithTooltip>
-              <div className="w-px h-4 bg-default-4" />
-              <WithTooltip tooltip="Zoom out">
-                <Button onClick={() => doZoomStep(-1)}>
-                  <IconMinus size={16} stroke={1.5} />
-                </Button>
-              </WithTooltip>
-              <Dropdown
-                placement="bottom"
-                trigger={
-                  <button
-                    type="button"
-                    aria-label="Zoom level"
-                    className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums"
-                  >
-                    {zoom}%
-                    <IconChevronDown size={12} stroke={2} />
-                  </button>
-                }
-              >
-                {ZOOM_LEVELS.map((level) => (
-                  <DropdownItem
-                    key={level}
-                    label={`${level}%`}
-                    icon={<IconZoomIn size={16} stroke={1} />}
-                    onClick={() => doZoomTo(level)}
-                  />
-                ))}
-              </Dropdown>
-              <WithTooltip tooltip="Zoom in">
-                <Button onClick={() => doZoomStep(1)}>
-                  <IconPlus size={16} stroke={1.5} />
-                </Button>
-              </WithTooltip>
-            </div>
+          </ButtonGroup>
+          <ButtonGroup>
+            <WithTooltip tooltip="Reset zoom & position">
+              <Button onClick={() => doZoomReset()}>
+                <IconFocus2 size={18} stroke={1} />
+              </Button>
+            </WithTooltip>
+            <div className="w-px h-4 bg-default-4 self-center" />
+            <WithTooltip tooltip="Zoom out">
+              <Button onClick={() => doZoomStep(-1)}>
+                <IconMinus size={16} stroke={1.5} />
+              </Button>
+            </WithTooltip>
+            <Dropdown
+              placement="bottom"
+              trigger={
+                <button
+                  type="button"
+                  aria-label="Zoom level"
+                  className="flex items-center gap-0.5 text-xs px-1 py-0.5 rounded hover:bg-default-3 tabular-nums"
+                >
+                  {zoom}%
+                  <IconChevronDown size={12} stroke={2} />
+                </button>
+              }
+            >
+              {ZOOM_LEVELS.map((level) => (
+                <DropdownItem
+                  key={level}
+                  label={`${level}%`}
+                  icon={<IconZoomIn size={16} stroke={1} />}
+                  onClick={() => doZoomTo(level)}
+                />
+              ))}
+            </Dropdown>
+            <WithTooltip tooltip="Zoom in">
+              <Button onClick={() => doZoomStep(1)}>
+                <IconPlus size={16} stroke={1.5} />
+              </Button>
+            </WithTooltip>
+          </ButtonGroup>
         </div>
 
       </div>

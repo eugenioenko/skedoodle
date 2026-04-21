@@ -24,7 +24,7 @@ import { useBezierStore } from "@/canvas/tools/bezier.tool";
 import { useLineStore } from "@/canvas/tools/line.tool";
 import { useTextStore } from "@/canvas/tools/text.tool";
 import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/canvas.grid";
-import { ToggleButton, ToggleGroup } from "./ui/button";
+import { ToggleButton, ButtonGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
 import { pushUpdateCommand } from "@/canvas/history.service";
 import { ColorPalette } from "./color-palette";
@@ -241,7 +241,7 @@ export const SettingsTab = () => {
       <Section title="Grid">
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <ToggleGroup>
+            <ButtonGroup>
               <ToggleButton
                 isSelected={gridType === "none"}
                 onClick={() => {
@@ -269,7 +269,7 @@ export const SettingsTab = () => {
               >
                 <IconGrid3x3 size={20} stroke={1} />
               </ToggleButton>
-            </ToggleGroup>
+            </ButtonGroup>
             <ColorInput
               value={gridColor}
               onChange={(value) => {

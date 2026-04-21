@@ -13,7 +13,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         type="button"
-        className={`p-1 rounded hover:bg-default-3 ${className ? className : ""
+        className={`p-1 flex items-center justify-center rounded hover:bg-default-3 ${className ? className : ""
           }`}
         ref={ref}
         {...rest}
@@ -26,13 +26,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-interface ToggleGroupProps {
+interface ButtonGroupProps {
   children: React.ReactNode;
 }
 
-export const ToggleGroup = ({ children }: ToggleGroupProps) => {
+export const ButtonGroup = ({ children }: ButtonGroupProps) => {
   return (
-    <div className="flex  border border-default-4 rounded overflow-hidden min-h-[26px]">
+    <div className="flex border border-default-4 rounded overflow-hidden min-h-[26px]">
       {children}
     </div>
   );
@@ -51,7 +51,7 @@ export const ToggleButton = (props: ToggleButtonProps) => {
   return (
     <button
       type="button"
-      className={`p-0.5 hover:bg-default-4 ${isPressed ? "bg-default-3" : ""}`}
+      className={`p-0.5 flex items-center justify-center hover:bg-default-4 ${isPressed ? "bg-default-3" : ""}`}
       aria-pressed={isPressed}
       {...rest}
     >
