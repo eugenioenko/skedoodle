@@ -1,16 +1,11 @@
-import { degreesToRadians, radiansToDegrees } from "@/canvas/canvas.utils";
 import { getDoodler } from "@/canvas/doodler.client";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
-  IconAngle,
   IconBorderCornerRounded,
   IconBrush,
-  IconDimensions,
   IconEyeClosed,
   IconGridDots,
   IconZoomOut,
-  IconSkewX,
-  IconSkewY,
   IconGrid3x3
 } from "@tabler/icons-react";
 import { colord } from "colord";
@@ -138,7 +133,7 @@ export const PropertiesTab = () => {
 
   return (
     <div className="flex flex-col min-h-full">
-      <div className="flex-grow">
+      <div>
       <Section title="Color">
         <div className="flex flex-col gap-4">
           <ColorInput
@@ -174,52 +169,10 @@ export const PropertiesTab = () => {
               />
             </div>
           </Section>
-          <Section title="Transform">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconAngle}
-                min={-360}
-                max={360}
-                sensitivity={1}
-                value={shape?.rotation}
-                onChange={(value) => updateShape("rotation", value)}
-                convertFrom={radiansToDegrees}
-                convertTo={degreesToRadians}
-              />
-              <SlideInput
-                icon={IconDimensions}
-                min={-Infinity}
-                max={Infinity}
-                sensitivity={1}
-                value={shape?.scale as number}
-                onChange={(value) => updateShape("scale", value)}
-                convertFrom={(n) => n * 100}
-                convertTo={(n) => n / 100}
-              />
-              <SlideInput
-                icon={IconSkewX}
-                min={-Math.PI}
-                max={Math.PI}
-                sensitivity={0.01}
-                value={shape?.skewX}
-                onChange={(value) => updateShape("skewX", value)}
-              />
-              <SlideInput
-                icon={IconSkewY}
-                min={-Math.PI}
-                max={Math.PI}
-                sensitivity={0.01}
-                value={shape?.skewY}
-                onChange={(value) => updateShape("skewY", value)}
-              />
-            </div>
-          </Section>
         </>
       )}
       </div>
-      <Section title="Layers">
-        <Layers />
-      </Section>
+      <Layers />
     </div>
   );
 };
