@@ -5,7 +5,7 @@ import { IconBrush, IconBucketDroplet, IconCheck, IconPencil, IconRefresh } from
 import { DEFAULT_PALETTE, useOptionsStore } from "@/canvas/canvas.store";
 import { Button } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
-import { ToggleButton, ToggleGroup } from "./ui/button";
+import { ToggleButton, ButtonGroup } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface ColorSwatchProps {
@@ -67,7 +67,7 @@ export const ColorPalette = ({ onApply }: ColorPaletteProps) => {
   return (
     <div className="flex flex-col gap-2 pt-2">
       <div className="flex items-center justify-between mt-4">
-        <ToggleGroup>
+        <ButtonGroup>
           <WithTooltip tooltip="Apply to stroke">
             <ToggleButton isSelected={target === "stroke"} onClick={() => setTarget("stroke")}>
               <IconBrush size={21} stroke={1} />
@@ -78,7 +78,7 @@ export const ColorPalette = ({ onApply }: ColorPaletteProps) => {
               <IconBucketDroplet size={21} stroke={1} />
             </ToggleButton>
           </WithTooltip>
-        </ToggleGroup>
+        </ButtonGroup>
         <div className="flex items-center gap-1">
           {editMode && (
             <WithTooltip tooltip="Reset to defaults">

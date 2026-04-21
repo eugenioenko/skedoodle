@@ -75,6 +75,18 @@ body {
   cursor: grabbing;
 }
 
+.canvas-container[data-selected="pointer"][data-option="handle-nwse"] {
+  cursor: nwse-resize;
+}
+
+.canvas-container[data-selected="pointer"][data-option="handle-nesw"] {
+  cursor: nesw-resize;
+}
+
+.canvas-container[data-selected="pointer"][data-option="handle-rotate"] {
+  cursor: grab;
+}
+
 .canvas-container[data-selected="zoom"] {
   cursor: zoom-in;
 }

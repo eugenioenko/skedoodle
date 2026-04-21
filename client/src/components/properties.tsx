@@ -1,16 +1,11 @@
-import { degreesToRadians, radiansToDegrees } from "@/canvas/canvas.utils";
 import { getDoodler } from "@/canvas/doodler.client";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
-  IconAngle,
   IconBorderCornerRounded,
   IconBrush,
-  IconDimensions,
   IconEyeClosed,
   IconGridDots,
   IconZoomOut,
-  IconSkewX,
-  IconSkewY,
   IconGrid3x3
 } from "@tabler/icons-react";
 import { colord } from "colord";
@@ -29,7 +24,7 @@ import { useBezierStore } from "@/canvas/tools/bezier.tool";
 import { useLineStore } from "@/canvas/tools/line.tool";
 import { useTextStore } from "@/canvas/tools/text.tool";
 import { setGridSize as setGridSizeDom, setGridType as setGridTypeDom, setGridColor as setGridColorDom, setGridMinZoom as setGridMinZoomDom } from "@/canvas/canvas.grid";
-import { ToggleButton, ToggleGroup } from "./ui/button";
+import { ToggleButton, ButtonGroup } from "./ui/button";
 import { useToastStore } from "./ui/toasts";
 import { pushUpdateCommand } from "@/canvas/history.service";
 import { ColorPalette } from "./color-palette";
@@ -138,7 +133,7 @@ export const PropertiesTab = () => {
 
   return (
     <div className="flex flex-col min-h-full">
-      <div className="flex-grow">
+      <div>
       <Section title="Color">
         <div className="flex flex-col gap-4">
           <ColorInput
@@ -174,52 +169,10 @@ export const PropertiesTab = () => {
               />
             </div>
           </Section>
-          <Section title="Transform">
-            <div className="grid grid-cols-2 gap-4">
-              <SlideInput
-                icon={IconAngle}
-                min={-360}
-                max={360}
-                sensitivity={1}
-                value={shape?.rotation}
-                onChange={(value) => updateShape("rotation", value)}
-                convertFrom={radiansToDegrees}
-                convertTo={degreesToRadians}
-              />
-              <SlideInput
-                icon={IconDimensions}
-                min={-Infinity}
-                max={Infinity}
-                sensitivity={1}
-                value={shape?.scale as number}
-                onChange={(value) => updateShape("scale", value)}
-                convertFrom={(n) => n * 100}
-                convertTo={(n) => n / 100}
-              />
-              <SlideInput
-                icon={IconSkewX}
-                min={-Math.PI}
-                max={Math.PI}
-                sensitivity={0.01}
-                value={shape?.skewX}
-                onChange={(value) => updateShape("skewX", value)}
-              />
-              <SlideInput
-                icon={IconSkewY}
-                min={-Math.PI}
-                max={Math.PI}
-                sensitivity={0.01}
-                value={shape?.skewY}
-                onChange={(value) => updateShape("skewY", value)}
-              />
-            </div>
-          </Section>
         </>
       )}
       </div>
-      <Section title="Layers">
-        <Layers />
-      </Section>
+      <Layers />
     </div>
   );
 };
@@ -288,7 +241,7 @@ export const SettingsTab = () => {
       <Section title="Grid">
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <ToggleGroup>
+            <ButtonGroup>
               <ToggleButton
                 isSelected={gridType === "none"}
                 onClick={() => {
@@ -316,7 +269,7 @@ export const SettingsTab = () => {
               >
                 <IconGrid3x3 size={20} stroke={1} />
               </ToggleButton>
-            </ToggleGroup>
+            </ButtonGroup>
             <ColorInput
               value={gridColor}
               onChange={(value) => {

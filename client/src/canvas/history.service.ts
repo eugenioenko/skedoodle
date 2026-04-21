@@ -87,6 +87,7 @@ function addDoodleToCanvas(doodle: Doodle): void {
   const { doodles, setDoodles } = useCanvasStore.getState();
   setDoodles([...doodles, doodle]);
   doodler.canvas.add(doodle.shape);
+  doodler.canvas.add(doodler.highlights);
 }
 
 function removeDoodleFromCanvas(id: string): void {

@@ -90,6 +90,7 @@ export function initPointerToolCleanup(): void {
       cancelMarquee();
       const { clearSelected } = usePointerStore.getState();
       clearSelected();
+      useOptionsStore.getState().setToolOption("");
       getDoodler().throttledTwoUpdate();
     }
   });
@@ -270,8 +271,7 @@ function startMarquee(surfacePos: { x: number; y: number }): void {
   rect.stroke = ColorHighlight;
   rect.linewidth = 1.5 / doodler.zui.scale;
   rect.opacity = 0.6;
-  (rect as any).isHighlight = true;
-  doodler.canvas.add(rect);
+  doodler.highlights.add(rect);
   marqueeRect = rect;
 }
 
@@ -301,7 +301,6 @@ function endMarquee(shiftKey: boolean): void {
   const hits: Shape[] = [];
   for (const doodle of doodles) {
     const shape = doodle.shape;
-    if ((shape as any).isHighlight) continue;
     if (!(shape as any).getBoundingClientRect) continue;
 
     const item = (shape as any).getBoundingClientRect(false);
@@ -424,6 +423,24 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   doodler.throttledTwoUpdate();
 }
 
+const HANDLE_CURSOR_OPTION: Record<string, string> = {
+  nw: "handle-nwse",
+  se: "handle-nwse",
+  ne: "handle-nesw",
+  sw: "handle-nesw",
+  rotate: "handle-rotate",
+};
+
+function updateHandleHoverCursor(e: MouseEvent<HTMLDivElement>): void {
+  const { selected } = usePointerStore.getState();
+  const { toolOption, setToolOption } = useOptionsStore.getState();
+  const desired =
+    selected.length > 0
+      ? HANDLE_CURSOR_OPTION[hitTestResizeHandle(eventToSurfacePosition(e)) ?? ""] ?? ""
+      : "";
+  if (desired !== toolOption) setToolOption(desired);
+}
+
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   if (isRotating()) {
     doRotateDrag(eventToSurfacePosition(e), e.shiftKey);
@@ -441,6 +458,7 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   if (isMoving) {
     doMoveShape(e);
   } else {
+    updateHandleHoverCursor(e);
     doTryHighlight(e);
   }
 }
@@ -537,7 +555,7 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
 
     const { selected } = usePointerStore.getState();
     const isSelected = selected.some((s) => s.id === shape.id);
-    if (!isShapeWithin || (shape as any).isHighlight || isSelected) {
+    if (!isShapeWithin || isSelected) {
       continue;
     }
 

@@ -26,7 +26,7 @@ import { useTextStore } from "@/canvas/tools/text.tool";
 import { ColorInput } from "./ui/color-input";
 import { useOptionsStore } from "@/canvas/canvas.store";
 import { useSquareStore } from "@/canvas/tools/square.tool";
-import { ToggleButton, ToggleGroup } from "./ui/button";
+import { ToggleButton, ButtonGroup } from "./ui/button";
 import { WithTooltip } from "./ui/tooltip";
 import { ToolHint } from "./ui/tool-hint";
 import { useSyncedColor } from "@/hooks/use-synced-color";
@@ -201,7 +201,7 @@ const BrushToolOptions = () => {
           icon={IconWaveSine}
         />
       </WithTooltip>
-      <ToggleGroup>
+      <ButtonGroup>
         <WithTooltip tooltip="Smooth — all nodes stay curved, best for organic flowing strokes">
           <ToggleButton isSelected={simplifyAlgo === "smooth"} onClick={() => setSimplifyAlgo("smooth")}>
             <IconVectorSpline size={20} stroke={1} />
@@ -212,7 +212,7 @@ const BrushToolOptions = () => {
             <IconVectorTriangle size={20} stroke={1} />
           </ToggleButton>
         </WithTooltip>
-      </ToggleGroup>
+      </ButtonGroup>
       {simplifyAlgo === "precise" && (
         <>
           <WithTooltip tooltip={cornerDetection ? "Disable corner detection" : "Enable corner detection — sharp turns render as hard edges instead of curves"}>
@@ -425,7 +425,7 @@ const LineToolOptions = () => {
       {selectedTool === "arrow" && (
         <>
           <label className="pl-2">Double</label>
-          <ToggleGroup>
+          <ButtonGroup>
             <WithTooltip tooltip="Double-ended arrow">
               <ToggleButton
                 isSelected={doubleArrow}
@@ -434,7 +434,7 @@ const LineToolOptions = () => {
                 <IconArrowsHorizontal size={20} stroke={1} />
               </ToggleButton>
             </WithTooltip>
-          </ToggleGroup>
+          </ButtonGroup>
         </>
       )}
     </div>

@@ -185,8 +185,7 @@ export function doTextStart(e: MouseEvent<HTMLDivElement>): void {
   rect.noFill();
   rect.stroke = ColorHighlight;
   rect.linewidth = 1.5 / doodler.zui.scale;
-  (rect as any).isHighlight = true;
-  doodler.canvas.add(rect);
+  doodler.highlights.add(rect);
   previewRect = rect;
 }
 

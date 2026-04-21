@@ -56,11 +56,11 @@ export const Layers = () => {
 
   return (
     <>
-      <div className="pb-1 pt-4 flex items-center justify-between">
+      <div className="pb-1 pt-4 flex items-center justify-between text-sm text-text-secondary">
         <span>Layers</span>
-        <span className="text-xs text-text-secondary">{doodles.length}</span>
+        <span className="text-xs">{doodles.length}</span>
       </div>
-      <div className="flex-grow max-h-56 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
+      <div className="max-h-56 overflow-y-auto scroll-smooth shadow rounded bg-default-3">
         <div className="flex flex-col text-sm">
           {doodles.map((doodle, index) => (
             <DoodleItem

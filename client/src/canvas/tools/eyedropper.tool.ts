@@ -68,7 +68,6 @@ export function doEyedropperPick(e: MouseEvent<HTMLDivElement>): void {
 
   for (const doodle of doodles) {
     const shape: any = doodle.shape;
-    if (shape.isHighlight) continue;
     if (!shape.getBoundingClientRect) continue;
     const item = shape.getBoundingClientRect(false);
     if (!isPointInRect(pointer.x, pointer.y, item.left, item.top, item.right, item.bottom)) {
