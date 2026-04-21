@@ -258,7 +258,7 @@ const SquareToolOptions = () => {
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
       <label className="pl-2">Width</label>
       <SlideInput
-        className="max-w-24"
+       
         value={strokeWidth}
         min={0}
         max={100}
@@ -267,7 +267,7 @@ const SquareToolOptions = () => {
       />
       <label className="pl-2">Radius</label>
       <SlideInput
-        className="max-w-24"
+       
         value={radius}
         min={0}
         max={100}
@@ -297,7 +297,7 @@ const EllipseToolOptions = () => {
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
       <label className="pl-2">Width</label>
       <SlideInput
-        className="max-w-24"
+       
         value={strokeWidth}
         min={0}
         max={100}
@@ -331,7 +331,7 @@ const TextToolOptions = () => {
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
       <label className="pl-2">Size</label>
       <SlideInput
-        className="max-w-24"
+       
         value={fontSize}
         min={8}
         max={256}
@@ -384,7 +384,7 @@ const BezierToolOptions = () => {
       <ColorInput value={fillColor} onChange={(value) => setFillColor(value)} />
       <label className="pl-2">Width</label>
       <SlideInput
-        className="max-w-24"
+       
         value={strokeWidth}
         min={0}
         max={100}
@@ -415,7 +415,7 @@ const LineToolOptions = () => {
       />
       <label className="pl-2">Width</label>
       <SlideInput
-        className="max-w-24"
+       
         value={strokeWidth}
         min={1}
         max={100}

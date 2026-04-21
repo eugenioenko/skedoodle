@@ -55,13 +55,14 @@ export const SlideInput = ({
       {label && (
         <label className="text-xs font-light opacity-65">{label}</label>
       )}
-      <div className={`relative ${className}`}>
+      <div className={`slide-input-wrapper ${className}`}>
         <button
-          className={`absolute left-px top-px w-6 h-6 cursor-ew-resize center rounded text-text-primary/65 border ${isHoverSliding ? "border-highlight" : "border-transparent"
+          className={`absolute left-px top-px cursor-ew-resize center rounded text-text-primary/65 border ${isHoverSliding ? "border-highlight" : "border-transparent"
             }`}
+          style={{ width: "var(--ctrl-icon-btn)", height: "var(--ctrl-icon-btn)" }}
           onMouseDown={(e) => onMouseDown(e.screenX)}
         >
-          {Icon && <Icon size={18} stroke={1} />}
+          {Icon && <Icon stroke={1} className="w-[var(--ctrl-icon)] h-[var(--ctrl-icon)]" />}
         </button>
         <input
           type="text"
@@ -102,10 +103,11 @@ const SliderPopover = ({ min, max, value, setValue }: SliderPopoverProps) => {
     >
       <PopoverTrigger
         onClick={() => setIsOpen((v) => !v)}
-        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-text-primary/65" ${isOpen ? "border-highlight" : "border-transparent"
+        className={`absolute border right-px top-px cursor-pointer center rounded text-text-primary/65" ${isOpen ? "border-highlight" : "border-transparent"
           }`}
+        style={{ width: "var(--ctrl-icon-btn)", height: "var(--ctrl-icon-btn)" }}
       >
-        <IconSelector size={18} stroke={1} />
+        <IconSelector stroke={1} className="w-[var(--ctrl-icon)] h-[var(--ctrl-icon)]" />
       </PopoverTrigger>
       <PopoverContent className="bg-default-2 px-4 py-2 rounded w-64 border border-white/10">
         <Slider

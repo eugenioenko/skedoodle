@@ -76,6 +76,7 @@ export interface OptionsState {
   exportTransparent: boolean;
   exportPadding: number;
   exportPngScale: 1 | 2 | 3;
+  uiSize: "default" | "large";
   setSelectedTool: (tool?: Tool) => void;
   setActiveTool: (tool?: Tool) => void;
   setRestoreTool: (tool?: Tool) => void;
@@ -98,6 +99,7 @@ export interface OptionsState {
   setExportTransparent: (exportTransparent: boolean) => void;
   setExportPadding: (exportPadding: number) => void;
   setExportPngScale: (exportPngScale: 1 | 2 | 3) => void;
+  setUiSize: (uiSize: "default" | "large") => void;
 }
 
 export const useOptionsStore = create<OptionsState>()(
@@ -125,6 +127,7 @@ export const useOptionsStore = create<OptionsState>()(
       exportTransparent: false,
       exportPadding: 16,
       exportPngScale: 2,
+      uiSize: "default",
       setSelectedTool: (selectedTool) => set(() => ({ selectedTool })),
       setActiveTool: (activeTool) => set(() => ({ activeTool })),
       setRestoreTool: (restoreTool) => set(() => ({ restoreTool })),
@@ -148,19 +151,11 @@ export const useOptionsStore = create<OptionsState>()(
       setExportTransparent: (exportTransparent) => set(() => ({ exportTransparent })),
       setExportPadding: (exportPadding) => set(() => ({ exportPadding })),
       setExportPngScale: (exportPngScale) => set(() => ({ exportPngScale })),
+      setUiSize: (uiSize) => set(() => ({ uiSize })),
     }),
     {
       name: "options",
-      version: 5,
-      migrate: (persisted: any, version: number) => {
-        if (version < 5) {
-          persisted.exportFormat = persisted.exportFormat ?? "png";
-          persisted.exportTransparent = persisted.exportTransparent ?? false;
-          persisted.exportPadding = persisted.exportPadding ?? 16;
-          persisted.exportPngScale = persisted.exportPngScale ?? 2;
-        }
-        return persisted;
-      },
+      version: 6,
     }
   )
 );

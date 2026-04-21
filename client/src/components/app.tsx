@@ -4,7 +4,7 @@ import { Panel } from "./panel";
 import { useWindowWheelPrevent } from "@/hooks/use-window-wheel";
 import { ToolOptions } from "./tool-options";
 import { Loader } from "./loader";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toasts } from "./ui/toasts";
 import { useCommandLogStore } from "@/canvas/history.store";
@@ -74,8 +74,14 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isTimeTraveling = useCommandLogStore((state) => state.isTimeTraveling);
+  const uiSize = useOptionsStore((state) => state.uiSize);
   const loadDelay = 650;
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    document.body.dataset.uiSize = uiSize;
+    return () => { delete document.body.dataset.uiSize; };
+  }, [uiSize]);
 
   const onReady = useCallback(() => {
     setTimeout(() => setIsLoading(false), loadDelay);
@@ -85,7 +91,10 @@ export const App = ({ mode = "online" }: { mode?: SketchMode }) => {
 
   return (
     <main className="w-dvw h-dvh flex flex-col text-text-primary relative">
-      <div className="bg-default-2 border-b border-default-1 min-h-12 h-12 flex items-center">
+      <div
+        className="bg-default-2 border-b border-default-1 flex items-center"
+        style={{ height: "var(--nav-h)", minHeight: "var(--nav-h)" }}
+      >
         <MainMenu />
         <div className="flex-grow min-w-0 px-4">
           <ToolOptions />

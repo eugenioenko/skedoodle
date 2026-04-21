@@ -123,7 +123,7 @@ const ToggleButton = ({ value, children }: ToggleButtonProps) => {
   return (
     <button
       type="button"
-      className={`p-1 rounded  ${isActive ? "bg-primary" : "hover:bg-default-3"
+      className={`toolbar-btn p-1 rounded ${isActive ? "bg-primary" : "hover:bg-default-3"
         }`}
       onClick={() => selectTool(value as Tool, current)}
     >
@@ -163,7 +163,7 @@ const ToolGroup = ({ tools }: { tools: ToolDef[] }) => {
     <div ref={refs.setReference} {...getReferenceProps()}>
       <button
         type="button"
-        className={`p-1 rounded relative ${isGroupActive ? "bg-primary" : "hover:bg-default-3"}`}
+        className={`toolbar-btn p-1 rounded relative ${isGroupActive ? "bg-primary" : "hover:bg-default-3"}`}
         onClick={() => handlePick(activePick.value)}
       >
         {activePick.icon}

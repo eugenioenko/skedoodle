@@ -195,9 +195,28 @@ export const SettingsTab = () => {
   const gridMinZoom = useOptionsStore((state) => state.gridMinZoom);
   const rendererType = useOptionsStore((state) => state.rendererType);
   const updateFrequency = useOptionsStore((state) => state.updateFrequency);
+  const uiSize = useOptionsStore((state) => state.uiSize);
 
   return (
     <div className="flex flex-col">
+      <Section title="UI size">
+        <ButtonGroup>
+          <ToggleButton
+            isSelected={uiSize === "default"}
+            onClick={() => useOptionsStore.getState().setUiSize("default")}
+            className="flex-1"
+          >
+            Default
+          </ToggleButton>
+          <ToggleButton
+            isSelected={uiSize === "large"}
+            onClick={() => useOptionsStore.getState().setUiSize("large")}
+            className="flex-1"
+          >
+            Large controls
+          </ToggleButton>
+        </ButtonGroup>
+      </Section>
       <Section title="Page">
         <ColorInput
           value={canvasColor}

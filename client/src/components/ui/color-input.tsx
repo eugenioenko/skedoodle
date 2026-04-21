@@ -31,7 +31,7 @@ export const ColorInput = ({ value, onChange, disabled }: ColorInputProps) => {
     onChange,
   });
   return (
-    <div className={`relative max-w-40 ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+    <div className={`relative inline-block ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
       <Popover
         open={isOpen}
         onOpenChange={setIsOpen}
@@ -40,9 +40,14 @@ export const ColorInput = ({ value, onChange, disabled }: ColorInputProps) => {
       >
         <PopoverTrigger
           onClick={() => setIsOpen((v) => !v)}
-          className={`w-[18px] h-[18px] rounded absolute left-1 top-1 ${isOpen ? "border-2 border-highlight" : ""
-            }`}
-          style={{ background: rgbValue }}
+          className={`rounded absolute ${isOpen ? "border-2 border-highlight" : ""}`}
+          style={{
+            background: rgbValue,
+            width: "var(--ctrl-swatch)",
+            height: "var(--ctrl-swatch)",
+            left: "calc((var(--ctrl-h) - var(--ctrl-swatch)) / 2)",
+            top: "calc((var(--ctrl-h) - var(--ctrl-swatch)) / 2)",
+          }}
         >
           &nbsp;
         </PopoverTrigger>
@@ -97,10 +102,11 @@ const AlphaSliderPopover = ({ value, setValue }: AlphaSliderPopoverProps) => {
     >
       <PopoverTrigger
         onClick={() => setIsOpen((v) => !v)}
-        className={`absolute border right-px top-px w-6 h-6 cursor-pointer center rounded text-text-primary/65" ${isOpen ? "border-highlight" : "border-transparent"
+        className={`absolute border right-px top-px cursor-pointer center rounded text-text-primary/65" ${isOpen ? "border-highlight" : "border-transparent"
           }`}
+        style={{ width: "var(--ctrl-icon-btn)", height: "var(--ctrl-icon-btn)" }}
       >
-        <IconPercentage size={18} stroke={1} />
+        <IconPercentage stroke={1} className="w-[var(--ctrl-icon)] h-[var(--ctrl-icon)]" />
       </PopoverTrigger>
       <PopoverContent className="bg-default-2 px-4 py-2 rounded w-60 border border-white/10">
         <Slider
