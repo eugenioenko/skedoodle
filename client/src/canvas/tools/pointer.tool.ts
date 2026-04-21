@@ -90,6 +90,7 @@ export function initPointerToolCleanup(): void {
       cancelMarquee();
       const { clearSelected } = usePointerStore.getState();
       clearSelected();
+      useOptionsStore.getState().setToolOption("");
       getDoodler().throttledTwoUpdate();
     }
   });
@@ -424,6 +425,24 @@ export function doPointerStart(e: MouseEvent<HTMLDivElement>): void {
   doodler.throttledTwoUpdate();
 }
 
+const HANDLE_CURSOR_OPTION: Record<string, string> = {
+  nw: "handle-nwse",
+  se: "handle-nwse",
+  ne: "handle-nesw",
+  sw: "handle-nesw",
+  rotate: "handle-rotate",
+};
+
+function updateHandleHoverCursor(e: MouseEvent<HTMLDivElement>): void {
+  const { selected } = usePointerStore.getState();
+  const { toolOption, setToolOption } = useOptionsStore.getState();
+  const desired =
+    selected.length > 0
+      ? HANDLE_CURSOR_OPTION[hitTestResizeHandle(eventToSurfacePosition(e)) ?? ""] ?? ""
+      : "";
+  if (desired !== toolOption) setToolOption(desired);
+}
+
 export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   if (isRotating()) {
     doRotateDrag(eventToSurfacePosition(e), e.shiftKey);
@@ -441,6 +460,7 @@ export function doPointerMove(e: MouseEvent<HTMLDivElement>): void {
   if (isMoving) {
     doMoveShape(e);
   } else {
+    updateHandleHoverCursor(e);
     doTryHighlight(e);
   }
 }
