@@ -271,8 +271,7 @@ function startMarquee(surfacePos: { x: number; y: number }): void {
   rect.stroke = ColorHighlight;
   rect.linewidth = 1.5 / doodler.zui.scale;
   rect.opacity = 0.6;
-  (rect as any).isHighlight = true;
-  doodler.canvas.add(rect);
+  doodler.highlights.add(rect);
   marqueeRect = rect;
 }
 
@@ -302,7 +301,6 @@ function endMarquee(shiftKey: boolean): void {
   const hits: Shape[] = [];
   for (const doodle of doodles) {
     const shape = doodle.shape;
-    if ((shape as any).isHighlight) continue;
     if (!(shape as any).getBoundingClientRect) continue;
 
     const item = (shape as any).getBoundingClientRect(false);
@@ -557,7 +555,7 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
 
     const { selected } = usePointerStore.getState();
     const isSelected = selected.some((s) => s.id === shape.id);
-    if (!isShapeWithin || (shape as any).isHighlight || isSelected) {
+    if (!isShapeWithin || isSelected) {
       continue;
     }
 

@@ -22,11 +22,12 @@ export const useInitTwoCanvas = (
     }
 
     const instance = createTwo(containerRef.current);
-    const canvasInstance = createCanvas(instance);
+    const { canvas: canvasInstance, highlights: highlightsInstance } = createCanvas(instance);
     const zuiInstance = createZUI(canvasInstance);
     const doodlerInstance = new Doodler({
       two: instance,
       canvas: canvasInstance as never,
+      highlights: highlightsInstance as never,
       zui: zuiInstance,
       sketchId,
       container: containerRef.current,
@@ -103,11 +104,12 @@ const createTwo = (container: HTMLDivElement): Two => {
   }).appendTo(container);
 };
 
-const createCanvas = (two: Two): Group => {
+const createCanvas = (two: Two): { canvas: Group; highlights: Group } => {
   const canvas = new Two.Group();
-
+  const highlights = new Two.Group();
+  canvas.add(highlights as never);
   two.add(canvas);
-  return canvas as never;
+  return { canvas: canvas as never, highlights: highlights as never };
 };
 
 const createZUI = (canvas: Two): ZUI => {

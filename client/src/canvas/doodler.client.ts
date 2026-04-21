@@ -25,6 +25,7 @@ interface DoodlerProps {
   two: Two;
   zui: ZUI;
   canvas: Group;
+  highlights: Group;
   sketchId: string;
   container: HTMLDivElement;
 }
@@ -33,12 +34,14 @@ export class Doodler {
   two: Two;
   zui: ZUI;
   canvas: Group;
+  highlights: Group;
   sketchId: string;
   container: HTMLDivElement;
 
   constructor(props: DoodlerProps) {
     this.two = props.two;
     this.canvas = props.canvas;
+    this.highlights = props.highlights;
     this.zui = props.zui;
     this.sketchId = props.sketchId || "default";
     this.container = props.container;
@@ -117,6 +120,8 @@ export class Doodler {
     const newDoodles = [...doodles, doodle];
     setDoodles(newDoodles);
     this.canvas.add(doodle.shape);
+    // keep highlights on top (Two.js add re-moves existing children to end)
+    this.canvas.add(this.highlights);
   }
 
   removeDoodle(doodle: Doodle): void {

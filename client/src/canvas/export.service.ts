@@ -36,7 +36,6 @@ export function getExportBounds(
 
   for (const doodle of doodles) {
     const shape = doodle.shape as any;
-    if (shape.isHighlight) continue;
     if (typeof shape.getBoundingClientRect !== "function") continue;
     const box = shape.getBoundingClientRect(true);
     if (!box) continue;
@@ -146,7 +145,6 @@ function buildScene(
   const group = two.makeGroup();
   for (const doodle of doodles) {
     const shape = doodle.shape as any;
-    if (shape.isHighlight) continue;
     if (typeof shape.clone !== "function") continue;
     const cloned = shape.clone();
     group.add(cloned);

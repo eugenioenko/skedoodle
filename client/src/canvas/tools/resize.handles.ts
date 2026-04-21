@@ -57,8 +57,7 @@ function createHandleCircle(x: number, y: number): Circle {
   dot.fill = "#ffffff";
   dot.stroke = ColorHighlight;
   dot.linewidth = 1.5 / scale;
-  (dot as any).isHighlight = true;
-  doodler.canvas.add(dot);
+  doodler.highlights.add(dot);
   return dot;
 }
 
@@ -82,8 +81,7 @@ export function showResizeHandles(shapes: Shape[]): void {
   groupRect.noFill();
   groupRect.stroke = ColorHighlight;
   groupRect.linewidth = 1.5 / scale;
-  (groupRect as any).isHighlight = true;
-  doodler.canvas.add(groupRect);
+  doodler.highlights.add(groupRect);
   groupOutline = groupRect;
 
   for (const id of ALL_HANDLES) {
@@ -101,8 +99,7 @@ export function showResizeHandles(shapes: Shape[]): void {
   const line = doodler.two.makeLine(topCenter.x, topCenter.y, rotatePos.x, rotatePos.y);
   line.stroke = ColorHighlight;
   line.linewidth = 1.5 / scale;
-  (line as any).isHighlight = true;
-  doodler.canvas.add(line);
+  doodler.highlights.add(line);
   rotateLine = line;
 }
 

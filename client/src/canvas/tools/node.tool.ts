@@ -95,7 +95,6 @@ function createDot(x: number, y: number, radius: number, fill: string, stroke: s
   dot.fill = fill;
   dot.stroke = stroke;
   dot.linewidth = 1.5 / scale;
-  (dot as any).isHighlight = true;
   return dot;
 }
 
@@ -107,7 +106,6 @@ function createControlLine(ax: number, ay: number, hx: number, hy: number, scale
   );
   line.noFill().stroke = ColorHighlight;
   line.linewidth = 1 / scale;
-  (line as any).isHighlight = true;
   return line;
 }
 
@@ -129,7 +127,7 @@ function showHandles(shape: Shape): void {
     const wy = v.y + ty;
 
     const dot = createDot(wx, wy, VERTEX_DOT_RADIUS, "#ffffff", ColorHighlight, scale);
-    doodler.canvas.add(dot);
+    doodler.highlights.add(dot);
 
     const entry: HandleEntry = { dot };
 
@@ -140,18 +138,18 @@ function showHandles(shape: Shape): void {
       const lx = wx + v.controls.left.x;
       const ly = wy + v.controls.left.y;
       entry.leftLine = createControlLine(wx, wy, lx, ly, scale);
-      doodler.canvas.add(entry.leftLine);
+      doodler.highlights.add(entry.leftLine);
       entry.leftDot = createDot(lx, ly, CONTROL_DOT_RADIUS, ColorHighlight, ColorHighlight, scale);
-      doodler.canvas.add(entry.leftDot);
+      doodler.highlights.add(entry.leftDot);
     }
 
     if (hasRight) {
       const rx = wx + v.controls.right.x;
       const ry = wy + v.controls.right.y;
       entry.rightLine = createControlLine(wx, wy, rx, ry, scale);
-      doodler.canvas.add(entry.rightLine);
+      doodler.highlights.add(entry.rightLine);
       entry.rightDot = createDot(rx, ry, CONTROL_DOT_RADIUS, ColorHighlight, ColorHighlight, scale);
-      doodler.canvas.add(entry.rightDot);
+      doodler.highlights.add(entry.rightDot);
     }
 
     handleMap.set(i, entry);
@@ -168,11 +166,11 @@ export function clearHandles(): void {
   const { handleMap } = useNodeStore.getState();
 
   for (const entry of handleMap.values()) {
-    doodler.canvas.remove(entry.dot);
-    if (entry.leftDot) doodler.canvas.remove(entry.leftDot);
-    if (entry.rightDot) doodler.canvas.remove(entry.rightDot);
-    if (entry.leftLine) doodler.canvas.remove(entry.leftLine);
-    if (entry.rightLine) doodler.canvas.remove(entry.rightLine);
+    doodler.highlights.remove(entry.dot);
+    if (entry.leftDot) doodler.highlights.remove(entry.leftDot);
+    if (entry.rightDot) doodler.highlights.remove(entry.rightDot);
+    if (entry.leftLine) doodler.highlights.remove(entry.leftLine);
+    if (entry.rightLine) doodler.highlights.remove(entry.rightLine);
   }
 
   useNodeStore.setState({
@@ -297,7 +295,6 @@ function findHitTarget(
   const { doodles } = useCanvasStore.getState();
   for (const doodle of doodles) {
     const shape = doodle.shape;
-    if ((shape as any).isHighlight) continue;
     if (!(shape as any).getBoundingClientRect) continue;
     // Skip non-editable types
     if (doodle.type === "text" || doodle.type === "rect" || doodle.type === "ellipse" || doodle.type === "circle") continue;
