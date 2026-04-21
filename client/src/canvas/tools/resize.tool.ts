@@ -16,6 +16,8 @@ import {
   handlePosition,
   showResizeHandles,
   repositionHandlesDuringResize,
+  storeHandleOriginsForRotate,
+  rotateHandlesByDelta,
 } from "./resize.handles";
 
 function getPlainScale(shape: Shape): ScaleXY {
@@ -248,6 +250,8 @@ export function startRotate(
     startTranslations.set(shape.id, shape.translation.clone());
   }
 
+  storeHandleOriginsForRotate();
+
   rotateDragState = {
     center,
     startAngle,
@@ -264,7 +268,7 @@ export function doRotate(
 ): void {
   if (!rotateDragState) return;
   const doodler = getDoodler();
-  const { center, startAngle, shapes, startRotations, startTranslations, outlines } =
+  const { center, startAngle, shapes, startRotations, startTranslations } =
     rotateDragState;
 
   let deltaAngle =
@@ -291,22 +295,7 @@ export function doRotate(
     shape.translation.y = center.y + relX * sin + relY * cos;
   }
 
-  // Rebuild outlines from fresh bounding boxes (rotation changes the AABB)
-  for (const [id, rect] of outlines) {
-    const shape = shapes.find((s) => s.id === id);
-    if (!shape) continue;
-    const item = (shape as any).getBoundingClientRect(false);
-    const pos = doodler.zui.clientToSurface({
-      x: item.left + item.width / 2,
-      y: item.top + item.height / 2,
-    });
-    rect.translation.x = pos.x;
-    rect.translation.y = pos.y;
-    rect.width = item.width / doodler.zui.scale;
-    rect.height = item.height / doodler.zui.scale;
-  }
-
-  showResizeHandles(shapes);
+  rotateHandlesByDelta(center, deltaAngle);
   doodler.throttledTwoUpdate();
 }
 

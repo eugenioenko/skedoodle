@@ -203,6 +203,73 @@ export function moveHandlesByDelta(dx: number, dy: number): void {
   }
 }
 
+// ── Rotate support ─────────────────────────────────────────────────
+
+const handleRotateOrigins: Map<HandleId, Vector> = new Map();
+let rotateLineRotateOrigins: { v0: Vector; v1: Vector } | null = null;
+let groupOutlineRotateOrigin: { x: number; y: number; rotation: number } | null = null;
+
+export function storeHandleOriginsForRotate(): void {
+  handleRotateOrigins.clear();
+  for (const [id, circle] of handles) {
+    handleRotateOrigins.set(id, circle.translation.clone());
+  }
+  rotateLineRotateOrigins = null;
+  if (rotateLine) {
+    const line = rotateLine as any;
+    rotateLineRotateOrigins = {
+      v0: new Vector(line.vertices[0].x, line.vertices[0].y),
+      v1: new Vector(line.vertices[1].x, line.vertices[1].y),
+    };
+  }
+  groupOutlineRotateOrigin = null;
+  if (groupOutline) {
+    groupOutlineRotateOrigin = {
+      x: groupOutline.translation.x,
+      y: groupOutline.translation.y,
+      rotation: groupOutline.rotation,
+    };
+  }
+}
+
+export function rotateHandlesByDelta(center: Vector, deltaAngle: number): void {
+  const cos = Math.cos(deltaAngle);
+  const sin = Math.sin(deltaAngle);
+  const rotateAround = (x: number, y: number) => {
+    const relX = x - center.x;
+    const relY = y - center.y;
+    return {
+      x: center.x + relX * cos - relY * sin,
+      y: center.y + relX * sin + relY * cos,
+    };
+  };
+
+  for (const [id, circle] of handles) {
+    const origin = handleRotateOrigins.get(id);
+    if (!origin) continue;
+    const p = rotateAround(origin.x, origin.y);
+    circle.translation.x = p.x;
+    circle.translation.y = p.y;
+  }
+
+  if (rotateLine && rotateLineRotateOrigins) {
+    const line = rotateLine as any;
+    const p0 = rotateAround(rotateLineRotateOrigins.v0.x, rotateLineRotateOrigins.v0.y);
+    const p1 = rotateAround(rotateLineRotateOrigins.v1.x, rotateLineRotateOrigins.v1.y);
+    line.vertices[0].x = p0.x;
+    line.vertices[0].y = p0.y;
+    line.vertices[1].x = p1.x;
+    line.vertices[1].y = p1.y;
+  }
+
+  if (groupOutline && groupOutlineRotateOrigin) {
+    const p = rotateAround(groupOutlineRotateOrigin.x, groupOutlineRotateOrigin.y);
+    groupOutline.translation.x = p.x;
+    groupOutline.translation.y = p.y;
+    groupOutline.rotation = groupOutlineRotateOrigin.rotation + deltaAngle;
+  }
+}
+
 // ── Resize drag handle repositioning ───────────────────────────────
 
 export function repositionHandlesDuringResize(
