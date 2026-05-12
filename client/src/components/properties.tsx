@@ -1,10 +1,16 @@
 import { getDoodler } from "@/canvas/doodler.client";
+import { radiansToDegrees, degreesToRadians, syncHighlightClone } from "@/canvas/canvas.utils";
+import { showResizeHandles } from "@/canvas/tools/resize.handles";
 import { usePointerStore } from "@/canvas/tools/pointer.tool";
 import {
+  IconArrowsMove,
   IconBorderCornerRounded,
   IconBrush,
+  IconDimensions,
   IconEyeClosed,
   IconGridDots,
+  IconBrightnessHalf,
+  IconRotate,
   IconZoomOut,
   IconGrid3x3
 } from "@tabler/icons-react";
@@ -132,6 +138,11 @@ export const PropertiesTab = () => {
         }
       }
       trackPropertyChange(item.id, field, oldValue, value);
+      syncHighlightClone(item);
+    }
+    const selected = usePointerStore.getState().selected;
+    if (selected.length > 0) {
+      showResizeHandles(selected);
     }
     doodler.throttledTwoUpdate();
   }
@@ -171,6 +182,69 @@ export const PropertiesTab = () => {
                 max={100}
                 value={(shape as RoundedRectangle)?.radius as number}
                 onChange={(value) => updateShape("radius", value)}
+              />
+            </div>
+          </Section>
+          <Section title="Position">
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                label="X"
+                icon={IconArrowsMove}
+                min={-10000}
+                max={10000}
+                value={shape?.translation.x ?? 0}
+                onChange={(value) => updateShape("translation.x", value)}
+              />
+              <SlideInput
+                label="Y"
+                icon={IconArrowsMove}
+                min={-10000}
+                max={10000}
+                value={shape?.translation.y ?? 0}
+                onChange={(value) => updateShape("translation.y", value)}
+              />
+            </div>
+          </Section>
+          <Section title="Dimensions">
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                label="W"
+                icon={IconDimensions}
+                min={1}
+                max={10000}
+                value={(shape as any)?.width ?? 0}
+                onChange={(value) => updateShape("width", value)}
+              />
+              <SlideInput
+                label="H"
+                icon={IconDimensions}
+                min={1}
+                max={10000}
+                value={(shape as any)?.height ?? 0}
+                onChange={(value) => updateShape("height", value)}
+              />
+            </div>
+          </Section>
+          <Section title="Transform">
+            <div className="grid grid-cols-2 gap-4">
+              <SlideInput
+                label="Rotation"
+                icon={IconRotate}
+                min={-360}
+                max={360}
+                value={radiansToDegrees(shape?.rotation ?? 0)}
+                convertTo={degreesToRadians}
+                convertFrom={radiansToDegrees}
+                onChange={(value) => updateShape("rotation", degreesToRadians(value))}
+              />
+              <SlideInput
+                label="Opacity"
+                icon={IconBrightnessHalf}
+                min={0}
+                max={100}
+                decimals={0}
+                value={Math.round(((shape as any)?.opacity ?? 1) * 100)}
+                onChange={(value) => updateShape("opacity", value / 100)}
               />
             </div>
           </Section>
