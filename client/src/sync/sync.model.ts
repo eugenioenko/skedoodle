@@ -1,5 +1,5 @@
 // src/canvas/history.service.ts
-export type CommandType = 'create' | 'update' | 'remove' | 'undo' | 'redo';
+export type CommandType = 'create' | 'update' | 'remove' | 'batch' | 'undo' | 'redo';
 
 export interface Command<T = any> {
     id: string; // Unique ID for the command

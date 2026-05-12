@@ -125,6 +125,13 @@ export function executeForward(cmd: Command): void {
       }
       break;
     }
+    case "batch": {
+      if (!Array.isArray(cmd.data)) return;
+      for (const sub of cmd.data as Command[]) {
+        executeForward(sub);
+      }
+      break;
+    }
   }
 }
 
@@ -277,6 +284,15 @@ function createInverseCommand(cmd: Command): Command | null {
       preUpdateSnapshots.set(inverseCmd.id, cmd.data);
       return inverseCmd;
     }
+    case "batch": {
+      if (!Array.isArray(cmd.data)) return null;
+      const inverseSubs: Command[] = [];
+      for (const sub of (cmd.data as Command[]).slice().reverse()) {
+        const inv = createInverseCommand(sub);
+        if (inv) inverseSubs.push(inv);
+      }
+      return createCommand("batch", "", { data: inverseSubs });
+    }
   }
   return null;
 }
@@ -291,6 +307,24 @@ export function pushRemoveCommand(doodle: Doodle): void {
   const serialized = serializeDoodle(doodle);
   const cmd = createCommand("remove", serialized.id, { data: serialized });
   pushCommand(cmd);
+}
+
+export function pushBatchRemoveCommand(doodles: Doodle[]): void {
+  const subs = doodles.map((doodle) => {
+    const serialized = serializeDoodle(doodle);
+    return createCommand("remove", serialized.id, { data: serialized });
+  });
+  const batch = createCommand("batch", "", { data: subs });
+  pushCommand(batch);
+}
+
+export function pushBatchCreateCommand(doodles: Doodle[]): void {
+  const subs = doodles.map((doodle) => {
+    const serialized = serializeDoodle(doodle);
+    return createCommand("create", serialized.id, { data: serialized });
+  });
+  const batch = createCommand("batch", "", { data: subs });
+  pushCommand(batch);
 }
 
 export function pushUpdateCommand(

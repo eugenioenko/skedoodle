@@ -22,10 +22,10 @@ import { doTextStart, doTextMove, doTextUp } from "./tools/text.tool";
 import { doZoom } from "./tools/zoom.tool";
 import { doBezierMove, doBezierNext, doBezierUp, finalizeBezier, cancelBezier } from "./tools/bezier.tool";
 import { doNodeStart, doNodeMove, doNodeUp, clearHandles as clearNodeHandles, useNodeStore } from "./tools/node.tool";
-import { undo, redo, exitTimeTravelMode, pushCreateCommand, pushRemoveCommand } from "./history.service";
+import { undo, redo, exitTimeTravelMode, pushCreateCommand, pushRemoveCommand, pushBatchRemoveCommand, pushBatchCreateCommand } from "./history.service";
 import { useCommandLogStore } from "./history.store";
 import { doCursorUpdate } from "./tools/cursor.tool";
-import { SerializedDoodle, serializeDoodle, unserializeDoodle } from "./doodle.utils";
+import { Doodle, SerializedDoodle, serializeDoodle, unserializeDoodle } from "./doodle.utils";
 import { usePointerStore } from "./tools/pointer.tool";
 
 let clipboard: SerializedDoodle[] = [];
@@ -421,12 +421,16 @@ function doDeleteSelected(): void {
   const doodler = getDoodler();
   const { doodles } = useCanvasStore.getState();
   const selectedIds = new Set(selected.map((s) => s.id));
+  const toRemove = doodles.filter((d) => selectedIds.has(d.shape.id));
 
-  for (const doodle of doodles) {
-    if (selectedIds.has(doodle.shape.id)) {
-      pushRemoveCommand(doodle);
-      doodler.removeDoodle(doodle);
-    }
+  if (toRemove.length === 1) {
+    pushRemoveCommand(toRemove[0]);
+  } else if (toRemove.length > 1) {
+    pushBatchRemoveCommand(toRemove);
+  }
+
+  for (const doodle of toRemove) {
+    doodler.removeDoodle(doodle);
   }
 
   clearSelected();
@@ -452,11 +456,18 @@ function doPaste(): void {
   const { clearSelected } = usePointerStore.getState();
   clearSelected();
 
+  const pasted: Doodle[] = [];
   for (const serialized of clipboard) {
     const offset = { ...serialized, x: serialized.x + pasteOffset, y: serialized.y + pasteOffset };
     const doodle = unserializeDoodle(offset);
     doodler.addDoodle(doodle);
-    pushCreateCommand(doodle);
+    pasted.push(doodle);
+  }
+
+  if (pasted.length === 1) {
+    pushCreateCommand(pasted[0]);
+  } else if (pasted.length > 1) {
+    pushBatchCreateCommand(pasted);
   }
 
   // Shift clipboard so consecutive pastes cascade
@@ -481,11 +492,18 @@ function doDuplicate(): void {
 
   clearSelected();
 
+  const duplicated: Doodle[] = [];
   for (const serialized of serializedItems) {
     const offset = { ...serialized, x: serialized.x + pasteOffset, y: serialized.y + pasteOffset };
     const doodle = unserializeDoodle(offset);
     doodler.addDoodle(doodle);
-    pushCreateCommand(doodle);
+    duplicated.push(doodle);
+  }
+
+  if (duplicated.length === 1) {
+    pushCreateCommand(duplicated[0]);
+  } else if (duplicated.length > 1) {
+    pushBatchCreateCommand(duplicated);
   }
 
   doodler.throttledTwoUpdate();
