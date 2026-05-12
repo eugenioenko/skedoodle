@@ -38,6 +38,14 @@ jobs:
         run: pnpm build
         working-directory: client
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: client
+
+      - name: Run e2e tests
+        run: npx playwright test
+        working-directory: client
+
       - name: Install server dependencies
         run: pnpm install --frozen-lockfile
         working-directory: server
