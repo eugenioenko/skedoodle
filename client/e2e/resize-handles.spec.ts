@@ -30,7 +30,7 @@ async function selectTool(page: Page, tool: "hand" | "pointer" | "brush" | "rect
   const sidebarOnly: typeof allBtns = [];
   for (const btn of allBtns) {
     const box = await btn.boundingBox();
-    if (box && box.x < 60) {
+    if (box && box.x < 60 && box.y > 50) {
       sidebarOnly.push(btn);
     }
   }
@@ -68,7 +68,7 @@ async function drag(page: Page, fromX: number, fromY: number, toX: number, toY: 
 // ── Tests ──────────────────────────────────────────────────────────
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/local");
+  await page.goto("/sandbox");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await svgRoot(page).waitFor({ state: "attached", timeout: 5000 });
