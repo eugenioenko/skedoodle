@@ -11,6 +11,46 @@ import { getDoodler } from "./doodler.client";
 export const ColorHighlight = "#0ea5cf";
 export const OUTLINE_SCALE = 1.01;
 
+// ── Highlight helpers ─────────────────────────────────────────────
+// Highlights are clone overlays in the highlights group. The original
+// shape is never mutated, so properties/serialization/undo always
+// read the real values.
+
+const highlightClones = new Map<string, Shape>();
+
+export function applyHighlight(shape: Shape): void {
+  if (highlightClones.has(shape.id)) return;
+  const clone = (shape as any).clone();
+  clone.fill = "transparent";
+  clone.stroke = ColorHighlight;
+  clone.linewidth = 2 / getDoodler().zui.scale;
+  clone.opacity = 1;
+  highlightClones.set(shape.id, clone);
+  getDoodler().highlights.add(clone);
+}
+
+export function restoreHighlight(shape: Shape): void {
+  const clone = highlightClones.get(shape.id);
+  if (!clone) return;
+  clone.remove();
+  highlightClones.delete(shape.id);
+}
+
+export function syncHighlightClone(shape: Shape): void {
+  const clone = highlightClones.get(shape.id);
+  if (!clone) return;
+  clone.translation.copy(shape.translation);
+  clone.rotation = shape.rotation;
+  clone.scale = (shape as any).scale;
+}
+
+export function updateHighlightScales(): void {
+  const scale = getDoodler().zui.scale;
+  for (const clone of highlightClones.values()) {
+    (clone as any).linewidth = 2 / scale;
+  }
+}
+
 // ── Shape helpers ──────────────────────────────────────────────────
 
 export interface SurfaceBBox {

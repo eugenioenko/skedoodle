@@ -7,6 +7,7 @@ import {
   normalizePathOrigin,
   ScaleXY,
   SurfaceBBox,
+  syncHighlightClone,
   WORLD_SPACE_TYPES,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
@@ -174,6 +175,7 @@ export function doResize(
     }
     shape.translation.x = anchor.x + (origTrans.x - anchor.x) * sfx;
     shape.translation.y = anchor.y + (origTrans.y - anchor.y) * sfy;
+    syncHighlightClone(shape);
   }
 
   // Scale outlines relative to anchor
@@ -293,6 +295,7 @@ export function doRotate(
     const relY = origTrans.y - center.y;
     shape.translation.x = center.x + relX * cos - relY * sin;
     shape.translation.y = center.y + relX * sin + relY * cos;
+    syncHighlightClone(shape);
   }
 
   rotateHandlesByDelta(center, deltaAngle);
