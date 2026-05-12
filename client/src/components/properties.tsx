@@ -10,7 +10,6 @@ import {
 } from "@tabler/icons-react";
 import { colord } from "colord";
 import { Shape } from "two.js/src/shape";
-import { Rectangle } from "two.js/src/shapes/rectangle";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
 import { Layers } from "./layers";
 import { History } from "./history";
@@ -61,6 +60,8 @@ function trackPropertyChange(shapeId: string, field: string, oldValue: any, newV
 }
 
 function getShapeField(shape: Shape, field: string): any {
+  if (field === "stroke") return (shape as any).stroke ?? "none";
+  if (field === "linewidth") return (shape as any).linewidth ?? 0;
   const props = field.split(".");
   if (props.length === 2) {
     return (shape as any)[props[0]][props[1]];
@@ -110,21 +111,25 @@ const Section = ({ title, children }: SectionProps) => (
 export const PropertiesTab = () => {
   const selection = usePointerStore((state) => state.selected);
   const shape = selection?.[0];
-  const strokeColor = colord((shape as any)?.stroke as string).toRgb();
+  const strokeColor = colord(shape ? ((shape as any).stroke ?? "#000000") : "#000000").toRgb();
   const fillColor = colord((shape as any)?.fill as string).toRgb();
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
     for (const item of usePointerStore.getState().selected) {
       const oldValue = getShapeField(item, field);
-      const props = field.split(".");
       if (["stroke", "fill"].includes(field)) {
         value = colord(value).toHex();
       }
-      if (props.length == 2) {
-        (item[props[0] as keyof Shape] as any)[props[1]] = value;
-      } else {
+      if (field === "stroke" || field === "linewidth") {
         (item as any)[field] = value;
+      } else {
+        const props = field.split(".");
+        if (props.length == 2) {
+          (item[props[0] as keyof Shape] as any)[props[1]] = value;
+        } else {
+          (item as any)[field] = value;
+        }
       }
       trackPropertyChange(item.id, field, oldValue, value);
     }
@@ -157,7 +162,7 @@ export const PropertiesTab = () => {
                 icon={IconBrush}
                 min={1}
                 max={5000}
-                value={(shape as Rectangle)?.linewidth}
+                value={shape ? ((shape as any).linewidth ?? 1) : 1}
                 onChange={(value) => updateShape("linewidth", value)}
               />
               <SlideInput

@@ -10,6 +10,10 @@ import {
   eventToClientPosition,
   eventToSurfacePosition,
   isPointInRect,
+  applyHighlight,
+  restoreHighlight,
+  syncHighlightClone,
+  updateHighlightScales,
 } from "../canvas.utils";
 import { getDoodler } from "../doodler.client";
 import { pushUpdateCommand } from "../history.service";
@@ -33,22 +37,11 @@ import {
   isRotating,
 } from "./resize.tool";
 
-interface Outlines {
-  selectedStrokes: Map<string, SavedStroke>;
-}
-
-interface SavedStroke {
-  stroke: string;
-  linewidth: number;
-}
-
 export interface PointerState {
   origin: Vector;
   highlighted?: Shape;
-  highlightedOriginalStroke?: SavedStroke;
   selected: Shape[];
   isMoving: boolean;
-  outlines: Outlines;
   origins: Vector[];
   clearSelected: () => void;
   addHighlightToSelection: (join: boolean) => void;
@@ -65,14 +58,11 @@ export const usePointerStore = create<PointerState>()((set) => ({
   origins: [],
   highlighted: undefined,
   isMoving: false,
-  outlines: {
-    selectedStrokes: new Map(),
-  },
   setIsMoving: (isMoving) => set((state) => ({ ...state, isMoving })),
   setOrigins: (origins) => set((state) => ({ ...state, origins })),
   setHighlight: (shape) =>
-    set((state) => highlightShape(state, shape)),
-  clearHighlight: () => set((state) => clearHighlight(state)),
+    set((state) => doHighlightShape(state, shape)),
+  clearHighlight: () => set((state) => doClearHighlight(state)),
   clearSelected: () => set((state) => clearSelected(state)),
   addHighlightToSelection: (join: boolean) =>
     set((state) => addToSelection(state, join)),
@@ -96,89 +86,41 @@ export function initPointerToolCleanup(): void {
   });
 }
 
-function highlightShape(
+function doHighlightShape(
   state: PointerState,
   shape: Shape
 ): PointerState {
-  // Restore previous highlight if any
-  if (state.highlighted && state.highlightedOriginalStroke) {
-    const prev = state.highlighted as any;
-    prev.stroke = state.highlightedOriginalStroke.stroke;
-    prev.linewidth = state.highlightedOriginalStroke.linewidth;
+  if (state.highlighted) {
+    restoreHighlight(state.highlighted);
   }
-
-  // Save original stroke and apply highlight
-  const s = shape as any;
-  const originalStroke: SavedStroke = {
-    stroke: (s.stroke as string) || "none",
-    linewidth: s.linewidth || 0,
-  };
-  s.stroke = ColorHighlight;
-  s.linewidth = Math.max(originalStroke.linewidth, 2);
-
+  applyHighlight(shape);
   state.highlighted = shape;
-  state.highlightedOriginalStroke = originalStroke;
-
   return state;
 }
 
-function clearHighlight(state: PointerState): PointerState {
-  // Restore original stroke
-  if (state.highlighted && state.highlightedOriginalStroke) {
-    const s = state.highlighted as any;
-    s.stroke = state.highlightedOriginalStroke.stroke;
-    s.linewidth = state.highlightedOriginalStroke.linewidth;
+function doClearHighlight(state: PointerState): PointerState {
+  if (state.highlighted) {
+    restoreHighlight(state.highlighted);
   }
   state.highlighted = undefined;
-  state.highlightedOriginalStroke = undefined;
   return state;
-}
-
-function applySelectionStroke(shape: Shape, outlines: Outlines): void {
-  const s = shape as any;
-  outlines.selectedStrokes.set(shape.id, {
-    stroke: (s.stroke as string) || "none",
-    linewidth: s.linewidth || 0,
-  });
-  s.stroke = ColorHighlight;
-  s.linewidth = Math.max(s.linewidth || 0, 2);
-}
-
-function restoreSelectionStroke(shape: Shape, outlines: Outlines): void {
-  const saved = outlines.selectedStrokes.get(shape.id);
-  if (saved) {
-    const s = shape as any;
-    s.stroke = saved.stroke;
-    s.linewidth = saved.linewidth;
-    outlines.selectedStrokes.delete(shape.id);
-  }
-}
-
-
-function removeAllSelectionHighlights(outlines: Outlines, selected: Shape[]): void {
-  for (const shape of selected) {
-    restoreSelectionStroke(shape, outlines);
-  }
 }
 
 function addToSelection(state: PointerState, join: boolean): PointerState {
-  const outlines = state.outlines;
   const highlighted = state.highlighted;
 
   if (!highlighted) {
     if (join) {
       return { ...state };
     } else {
-      removeAllSelectionHighlights(outlines, state.selected);
+      for (const s of state.selected) restoreHighlight(s);
       hideResizeHandles();
       return { ...state, selected: [] };
     }
   }
 
-  // The click commits the hover into a selection action: end the hover state
-  // and restore the original stroke so applySelectionStroke captures the true
-  // baseline rather than the hover-highlight color.
-  clearHighlight(state);
+  // End hover state, then re-apply as selection highlight
+  doClearHighlight(state);
 
   let selected = [...state.selected];
   const isAlreadySelected = state.selected.find(
@@ -187,23 +129,19 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
   let selectionChanged = false;
 
   if (join && isAlreadySelected) {
-    // Remove from selection
     selected = selected.filter((item) => item.id !== highlighted.id);
-    restoreSelectionStroke(highlighted, outlines);
+    restoreHighlight(highlighted);
     selectionChanged = true;
   } else if (join && !isAlreadySelected) {
-    // Add to selection
     selected.push(highlighted);
-    applySelectionStroke(highlighted, outlines);
+    applyHighlight(highlighted);
     selectionChanged = true;
   } else if (!join && !isAlreadySelected) {
-    // Replace selection
-    removeAllSelectionHighlights(outlines, state.selected);
+    for (const s of state.selected) restoreHighlight(s);
     selected = [highlighted];
-    applySelectionStroke(highlighted, outlines);
+    applyHighlight(highlighted);
     selectionChanged = true;
   }
-  // !join && isAlreadySelected → selection unchanged, skip handle rebuild
 
   if (selectionChanged) {
     if (selected.length > 0) {
@@ -216,20 +154,21 @@ function addToSelection(state: PointerState, join: boolean): PointerState {
 }
 
 function clearSelected(state: PointerState): PointerState {
-  removeAllSelectionHighlights(state.outlines, state.selected);
+  for (const s of state.selected) restoreHighlight(s);
   hideResizeHandles();
   return { ...state, selected: [] };
 }
 
 function selectShapesDirect(state: PointerState, shapes: Shape[]): PointerState {
-  removeAllSelectionHighlights(state.outlines, state.selected);
+  for (const s of state.selected) restoreHighlight(s);
+  hideResizeHandles();
 
   if (shapes.length === 0) {
     return { ...state, selected: [] };
   }
 
   for (const shape of shapes) {
-    applySelectionStroke(shape, state.outlines);
+    applyHighlight(shape);
   }
 
   showResizeHandles(shapes);
@@ -522,6 +461,7 @@ function doMoveShape(e: MouseEvent<HTMLDivElement>): void {
     const origin = origins[i];
     shape.translation.x = origin.x + dx;
     shape.translation.y = origin.y + dy;
+    syncHighlightClone(shape);
   }
 
   // Move resize handles
@@ -576,6 +516,6 @@ export function doTryHighlight(e: MouseEvent<HTMLDivElement>): void {
  */
 export function updateOutlineScales(): void {
   const { selected } = usePointerStore.getState();
-
   updateResizeHandleScales(selected);
+  updateHighlightScales();
 }

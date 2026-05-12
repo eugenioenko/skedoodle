@@ -33,6 +33,8 @@ function clearSelection(): void {
 }
 
 function getShapeField(shape: Shape, field: string): any {
+  if (field === "stroke") return (shape as any).stroke ?? "none";
+  if (field === "linewidth") return (shape as any).linewidth ?? 0;
   if (field === "_vertexData") {
     const path = shape as any;
     return (path.vertices || []).map((v: any) => ({
@@ -51,6 +53,10 @@ function getShapeField(shape: Shape, field: string): any {
 }
 
 function setShapeField(shape: Shape, field: string, value: any): void {
+  if (field === "stroke" || field === "linewidth") {
+    (shape as any)[field] = value;
+    return;
+  }
   if (field === "_vertexData") {
     const path = shape as any;
     if (!path.vertices) return;
