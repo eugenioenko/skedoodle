@@ -11,6 +11,7 @@ export interface ToastStore {
   addToast: (message: string, type?: string) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToastStore = create<ToastStore>()((set) => ({
   toasts: [],
   addToast: (message: string, type?: string) => {

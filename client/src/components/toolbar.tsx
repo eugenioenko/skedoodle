@@ -1,4 +1,5 @@
 import { Tool, useOptionsStore } from "@/canvas/canvas.store";
+import { selectTool } from "@/canvas/canvas.service";
 import {
   IconArrowNarrowRight,
   IconBrush,
@@ -35,20 +36,6 @@ interface ToolDef {
   tooltip: string;
 }
 
-// Select a tool. For one-shot tools like the eyedropper, remember the previous
-// tool in restoreTool so the canvas service can swap back after the next click.
-// For all other selections, clear restoreTool so a stale value can't trigger
-// an unexpected revert later.
-function selectTool(next: Tool, current?: Tool): void {
-  const { setSelectedTool, setRestoreTool } = useOptionsStore.getState();
-  if (next === "eyedropper" && current && current !== "eyedropper") {
-    setRestoreTool(current);
-  } else {
-    setRestoreTool(undefined);
-  }
-  setSelectedTool(next);
-}
-
 export const Toolbar = () => {
   return (
     <div className="absolute bottom-0 left-0 h-14 min-h-14 right-0 md:right-auto md:top-0  md:h-auto md:w-14 z-10">
@@ -60,7 +47,7 @@ export const Toolbar = () => {
         </WithTooltip>
         <ToolGroup
           tools={[
-            { value: "pointer", icon: <IconPointer stroke={1} />, tooltip: "Pointer tool [P]" },
+            { value: "pointer", icon: <IconPointer stroke={1} />, tooltip: "Pointer tool [V]" },
             { value: "node", icon: <IconVector stroke={1} />, tooltip: "Node tool [N]" },
           ]}
         />
@@ -69,7 +56,7 @@ export const Toolbar = () => {
             <IconBrush stroke={1} />
           </ToggleButton>
         </WithTooltip>
-        <WithTooltip tooltip="Pen tool [C]">
+        <WithTooltip tooltip="Pen tool [P]">
           <ToggleButton value="bezier">
             <IconPen stroke={1} />
           </ToggleButton>

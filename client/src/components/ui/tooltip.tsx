@@ -22,6 +22,7 @@ interface TooltipOptions {
   onOpenChange?: (open: boolean) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTooltip({
   initialOpen = false,
   placement = "top",
@@ -82,6 +83,7 @@ type ContextType = ReturnType<typeof useTooltip> | null;
 
 const TooltipContext = React.createContext<ContextType>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTooltipContext = () => {
   const context = React.useContext(TooltipContext);
 
