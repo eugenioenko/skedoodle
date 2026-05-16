@@ -6,6 +6,15 @@
     "build": "pnpm --filter skedoodle-client build && pnpm --filter skedoodle-server build",
     "lint": "pnpm --filter skedoodle-client lint"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "prisma",
+      "sqlite3"
+    ]
+  },
   "devDependencies": {
     "concurrently": "^9.1.2"
   }
