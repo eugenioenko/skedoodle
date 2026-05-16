@@ -8,16 +8,52 @@ import { IconGitBranch } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { Command } from "@/sync/sync.model";
 
+const SHAPE_NAMES: Record<string, string> = {
+  brush: "Brush",
+  rect: "Rectangle",
+  ellipse: "Ellipse",
+  circle: "Circle",
+  line: "Line",
+  arrow: "Arrow",
+  text: "Text",
+  bezier: "Bezier",
+};
+
+function shapeName(cmd: Command): string {
+  return SHAPE_NAMES[cmd.data?.type] ?? "Shape";
+}
+
+function updateAction(data: Record<string, any>): string {
+  const fields = Object.keys(data);
+  if (fields.some((f) => f.startsWith("translation"))) return "Move";
+  if (fields.includes("rotation")) return "Rotate";
+  if (fields.includes("scale")) return "Resize";
+  if (fields.includes("stroke") || fields.includes("fill")) return "Recolor";
+  if (fields.includes("linewidth")) return "Stroke";
+  if (fields.includes("opacity")) return "Opacity";
+  if (fields.includes("width") || fields.includes("height")) return "Resize";
+  if (fields.includes("radius")) return "Radius";
+  return "Update";
+}
+
 function commandLabel(cmd: Command): string {
   switch (cmd.type) {
     case "create":
-      return `Create ${cmd.data?.t ?? "shape"}`;
+      return `Create ${shapeName(cmd)}`;
     case "update":
-      return `Update shape`;
+      return `${updateAction(cmd.data ?? {})} Shape`;
     case "remove":
-      return `Remove ${cmd.data?.t ?? "shape"}`;
+      return `Remove ${shapeName(cmd)}`;
+    case "batch": {
+      const subs = cmd.data as Command[] | undefined;
+      if (!subs?.length) return "Batch";
+      const subType = subs[0].type;
+      if (subType === "remove") return `Remove ${subs.length} Shapes`;
+      if (subType === "create") return `Create ${subs.length} Shapes`;
+      return `Update ${subs.length} Shapes`;
+    }
     default:
-      return "Unknown command";
+      return "Unknown";
   }
 }
 
