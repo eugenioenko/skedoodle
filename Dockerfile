@@ -1,6 +1,6 @@
 # Stage 1: Build client
 FROM node:22-alpine AS client-build
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY client/package.json ./client/
@@ -17,7 +17,7 @@ RUN cd client && VITE_API_URL=$VITE_API_URL VITE_WS_URL=$VITE_WS_URL VITE_OIDC_I
 
 # Stage 2: Build server
 FROM node:22-alpine AS server-build
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
 WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY client/package.json ./client/
