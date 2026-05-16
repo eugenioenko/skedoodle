@@ -14,6 +14,7 @@ import {
   IconAlignCenter,
   IconAlignLeft,
   IconAlignRight,
+  IconLineHeight,
   IconSquare,
   IconVectorSpline,
   IconVectorTriangle,
@@ -313,7 +314,8 @@ const TextToolOptions = () => {
   const localFillColor = useTextStore((state) => state.fillColor);
   const fontFamily = useTextStore((state) => state.fontFamily);
   const alignment = useTextStore((state) => state.alignment);
-  const { setFillColor: setLocalFillColor, setFontSize, setFontFamily, setAlignment } =
+  const leading = useTextStore((state) => state.leading);
+  const { setFillColor: setLocalFillColor, setFontSize, setFontFamily, setAlignment, setLeading } =
     useTextStore.getState();
 
   const [fillColor, setFillColor] = useSyncedColor(localFillColor, setLocalFillColor, "fill");
@@ -337,6 +339,16 @@ const TextToolOptions = () => {
         max={256}
         onChange={(value) => setFontSize(value)}
         icon={IconLetterT}
+      />
+      <label className="pl-2">Leading</label>
+      <SlideInput
+        className="max-w-24"
+        value={leading}
+        min={0.8}
+        max={3}
+        decimals={1}
+        onChange={(value) => setLeading(value)}
+        icon={IconLineHeight}
       />
       <label className="pl-2">Font</label>
       <select
