@@ -120,7 +120,7 @@ export const MenuComponent = React.forwardRef<
     }
   }, [tree, isOpen, nodeId, parentId]);
 
-  // eslint-disable-next-line react-hooks/refs
+   
   const mergedRefs = useMergeRefs([refs.setReference, item.ref, forwardedRef]);
   // Use the consumer's element directly (asChild-style) so we don't nest
   // a <button> inside their <button>. Consumers should pass a real <button>
@@ -147,7 +147,7 @@ export const MenuComponent = React.forwardRef<
           {isOpen && (
             <FloatingPortal>
               <div
-                // eslint-disable-next-line react-hooks/refs
+                 
                 ref={refs.setFloating}
                 className="card flex flex-col border border-white/10 rounded overflow-hidden"
                 style={{ ...floatingStyles, zIndex: 9999 }}

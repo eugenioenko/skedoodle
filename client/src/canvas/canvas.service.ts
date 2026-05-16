@@ -1,5 +1,5 @@
 import { MouseEvent, TouchEvent } from "react";
-import { useCanvasStore, useOptionsStore } from "./canvas.store";
+import { Tool, useCanvasStore, useOptionsStore } from "./canvas.store";
 import {
   MouseButton,
   touchEventToMouseEvent,
@@ -31,6 +31,32 @@ import { usePointerStore } from "./tools/pointer.tool";
 let clipboard: SerializedDoodle[] = [];
 
 let enteredNodeFromPointer = false;
+
+const KEY_TO_TOOL: Record<string, Tool> = {
+  h: "hand",
+  v: "pointer",
+  n: "node",
+  b: "brush",
+  p: "bezier",
+  r: "square",
+  o: "ellipse",
+  l: "line",
+  a: "arrow",
+  t: "text",
+  e: "eraser",
+  i: "eyedropper",
+  z: "zoom",
+};
+
+export function selectTool(next: Tool, current?: Tool): void {
+  const { setSelectedTool, setRestoreTool } = useOptionsStore.getState();
+  if (next === "eyedropper" && current && current !== "eyedropper") {
+    setRestoreTool(current);
+  } else {
+    setRestoreTool(undefined);
+  }
+  setSelectedTool(next);
+}
 
 const NODE_EDITABLE_TYPES = new Set(["brush", "bezier", "line", "arrow"]);
 
@@ -389,6 +415,12 @@ function doKeyDown(e: KeyboardEvent): void {
     return;
   }
 
+  if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A") && !e.shiftKey) {
+    e.preventDefault();
+    doSelectAll();
+    return;
+  }
+
   if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C") && !e.shiftKey) {
     e.preventDefault();
     doCopy();
@@ -412,6 +444,26 @@ function doKeyDown(e: KeyboardEvent): void {
     doDeleteSelected();
     return;
   }
+
+  if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+    const isCanvasContext = target === document.body || target.closest("[data-canvas]") !== null;
+    if (!isCanvasContext) return;
+
+    const tool = KEY_TO_TOOL[e.key.toLowerCase()];
+    if (tool) {
+      e.preventDefault();
+      selectTool(tool, selectedTool);
+    }
+  }
+}
+
+function doSelectAll(): void {
+  const { doodles } = useCanvasStore.getState();
+  if (doodles.length === 0) return;
+  const { selectShapes } = usePointerStore.getState();
+  selectTool("pointer", useOptionsStore.getState().selectedTool);
+  selectShapes(doodles.map((d) => d.shape));
+  getDoodler().throttledTwoUpdate();
 }
 
 function doDeleteSelected(): void {

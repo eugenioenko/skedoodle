@@ -25,6 +25,7 @@ interface PopoverOptions {
   onOpenChange?: (open: boolean) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePopover({
   initialOpen = false,
   placement = "top",
@@ -95,6 +96,7 @@ type ContextType =
 
 const PopoverContext = React.createContext<ContextType>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePopoverContext = () => {
   const context = React.useContext(PopoverContext);
 

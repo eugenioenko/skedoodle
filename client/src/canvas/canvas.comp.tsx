@@ -25,6 +25,7 @@ export const Canvas = ({ sketchId, onReady }: CanvasProps) => {
       className="canvas-container flex-grow overflow-hidden"
       tabIndex={0}
       ref={containerRef}
+      data-canvas
       data-selected={selectedTool}
       data-active={activeTool}
       data-option={toolOption}

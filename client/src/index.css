@@ -68,7 +68,7 @@ body {
 }
 
 .canvas-container[data-selected="node"] {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='%23666' stroke-width='1'/%3E%3Ccircle cx='8' cy='8' r='1' fill='%23666'/%3E%3C/svg%3E") 8 8, crosshair;
+  cursor: default;
 }
 
 .canvas-container[data-selected="pointer"][data-option="moving"] {
