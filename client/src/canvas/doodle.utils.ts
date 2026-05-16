@@ -5,7 +5,7 @@ import { Shape } from "two.js/src/shape";
 import { Circle } from "two.js/src/shapes/circle";
 import { Ellipse } from "two.js/src/shapes/ellipse";
 import { RoundedRectangle } from "two.js/src/shapes/rounded-rectangle";
-import { Text } from "two.js/src/text";
+import { MultilineText } from "twojs-multiline-text";
 
 export type DoodleType = "brush" | "rect" | "line" | "arrow" | "text" | "ellipse" | "circle" | "bezier";
 
@@ -34,6 +34,8 @@ export interface SerializedDoodle {
   fontSize?: number;
   fontAlignment?: string;
   fontWeight?: number | string;
+  leading?: number;
+  textWidth?: number;
   // bezier-specific fields
   bezierVertices?: [number, number, number, number, number, number, string][];
   closed?: boolean;
@@ -69,12 +71,16 @@ export function serializeDoodle(doodle: Doodle): SerializedDoodle {
   };
 
   if (type === "text") {
-    const text = shape as Text;
+    const text = shape as unknown as MultilineText;
     serialized.text = text.value;
     serialized.fontFamily = text.family;
     serialized.fontSize = text.size;
     serialized.fontAlignment = text.alignment;
     serialized.fontWeight = text.weight;
+    serialized.leading = text.leading;
+    if (text.width !== Infinity && text.width > 0) {
+      serialized.textWidth = text.width;
+    }
   }
 
   if (type === "bezier") {
@@ -143,15 +149,19 @@ export function unserializeDoodle(serialized: SerializedDoodle): Doodle {
     shape.linewidth = linewidth;
     return { shape, type: "ellipse" };
   } else if (type === "text") {
-    const shape = new Text(serialized.text || "", x, y);
+    const shape = new MultilineText(serialized.text || "", x, y, {
+      fill,
+      stroke,
+      linewidth,
+      family: serialized.fontFamily || "sans-serif",
+      size: serialized.fontSize || 24,
+      alignment: (serialized.fontAlignment || "left") as "left" | "center" | "right",
+      baseline: "middle",
+      weight: serialized.fontWeight as number || 400,
+      leading: serialized.leading || 1.3,
+      width: serialized.textWidth || Infinity,
+    });
     shape.id = id;
-    shape.fill = fill;
-    shape.stroke = stroke;
-    shape.linewidth = linewidth;
-    shape.family = serialized.fontFamily || "sans-serif";
-    shape.size = serialized.fontSize || 24;
-    shape.alignment = (serialized.fontAlignment || "left") as "left" | "center" | "right";
-    shape.weight = serialized.fontWeight || 400;
     return { shape, type: "text" };
   } else if (type === "bezier") {
     const anchors = (serialized.bezierVertices || []).map(

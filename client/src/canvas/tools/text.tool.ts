@@ -3,7 +3,7 @@ import { MouseEvent } from "react";
 import { colord, RgbaColor } from "colord";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Text } from "two.js/src/text";
+import { MultilineText } from "twojs-multiline-text";
 import { Rectangle } from "two.js/src/shapes/rectangle";
 import { ColorHighlight, eventToClientPosition, isPointInRect } from "../canvas.utils";
 import { useCanvasStore } from "../canvas.store";
@@ -16,10 +16,12 @@ export interface TextState {
   fontFamily: string;
   fillColor: RgbaColor;
   alignment: "left" | "center" | "right";
+  leading: number;
   setFontSize: (fontSize: number) => void;
   setFontFamily: (fontFamily: string) => void;
   setFillColor: (fillColor: RgbaColor) => void;
   setAlignment: (alignment: "left" | "center" | "right") => void;
+  setLeading: (leading: number) => void;
 }
 
 export const useTextStore = create<TextState>()(
@@ -29,10 +31,12 @@ export const useTextStore = create<TextState>()(
       fontFamily: "sans-serif",
       fillColor: { r: 33, g: 33, b: 33, a: 1 },
       alignment: "left" as const,
+      leading: 1.3,
       setFontSize: (fontSize) => set(() => ({ fontSize })),
       setFontFamily: (fontFamily) => set(() => ({ fontFamily })),
       setFillColor: (fillColor) => set(() => ({ fillColor })),
       setAlignment: (alignment) => set(() => ({ alignment })),
+      setLeading: (leading) => set(() => ({ leading })),
     }),
     { name: "text-tool", version: 1 }
   )
@@ -56,7 +60,7 @@ const MIN_DRAG_SIZE = 20;
 
 function editExistingText(_e: MouseEvent<HTMLDivElement>, doodle: Doodle): void {
   const doodler = getDoodler();
-  const textShape = doodle.shape as unknown as Text;
+  const textShape = doodle.shape as unknown as MultilineText;
   const scale = doodler.zui.scale;
   const color = colord(textShape.fill as string).toRgbString();
 
@@ -67,6 +71,7 @@ function editExistingText(_e: MouseEvent<HTMLDivElement>, doodle: Doodle): void 
 
   // Position overlay at the shape's screen position
   const bbox = (textShape as any).getBoundingClientRect(false);
+  const hasFixedWidth = textShape.width !== Infinity && textShape.width > 0;
 
   const overlay = document.createElement("div");
   overlay.contentEditable = "true";
@@ -76,6 +81,9 @@ function editExistingText(_e: MouseEvent<HTMLDivElement>, doodle: Doodle): void 
   overlay.style.top = `${bbox.top}px`;
   overlay.style.minWidth = `${bbox.width}px`;
   overlay.style.minHeight = `${bbox.height}px`;
+  if (hasFixedWidth) {
+    overlay.style.width = `${textShape.width * scale}px`;
+  }
   overlay.style.fontSize = `${textShape.size * scale}px`;
   overlay.style.fontFamily = textShape.family;
   overlay.style.color = color;
@@ -83,7 +91,7 @@ function editExistingText(_e: MouseEvent<HTMLDivElement>, doodle: Doodle): void 
   overlay.style.background = "transparent";
   overlay.style.border = "1px solid #0ea5cf";
   overlay.style.outline = "none";
-  overlay.style.lineHeight = "1.2";
+  overlay.style.lineHeight = `${textShape.leading}`;
   overlay.style.zIndex = "10000";
   overlay.style.whiteSpace = "pre-wrap";
   overlay.style.cursor = "text";
@@ -217,7 +225,7 @@ export function doTextUp(e: MouseEvent<HTMLDivElement>): void {
   }
 
   const doodler = getDoodler();
-  const { fontSize, fontFamily, fillColor, alignment } =
+  const { fontSize, fontFamily, fillColor, alignment, leading } =
     useTextStore.getState();
   const scale = doodler.zui.scale;
   const color = colord(fillColor).toRgbString();
@@ -250,7 +258,7 @@ export function doTextUp(e: MouseEvent<HTMLDivElement>): void {
   overlay.style.background = "transparent";
   overlay.style.border = "1px solid #0ea5cf";
   overlay.style.outline = "none";
-  overlay.style.lineHeight = "1.2";
+  overlay.style.lineHeight = `${leading}`;
   overlay.style.zIndex = "10000";
   overlay.style.whiteSpace = "pre-wrap";
   overlay.style.cursor = "text";
@@ -284,20 +292,26 @@ export function doTextUp(e: MouseEvent<HTMLDivElement>): void {
       let textX: number;
       let textY: number;
 
+      const paddingSurface = PADDING / scale;
+
       if (isFixedBounds) {
         textX = surfaceLeft + surfaceW / 2;
         textY = surfaceTop + surfaceH / 2;
       } else {
-        textX = originSurfaceX;
-        textY = originSurfaceY + fontSize / 2;
+        textX = originSurfaceX + paddingSurface;
+        textY = originSurfaceY + paddingSurface + fontSize / 2;
       }
 
-      const text = new Text(value, textX, textY);
-      text.fill = color;
-      text.noStroke();
-      text.family = fontFamily;
-      text.size = fontSize;
-      text.alignment = alignment;
+      const text = new MultilineText(value, textX, textY, {
+        fill: color,
+        stroke: "none",
+        family: fontFamily,
+        size: fontSize,
+        alignment,
+        baseline: "middle",
+        leading,
+        width: isFixedBounds ? surfaceW - 2 * paddingSurface : Infinity,
+      });
 
       doodler.addDoodle({ shape: text, type: "text" });
       pushCreateCommand({ shape: text, type: "text" });

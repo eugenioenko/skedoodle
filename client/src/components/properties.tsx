@@ -10,6 +10,7 @@ import {
   IconEyeClosed,
   IconGridDots,
   IconBrightnessHalf,
+  IconLineHeight,
   IconRotate,
   IconZoomOut,
   IconGrid3x3
@@ -22,7 +23,7 @@ import { History } from "./history";
 import { Timeline } from "./timeline";
 import { ColorInput } from "./ui/color-input";
 import { SlideInput } from "./ui/slide-input";
-import { useOptionsStore } from "@/canvas/canvas.store";
+import { useCanvasStore, useOptionsStore } from "@/canvas/canvas.store";
 import { useBrushStore } from "@/canvas/tools/brush.tool";
 import { useSquareStore } from "@/canvas/tools/square.tool";
 import { useBezierStore } from "@/canvas/tools/bezier.tool";
@@ -116,9 +117,11 @@ const Section = ({ title, children }: SectionProps) => (
 
 export const PropertiesTab = () => {
   const selection = usePointerStore((state) => state.selected);
+  const doodles = useCanvasStore((state) => state.doodles);
   const shape = selection?.[0];
   const strokeColor = colord(shape ? ((shape as any).stroke ?? "#000000") : "#000000").toRgb();
   const fillColor = colord((shape as any)?.fill as string).toRgb();
+  const isTextShape = shape && doodles.some((d) => d.shape.id === shape.id && d.type === "text");
 
   function updateShape(field: keyof Shape | string, value: any): void {
     const doodler = getDoodler();
@@ -248,6 +251,19 @@ export const PropertiesTab = () => {
               />
             </div>
           </Section>
+          {isTextShape && (
+            <Section title="Text">
+              <SlideInput
+                label="Leading"
+                icon={IconLineHeight}
+                min={0.8}
+                max={3}
+                decimals={1}
+                value={(shape as any)?.leading ?? 1.3}
+                onChange={(value) => updateShape("leading", value)}
+              />
+            </Section>
+          )}
         </>
       )}
       </div>
