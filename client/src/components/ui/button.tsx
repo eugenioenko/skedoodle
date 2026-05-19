@@ -32,7 +32,10 @@ interface ButtonGroupProps {
 
 export const ButtonGroup = ({ children }: ButtonGroupProps) => {
   return (
-    <div className="flex border border-default-4 rounded overflow-hidden min-h-[26px]">
+    <div
+      className="flex items-center border border-default-4 rounded overflow-hidden"
+      style={{ minHeight: "var(--ctrl-h)" }}
+    >
       {children}
     </div>
   );
@@ -45,13 +48,13 @@ interface ToggleButtonProps
 }
 
 export const ToggleButton = (props: ToggleButtonProps) => {
-  const { isSelected, children, ...rest } = props;
+  const { isSelected, children, className, ...rest } = props;
   const isPressed = !!isSelected;
 
   return (
     <button
       type="button"
-      className={`p-0.5 flex items-center justify-center hover:bg-default-4 ${isPressed ? "bg-default-3" : ""}`}
+      className={`p-0.5 flex items-center justify-center hover:bg-default-4 ${isPressed ? "bg-default-3" : ""} ${className ?? ""}`}
       aria-pressed={isPressed}
       {...rest}
     >

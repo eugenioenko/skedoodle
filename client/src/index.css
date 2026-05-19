@@ -32,6 +32,46 @@
   --color-text-secondary: #e7e7e7;
 
   --width-breakpoint: 768px;
+
+  /* Interactive control sizing — overridden under body[data-ui-size="large"] */
+  --radius: 0.25rem;
+  --ctrl-h: 26px;
+  /* ButtonGroup min-height, input height */
+  --ctrl-icon-btn: 24px;
+  /* inner icon button inside SlideInput */
+  --ctrl-icon: 18px;
+  /* icon rendered inside control buttons */
+  --ctrl-pad-x: 26px;
+  /* input horizontal padding to clear icon button */
+  --ctrl-swatch: 18px;
+  /* ColorInput color swatch trigger */
+  --color-input-hex-w: 6rem;
+  /* hex text field — grows just enough to keep room for text */
+  --color-input-alpha-w: 4rem;
+  /* alpha text field */
+  --slider-input-w: 100%;
+  /* SlideInput text field — fills grid column at default */
+  --slider-input-max-w: 6rem;
+  /* SlideInput wrapper cap — 96px */
+  --nav-h: 3rem;
+  /* top navbar height — 48px (h-12) */
+  --toolbar-btn: auto;
+  /* toolbar tool button — natural size (p-1 + 24px icon) at default */
+}
+
+body[data-ui-size="large"] {
+  --ctrl-h: 44px;
+  --ctrl-icon-btn: 42px;
+  --ctrl-icon: 28px;
+  --ctrl-pad-x: 48px;
+  --ctrl-swatch: 44px;
+  --color-input-hex-w: 7rem;
+  --color-input-alpha-w: 5rem;
+  --slider-input-w: 8rem;
+  --slider-input-max-w: 8rem;
+  --nav-h: 3.5rem;
+  /* 56px (h-14) */
+  --toolbar-btn: 44px;
 }
 
 body {
@@ -107,16 +147,41 @@ button {
   @apply focus-visible:border focus-visible:border-highlight focus-visible:outline-none;
 }
 
+.slide-input-wrapper {
+  position: relative;
+  width: var(--slider-input-w);
+  max-width: var(--slider-input-max-w);
+}
+
+.toolbar-btn {
+  width: var(--toolbar-btn);
+  height: var(--toolbar-btn);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 input.slider-input {
-  @apply px-[26px] text-sm;
+  @apply text-sm;
+  width: var(--slider-input-w);
+  height: var(--ctrl-h);
+  padding-left: var(--ctrl-pad-x);
+  padding-right: var(--ctrl-pad-x);
 }
 
 input.color-input {
-  @apply pl-[26px] pr-1 text-sm max-w-24 rounded-r-none border-r-default-1;
+  @apply text-sm rounded-r-none border-r-default-1;
+  width: var(--color-input-hex-w);
+  height: var(--ctrl-h);
+  padding-left: var(--ctrl-pad-x);
+  padding-right: 0.25rem;
 }
 
 input.alpha-input {
-  @apply pr-[26px] text-sm rounded-l-none max-w-16;
+  @apply text-sm rounded-l-none;
+  width: var(--color-input-alpha-w);
+  height: var(--ctrl-h);
+  padding-right: var(--ctrl-pad-x);
 }
 
 input.app-text-input {
